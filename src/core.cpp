@@ -2100,7 +2100,7 @@ void QCustomPlot::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QCPPainter painter(this);
     if (painter.isActive()) {
-        painter.setRenderHint(QPainter::HighQualityAntialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
+        painter.setRenderHint(QPainter::Antialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
         if (mBackgroundBrush.style() != Qt::NoBrush)
             painter.fillRect(mViewport, mBackgroundBrush);
         drawBackground(&painter);

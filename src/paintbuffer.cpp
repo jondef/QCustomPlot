@@ -204,7 +204,7 @@ QCPPaintBufferPixmap::~QCPPaintBufferPixmap() {
 /* inherits documentation from base class */
 QCPPainter *QCPPaintBufferPixmap::startPainting() {
     QCPPainter *result = new QCPPainter(&mBuffer);
-    result->setRenderHint(QPainter::HighQualityAntialiasing);
+    result->setRenderHint(QPainter::Antialiasing);
     return result;
 }
 
@@ -390,7 +390,7 @@ QCPPainter *QCPPaintBufferGlFbo::startPainting()
         mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
     mGlFrameBuffer->bind();
     QCPPainter *result = new QCPPainter(mGlPaintDevice.toStrongRef().data());
-    result->setRenderHint(QPainter::HighQualityAntialiasing);
+    result->setRenderHint(QPainter::Antialiasing);
     return result;
 }
 
