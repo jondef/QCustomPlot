@@ -58,55 +58,55 @@
 /* start documentation of pure virtual functions */
 
 /*! \fn virtual int QCPPlottableInterface1D::dataCount() const = 0;
-  
+
   Returns the number of data points of the plottable.
 */
 
 /*! \fn virtual QCPDataSelection QCPPlottableInterface1D::selectTestRect(const QRectF &rect, bool onlySelectable) const = 0;
-  
+
   Returns a data selection containing all the data points of this plottable which are contained (or
   hit by) \a rect. This is used mainly in the selection rect interaction for data selection (\ref
   dataselection "data selection mechanism").
-  
+
   If \a onlySelectable is true, an empty QCPDataSelection is returned if this plottable is not
   selectable (i.e. if \ref QCPAbstractPlottable::setSelectable is \ref QCP::stNone).
-  
+
   \note \a rect must be a normalized rect (positive or zero width and height). This is especially
   important when using the rect of \ref QCPSelectionRect::accepted, which is not necessarily
   normalized. Use <tt>QRect::normalized()</tt> when passing a rect which might not be normalized.
 */
 
 /*! \fn virtual double QCPPlottableInterface1D::dataMainKey(int index) const = 0
-  
+
   Returns the main key of the data point at the given \a index.
-  
+
   What the main key is, is defined by the plottable's data type. See the \ref
   qcpdatacontainer-datatype "QCPDataContainer DataType" documentation for details about this naming
   convention.
 */
 
 /*! \fn virtual double QCPPlottableInterface1D::dataSortKey(int index) const = 0
-  
+
   Returns the sort key of the data point at the given \a index.
-  
+
   What the sort key is, is defined by the plottable's data type. See the \ref
   qcpdatacontainer-datatype "QCPDataContainer DataType" documentation for details about this naming
   convention.
 */
 
 /*! \fn virtual double QCPPlottableInterface1D::dataMainValue(int index) const = 0
-  
+
   Returns the main value of the data point at the given \a index.
-  
+
   What the main value is, is defined by the plottable's data type. See the \ref
   qcpdatacontainer-datatype "QCPDataContainer DataType" documentation for details about this naming
   convention.
 */
 
 /*! \fn virtual QCPRange QCPPlottableInterface1D::dataValueRange(int index) const = 0
-  
+
   Returns the value range of the data point at the given \a index.
-  
+
   What the value range is, is defined by the plottable's data type. See the \ref
   qcpdatacontainer-datatype "QCPDataContainer DataType" documentation for details about this naming
   convention.
@@ -200,10 +200,10 @@
 /* start documentation of inline functions */
 
 /*! \fn QCPPlottableInterface1D *QCPAbstractPlottable1D::interface1D()
-  
+
   Returns a \ref QCPPlottableInterface1D pointer to this plottable, providing access to its 1D
   interface.
-  
+
   \seebaseclassmethod
 */
 
@@ -378,7 +378,7 @@ int QCPAbstractPlottable1D<DataType>::findEnd(double sortKey, bool expandedRange
 
   If \a details is not 0, it will be set to a \ref QCPDataSelection, describing the closest data point
   to \a pos.
-  
+
   \seebaseclassmethod
 */
 template<class DataType>

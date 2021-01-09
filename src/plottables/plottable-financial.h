@@ -61,12 +61,12 @@ Q_DECLARE_TYPEINFO(QCPFinancialData, Q_PRIMITIVE_TYPE);
 
 
 /*! \typedef QCPFinancialDataContainer
-  
+
   Container for storing \ref QCPFinancialData points. The data is stored sorted by \a key.
-  
+
   This template instantiation is the container in which QCPFinancial holds its data. For details
   about the generic container, see the documentation of the class template \ref QCPDataContainer.
-  
+
   \see QCPFinancialData, QCPFinancial::setData
 */
 typedef QCPDataContainer<QCPFinancialData> QCPFinancialDataContainer;
@@ -85,11 +85,11 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines the ways the width of the financial bar can be specified. Thus it defines what the
-      number passed to \ref setWidth actually means.
+    Defines the ways the width of the financial bar can be specified. Thus it defines what the
+    number passed to \ref setWidth actually means.
 
-      \see setWidthType, setWidth
-    */
+    \see setWidthType, setWidth
+  */
     enum WidthType {
         wtAbsolute       ///< width is in absolute pixels
         , wtAxisRectRatio ///< width is given by a fraction of the axis rect size
@@ -98,10 +98,10 @@ public:
     Q_ENUMS(WidthType)
 
     /*!
-      Defines the possible representations of OHLC data in the plot.
+    Defines the possible representations of OHLC data in the plot.
 
-      \see setChartStyle
-    */
+    \see setChartStyle
+  */
     enum ChartStyle {
         csOhlc         ///< Open-High-Low-Close bar representation
         , csCandlestick  ///< Candlestick representation

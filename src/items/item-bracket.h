@@ -43,11 +43,11 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines the various visual shapes of the bracket item. The appearance can be further modified
-      by \ref setLength and \ref setPen.
+    Defines the various visual shapes of the bracket item. The appearance can be further modified
+    by \ref setLength and \ref setPen.
 
-      \see setStyle
-    */
+    \see setStyle
+  */
     enum BracketStyle {
         bsSquare  ///< A brace with angled edges
         , bsRound  ///< A brace with round edges

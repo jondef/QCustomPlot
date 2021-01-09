@@ -118,7 +118,7 @@
 /*!
   The QCP Namespace contains general enums, QFlags and functions used throughout the QCustomPlot
   library.
-  
+
   It provides QMetaObject-based reflection of its enums and flags via \a QCP::staticMetaObject.
 */
 #ifndef Q_MOC_RUN
@@ -168,7 +168,7 @@ namespace QCP {
 /*!
   Represents negative and positive sign domain, e.g. for passing to \ref
   QCPAbstractPlottable::getKeyRange and \ref QCPAbstractPlottable::getValueRange.
-  
+
   This is primarily needed when working with logarithmic axis scales, since only one of the sign
   domains can be visible at a time.
 */
@@ -180,7 +180,7 @@ namespace QCP {
 
 /*!
   Defines the sides of a rectangular entity to which margins can be applied.
-  
+
   \see QCPLayoutElement::setAutoMargins, QCPAxisRect::setAutoMargins
 */
     enum MarginSide {
@@ -197,9 +197,9 @@ namespace QCP {
   Defines what objects of a plot can be forcibly drawn antialiased/not antialiased. If an object is
   neither forcibly drawn antialiased nor forcibly drawn not antialiased, it is up to the respective
   element how it is drawn. Typically it provides a \a setAntialiased function for this.
-  
+
   \c AntialiasedElements is a flag of or-combined elements of this enum type.
-  
+
   \see QCustomPlot::setAntialiasedElements, QCustomPlot::setNotAntialiasedElements
 */
     enum AntialiasedElement {
@@ -221,7 +221,7 @@ namespace QCP {
 
 /*!
   Defines plotting hints that control various aspects of the quality and speed of plotting.
-  
+
   \see QCustomPlot::setPlottingHints
 */
     enum PlottingHint {
@@ -239,9 +239,9 @@ namespace QCP {
 
 /*!
   Defines the mouse interactions possible with QCustomPlot.
-  
+
   \c Interactions is a flag of or-combined elements of this enum type.
-  
+
   \see QCustomPlot::setInteractions
 */
     enum Interaction {
@@ -265,7 +265,7 @@ namespace QCP {
 
 /*!
   Defines the behaviour of the selection rect.
-  
+
   \see QCustomPlot::setSelectionRectMode, QCustomPlot::selectionRect, QCPSelectionRect
 */
     enum SelectionRectMode {
@@ -281,7 +281,7 @@ namespace QCP {
 /*!
   Defines the different ways a plottable can be selected. These images show the effect of the
   different selection types, when the indicated selection rect was dragged:
-  
+
   <center>
   <table>
   <tr>
@@ -293,7 +293,7 @@ namespace QCP {
   </tr>
   </table>
   </center>
-  
+
   \see QCPAbstractPlottable::setSelectable, QCPDataSelection::enforceType
 */
     enum SelectionType {
@@ -309,7 +309,7 @@ namespace QCP {
     };
 
 /*! \internal
-  
+
   Returns whether the specified \a value is considered an invalid data value for plottables (i.e.
   is \e nan or \e +/-inf). This function is used to check data validity upon replots, when the
   compiler flag \c QCUSTOMPLOT_CHECK_DATA is set.
@@ -320,7 +320,7 @@ namespace QCP {
 
 /*! \internal
   \overload
-  
+
   Checks two arguments instead of one.
 */
     inline bool isInvalidData(double value1, double value2) {
@@ -328,9 +328,9 @@ namespace QCP {
     }
 
 /*! \internal
-  
+
   Sets the specified \a side of \a margins to \a value
-  
+
   \see getMarginValue
 */
     inline void setMarginValue(QMargins &margins, QCP::MarginSide side, int value) {
@@ -356,10 +356,10 @@ namespace QCP {
     }
 
 /*! \internal
-  
+
   Returns the value of the specified \a side of \a margins. If \a side is \ref QCP::msNone or
   \ref QCP::msAll, returns 0.
-  
+
   \see setMarginValue
 */
     inline int getMarginValue(const QMargins &margins, QCP::MarginSide side) {

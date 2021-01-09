@@ -63,10 +63,10 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines how a layer should be inserted relative to an other layer.
+    Defines how a layer should be inserted relative to an other layer.
 
-      \see addLayer, moveLayer
-    */
+    \see addLayer, moveLayer
+  */
     enum LayerInsertMode {
         limBelow  ///< Layer is inserted below other layer
         , limAbove ///< Layer is inserted above other layer
@@ -74,10 +74,10 @@ public:
     Q_ENUMS(LayerInsertMode)
 
     /*!
-      Defines with what timing the QCustomPlot surface is refreshed after a replot.
+    Defines with what timing the QCustomPlot surface is refreshed after a replot.
 
-      \see replot
-    */
+    \see replot
+  */
     enum RefreshPriority {
         rpImmediateRefresh ///< Replots immediately and repaints the widget immediately by calling QWidget::repaint() after the replot
         ,

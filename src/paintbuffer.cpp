@@ -377,23 +377,21 @@ QCPPaintBufferGlFbo::~QCPPaintBufferGlFbo()
 /* inherits documentation from base class */
 QCPPainter *QCPPaintBufferGlFbo::startPainting()
 {
-  if (mGlPaintDevice.isNull())
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
-    return 0;
-  }
-  if (!mGlFrameBuffer)
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
-    return 0;
-  }
-  
-  if (QOpenGLContext::currentContext() != mGlContext.data())
-    mGlContext.data()->makeCurrent(mGlContext.data()->surface());
-  mGlFrameBuffer->bind();
-  QCPPainter *result = new QCPPainter(mGlPaintDevice.data());
-  result->setRenderHint(QPainter::HighQualityAntialiasing);
-  return result;
+    if (mGlPaintDevice.isNull()) {
+        qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
+        return 0;
+    }
+    if (!mGlFrameBuffer) {
+        qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
+        return 0;
+    }
+
+    if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
+        mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    mGlFrameBuffer->bind();
+    QCPPainter *result = new QCPPainter(mGlPaintDevice.toStrongRef().data());
+    result->setRenderHint(QPainter::HighQualityAntialiasing);
+    return result;
 }
 
 /* inherits documentation from base class */
@@ -422,25 +420,23 @@ void QCPPaintBufferGlFbo::draw(QCPPainter *painter) const
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferGlFbo::clear(const QColor &color)
-{
-  if (mGlContext.isNull())
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
-    return;
-  }
-  if (!mGlFrameBuffer)
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
-    return;
-  }
-  
-  if (QOpenGLContext::currentContext() != mGlContext.data())
-    mGlContext.data()->makeCurrent(mGlContext.data()->surface());
-  mGlFrameBuffer->bind();
-  glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  mGlFrameBuffer->release();
+void QCPPaintBufferGlFbo::clear(const QColor &color) {
+    if (mGlContext.isNull()) {
+        qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
+        return;
+    }
+    if (!mGlFrameBuffer) {
+        qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
+        return;
+    }
+
+    if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
+        mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    mGlFrameBuffer->bind();
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    f->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGlFrameBuffer->release();
 }
 
 /* inherits documentation from base class */
@@ -454,28 +450,26 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
     delete mGlFrameBuffer;
     mGlFrameBuffer = 0;
   }
-  
-  if (mGlContext.isNull())
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
-    return;
-  }
-  if (mGlPaintDevice.isNull())
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
-    return;
-  }
-  
-  // create new fbo with appropriate size:
-  mGlContext.data()->makeCurrent(mGlContext.data()->surface());
-  QOpenGLFramebufferObjectFormat frameBufferFormat;
-  frameBufferFormat.setSamples(mGlContext.data()->format().samples());
-  frameBufferFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-  mGlFrameBuffer = new QOpenGLFramebufferObject(mSize*mDevicePixelRatio, frameBufferFormat);
-  if (mGlPaintDevice.data()->size() != mSize*mDevicePixelRatio)
-    mGlPaintDevice.data()->setSize(mSize*mDevicePixelRatio);
+
+    if (mGlContext.isNull()) {
+        qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
+        return;
+    }
+    if (mGlPaintDevice.isNull()) {
+        qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
+        return;
+    }
+
+    // create new fbo with appropriate size:
+    mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    QOpenGLFramebufferObjectFormat frameBufferFormat;
+    frameBufferFormat.setSamples(mGlContext.toStrongRef().data()->format().samples());
+    frameBufferFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    mGlFrameBuffer = new QOpenGLFramebufferObject(mSize * mDevicePixelRatio, frameBufferFormat);
+    if (mGlPaintDevice.toStrongRef().data()->size() != mSize * mDevicePixelRatio)
+        mGlPaintDevice.toStrongRef().data()->setSize(mSize * mDevicePixelRatio);
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-  mGlPaintDevice.data()->setDevicePixelRatio(mDevicePixelRatio);
+    mGlPaintDevice.toStrongRef().data()->setDevicePixelRatio(mDevicePixelRatio);
 #endif
 }
 #endif // QCP_OPENGL_FBO

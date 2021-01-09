@@ -32,10 +32,10 @@ class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker {
 Q_GADGET
 public:
     /*!
-      Defines the logical units in which fractions of time spans can be expressed.
+    Defines the logical units in which fractions of time spans can be expressed.
 
-      \see setFieldWidth, setTimeFormat
-    */
+    \see setFieldWidth, setTimeFormat
+  */
     enum TimeUnit {
         tuMilliseconds ///< Milliseconds, one thousandth of a second (%%z in \ref setTimeFormat)
         , tuSeconds     ///< Seconds (%%s in \ref setTimeFormat)

@@ -83,11 +83,11 @@ class QCP_LIB_DECL QCPItemPosition : public QCPItemAnchor {
 Q_GADGET
 public:
     /*!
-      Defines the ways an item position can be specified. Thus it defines what the numbers passed to
-      \ref setCoords actually mean.
+    Defines the ways an item position can be specified. Thus it defines what the numbers passed to
+    \ref setCoords actually mean.
 
-      \see setType
-    */
+    \see setType
+  */
     enum PositionType {
         ptAbsolute        ///< Static positioning in pixels, starting from the top left corner of the viewport/widget.
         ,

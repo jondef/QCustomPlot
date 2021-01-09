@@ -214,4 +214,4 @@ protected:
 };
 
 #endif // QCP_PLOTTABLE_COLORMAP_H
- 
+

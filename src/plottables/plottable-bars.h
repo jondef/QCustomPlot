@@ -45,11 +45,11 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines the ways the spacing between bars in the group can be specified. Thus it defines what
-      the number passed to \ref setSpacing actually means.
+    Defines the ways the spacing between bars in the group can be specified. Thus it defines what
+    the number passed to \ref setSpacing actually means.
 
-      \see setSpacingType, setSpacing
-    */
+    \see setSpacingType, setSpacing
+  */
     enum SpacingType {
         stAbsolute       ///< Bar spacing is in absolute pixels
         , stAxisRectRatio ///< Bar spacing is given by a fraction of the axis rect size
@@ -143,12 +143,12 @@ Q_DECLARE_TYPEINFO(QCPBarsData, Q_PRIMITIVE_TYPE);
 
 
 /*! \typedef QCPBarsDataContainer
-  
+
   Container for storing \ref QCPBarsData points. The data is stored sorted by \a key.
-  
+
   This template instantiation is the container in which QCPBars holds its data. For details about
   the generic container, see the documentation of the class template \ref QCPDataContainer.
-  
+
   \see QCPBarsData, QCPBars::setData
 */
 typedef QCPDataContainer<QCPBarsData> QCPBarsDataContainer;
@@ -166,11 +166,11 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines the ways the width of the bar can be specified. Thus it defines what the number passed
-      to \ref setWidth actually means.
+    Defines the ways the width of the bar can be specified. Thus it defines what the number passed
+    to \ref setWidth actually means.
 
-      \see setWidthType, setWidth
-    */
+    \see setWidthType, setWidth
+  */
     enum WidthType {
         wtAbsolute       ///< Bar width is in absolute pixels
         , wtAxisRectRatio ///< Bar width is given by a fraction of the axis rect size

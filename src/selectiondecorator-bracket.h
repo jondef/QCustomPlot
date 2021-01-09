@@ -34,11 +34,11 @@ Q_GADGET
 public:
 
     /*!
-      Defines which shape is drawn at the boundaries of selected data ranges.
+    Defines which shape is drawn at the boundaries of selected data ranges.
 
-      Some of the bracket styles further allow specifying a height and/or width, see \ref
-      setBracketHeight and \ref setBracketWidth.
-    */
+    Some of the bracket styles further allow specifying a height and/or width, see \ref
+    setBracketHeight and \ref setBracketWidth.
+  */
     enum BracketStyle {
         bsSquareBracket ///< A square bracket is drawn.
         , bsHalfEllipse   ///< A half ellipse is drawn. The size of the ellipse is given by the bracket width/height properties.

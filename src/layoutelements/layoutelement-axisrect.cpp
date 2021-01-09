@@ -1190,19 +1190,19 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event) {
     if (mParentPlot->interactions().testFlag(QCP::iRangeZoom)) {
         if (mRangeZoom != 0) {
             double factor;
-            double wheelSteps = event->delta() / 120.0; // a single step delta is +/-120 usually
+            double wheelSteps = event->angleDelta().y() / 120.0; // a single step delta is +/-120 usually
             if (mRangeZoom.testFlag(Qt::Horizontal)) {
                 factor = qPow(mRangeZoomFactorHorz, wheelSteps);
                 for (int i = 0; i < mRangeZoomHorzAxis.size(); ++i) {
                     if (!mRangeZoomHorzAxis.at(i).isNull())
-                        mRangeZoomHorzAxis.at(i)->scaleRange(factor, mRangeZoomHorzAxis.at(i)->pixelToCoord(event->pos().x()));
+                        mRangeZoomHorzAxis.at(i)->scaleRange(factor, mRangeZoomHorzAxis.at(i)->pixelToCoord(event->position().x()));
                 }
             }
             if (mRangeZoom.testFlag(Qt::Vertical)) {
                 factor = qPow(mRangeZoomFactorVert, wheelSteps);
                 for (int i = 0; i < mRangeZoomVertAxis.size(); ++i) {
                     if (!mRangeZoomVertAxis.at(i).isNull())
-                        mRangeZoomVertAxis.at(i)->scaleRange(factor, mRangeZoomVertAxis.at(i)->pixelToCoord(event->pos().y()));
+                        mRangeZoomVertAxis.at(i)->scaleRange(factor, mRangeZoomVertAxis.at(i)->pixelToCoord(event->position().y()));
                 }
             }
             mParentPlot->replot();

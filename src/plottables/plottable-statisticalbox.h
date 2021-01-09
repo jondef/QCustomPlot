@@ -68,13 +68,13 @@ Q_DECLARE_TYPEINFO(QCPStatisticalBoxData, Q_MOVABLE_TYPE);
 
 
 /*! \typedef QCPStatisticalBoxDataContainer
-  
+
   Container for storing \ref QCPStatisticalBoxData points. The data is stored sorted by \a key.
-  
+
   This template instantiation is the container in which QCPStatisticalBox holds its data. For
   details about the generic container, see the documentation of the class template \ref
   QCPDataContainer.
-  
+
   \see QCPStatisticalBoxData, QCPStatisticalBox::setData
 */
 typedef QCPDataContainer<QCPStatisticalBoxData> QCPStatisticalBoxDataContainer;

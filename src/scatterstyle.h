@@ -34,13 +34,13 @@ class QCP_LIB_DECL QCPScatterStyle {
 Q_GADGET
 public:
     /*!
-      Represents the various properties of a scatter style instance. For example, this enum is used
-      to specify which properties of \ref QCPSelectionDecorator::setScatterStyle will be used when
-      highlighting selected data points.
+    Represents the various properties of a scatter style instance. For example, this enum is used
+    to specify which properties of \ref QCPSelectionDecorator::setScatterStyle will be used when
+    highlighting selected data points.
 
-      Specific scatter properties can be transferred between \ref QCPScatterStyle instances via \ref
-      setFromOther.
-    */
+    Specific scatter properties can be transferred between \ref QCPScatterStyle instances via \ref
+    setFromOther.
+  */
     enum ScatterProperty {
         spNone = 0x00  ///< <tt>0x00</tt> None
         , spPen = 0x01  ///< <tt>0x01</tt> The pen property, see \ref setPen
@@ -54,12 +54,12 @@ public:
     Q_DECLARE_FLAGS(ScatterProperties, ScatterProperty)
 
     /*!
-      Defines the shape used for scatter points.
+    Defines the shape used for scatter points.
 
-      On plottables/items that draw scatters, the sizes of these visualizations (with exception of
-      \ref ssDot and \ref ssPixmap) can be controlled with the \ref setSize function. Scatters are
-      drawn with the pen and brush specified with \ref setPen and \ref setBrush.
-    */
+    On plottables/items that draw scatters, the sizes of these visualizations (with exception of
+    \ref ssDot and \ref ssPixmap) can be controlled with the \ref setSize function. Scatters are
+    drawn with the pen and brush specified with \ref setPen and \ref setBrush.
+  */
     enum ScatterShape {
         ssNone       ///< no scatter symbols are drawn (e.g. in QCPGraph, data only represented with lines)
         , ssDot       ///< \enumimage{ssDot.png} a single pixel (use \ref ssDisc or \ref ssCircle if you want a round shape with a certain radius)

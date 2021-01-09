@@ -355,7 +355,7 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
         mAutoAddPlottableToLegend(true),
         mAntialiasedElements(QCP::aeNone),
         mNotAntialiasedElements(QCP::aeNone),
-        mInteractions(0),
+        mInteractions(QCP::Interactions()),
         mSelectionTolerance(8),
         mNoAntialiasingOnDrag(false),
         mBackgroundBrush(Qt::white, Qt::SolidPattern),
@@ -1531,7 +1531,7 @@ bool QCustomPlot::removeLayer(QCPLayer *layer) {
         setCurrentLayer(targetLayer);
     // invalidate the paint buffer that was responsible for this layer:
     if (!layer->mPaintBuffer.isNull())
-        layer->mPaintBuffer.data()->setInvalidated();
+        layer->mPaintBuffer.toStrongRef().data()->setInvalidated();
     // remove layer:
     delete layer;
     mLayers.removeOne(layer);
@@ -1565,9 +1565,9 @@ bool QCustomPlot::moveLayer(QCPLayer *layer, QCPLayer *otherLayer, QCustomPlot::
 
     // invalidate the paint buffers that are responsible for the layers:
     if (!layer->mPaintBuffer.isNull())
-        layer->mPaintBuffer.data()->setInvalidated();
+        layer->mPaintBuffer.toStrongRef().data()->setInvalidated();
     if (!otherLayer->mPaintBuffer.isNull())
-        otherLayer->mPaintBuffer.data()->setInvalidated();
+        otherLayer->mPaintBuffer.toStrongRef().data()->setInvalidated();
 
     updateLayerIndices();
     return true;
@@ -2303,7 +2303,7 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event) {
 void QCustomPlot::wheelEvent(QWheelEvent *event) {
     emit mouseWheel(event);
     // forward event to layerable under cursor:
-    QList<QCPLayerable *> candidates = layerableListAt(event->pos(), false);
+    QList<QCPLayerable *> candidates = layerableListAt(event->position(), false);
     for (int i = 0; i < candidates.size(); ++i) {
         event->accept(); // default impl of QCPLayerable's mouse events ignore the event, in that case propagate to next candidate in list
         candidates.at(i)->wheelEvent(event);
@@ -2625,8 +2625,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event) {
                     if (QCPPlottableInterface1D *plottableInterface = plottable->interface1D()) {
                         QCPDataSelection dataSel = plottableInterface->selectTestRect(rectF, true);
                         if (!dataSel.isEmpty())
-                            potentialSelections.insertMulti(dataSel.dataPointCount(),
-                                                            QPair<QCPAbstractPlottable *, QCPDataSelection>(plottable, dataSel));
+                            potentialSelections.insert(dataSel.dataPointCount(), QPair<QCPAbstractPlottable *, QCPDataSelection>(plottable, dataSel));
                     }
                 }
 

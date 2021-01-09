@@ -61,12 +61,12 @@ Q_DECLARE_TYPEINFO(QCPGraphData, Q_PRIMITIVE_TYPE);
 
 
 /*! \typedef QCPGraphDataContainer
-  
+
   Container for storing \ref QCPGraphData points. The data is stored sorted by \a key.
-  
+
   This template instantiation is the container in which QCPGraph holds its data. For details about
   the generic container, see the documentation of the class template \ref QCPDataContainer.
-  
+
   \see QCPGraphData, QCPGraph::setData
 */
 typedef QCPDataContainer<QCPGraphData> QCPGraphDataContainer;
@@ -82,10 +82,10 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines how the graph's line is represented visually in the plot. The line is drawn with the
-      current pen of the graph (\ref setPen).
-      \see setLineStyle
-    */
+    Defines how the graph's line is represented visually in the plot. The line is drawn with the
+    current pen of the graph (\ref setPen).
+    \see setLineStyle
+  */
     enum LineStyle {
         lsNone        ///< data points are not connected with any lines (e.g. data only represented
         ///< with symbols according to the scatter style, see \ref setScatterStyle)

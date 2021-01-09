@@ -32,10 +32,10 @@ class QCP_LIB_DECL QCPAxisTickerPi : public QCPAxisTicker {
 Q_GADGET
 public:
     /*!
-      Defines how fractions should be displayed in tick labels.
+    Defines how fractions should be displayed in tick labels.
 
-      \see setFractionStyle
-    */
+    \see setFractionStyle
+  */
     enum FractionStyle {
         fsFloatingPoint     ///< Fractions are displayed as regular decimal floating point numbers, e.g. "0.25" or "0.125".
         , fsAsciiFractions   ///< Fractions are written as rationals using ASCII characters only, e.g. "1/4" or "1/8"

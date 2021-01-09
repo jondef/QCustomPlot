@@ -61,13 +61,13 @@ Q_DECLARE_TYPEINFO(QCPCurveData, Q_PRIMITIVE_TYPE);
 
 
 /*! \typedef QCPCurveDataContainer
-  
+
   Container for storing \ref QCPCurveData points. The data is stored sorted by \a t, so the \a
   sortKey() (returning \a t) is different from \a mainKey() (returning \a key).
-  
+
   This template instantiation is the container in which QCPCurve holds its data. For details about
   the generic container, see the documentation of the class template \ref QCPDataContainer.
-  
+
   \see QCPCurveData, QCPCurve::setData
 */
 typedef QCPDataContainer<QCPCurveData> QCPCurveDataContainer;
@@ -81,10 +81,10 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines how the curve's line is represented visually in the plot. The line is drawn with the
-      current pen of the curve (\ref setPen).
-      \see setLineStyle
-    */
+    Defines how the curve's line is represented visually in the plot. The line is drawn with the
+    current pen of the curve (\ref setPen).
+    \see setLineStyle
+  */
     enum LineStyle {
         lsNone  ///< No line is drawn between data points (e.g. only scatters)
         , lsLine ///< Data points are connected with a straight line

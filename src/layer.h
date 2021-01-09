@@ -52,12 +52,12 @@ Q_OBJECT
 public:
 
     /*!
-      Defines the different rendering modes of a layer. Depending on the mode, certain layers can be
-      replotted individually, without the need to replot (possibly complex) layerables on other
-      layers.
+    Defines the different rendering modes of a layer. Depending on the mode, certain layers can be
+    replotted individually, without the need to replot (possibly complex) layerables on other
+    layers.
 
-      \see setMode
-    */
+    \see setMode
+  */
     enum LayerMode {
         lmLogical   ///< Layer is used only for rendering order, and shares paint buffer with all other adjacent logical layers.
         , lmBuffered ///< Layer has its own paint buffer and may be replotted individually (see \ref replot).

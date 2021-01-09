@@ -161,9 +161,9 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines at which side of the axis rect the axis will appear. This also affects how the tick
-      marks are drawn, on which side the labels are placed etc.
-    */
+    Defines at which side of the axis rect the axis will appear. This also affects how the tick
+    marks are drawn, on which side the labels are placed etc.
+  */
     enum AxisType {
         atLeft = 0x01  ///< <tt>0x01</tt> Axis is vertical and on the left side of the axis rect
         , atRight = 0x02  ///< <tt>0x02</tt> Axis is vertical and on the right side of the axis rect
@@ -174,19 +174,19 @@ public:
     Q_FLAGS(AxisTypes)
     Q_DECLARE_FLAGS(AxisTypes, AxisType)
     /*!
-      Defines on which side of the axis the tick labels (numbers) shall appear.
+    Defines on which side of the axis the tick labels (numbers) shall appear.
 
-      \see setTickLabelSide
-    */
+    \see setTickLabelSide
+  */
     enum LabelSide {
         lsInside    ///< Tick labels will be displayed inside the axis rect and clipped to the inner axis rect
         , lsOutside  ///< Tick labels will be displayed outside the axis rect
     };
     Q_ENUMS(LabelSide)
     /*!
-      Defines the scale of an axis.
-      \see setScaleType
-    */
+    Defines the scale of an axis.
+    \see setScaleType
+  */
     enum ScaleType {
         stLinear       ///< Linear scaling
         ,
@@ -194,9 +194,9 @@ public:
     };
     Q_ENUMS(ScaleType)
     /*!
-      Defines the selectable parts of an axis.
-      \see setSelectableParts, setSelectedParts
-    */
+    Defines the selectable parts of an axis.
+    \see setSelectableParts, setSelectedParts
+  */
     enum SelectablePart {
         spNone = 0      ///< None of the selectable parts
         , spAxis = 0x001  ///< The axis backbone and tick marks

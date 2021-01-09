@@ -83,9 +83,9 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-      Defines the phases of the update process, that happens just before a replot. At each phase,
-      \ref update is called with the according UpdatePhase value.
-    */
+    Defines the phases of the update process, that happens just before a replot. At each phase,
+    \ref update is called with the according UpdatePhase value.
+  */
     enum UpdatePhase {
         upPreparation ///< Phase used for any type of preparation that needs to be done before margin calculation and layout
         , upMargins    ///< Phase in which the margins are calculated and set
@@ -94,13 +94,13 @@ public:
     Q_ENUMS(UpdatePhase)
 
     /*!
-      Defines to which rect of a layout element the size constraints that can be set via \ref
-      setMinimumSize and \ref setMaximumSize apply. The outer rect (\ref outerRect) includes the
-      margins (e.g. in the case of a QCPAxisRect the axis labels), whereas the inner rect (\ref rect)
-      does not.
+    Defines to which rect of a layout element the size constraints that can be set via \ref
+    setMinimumSize and \ref setMaximumSize apply. The outer rect (\ref outerRect) includes the
+    margins (e.g. in the case of a QCPAxisRect the axis labels), whereas the inner rect (\ref rect)
+    does not.
 
-      \see setSizeConstraintRect
-    */
+    \see setSizeConstraintRect
+  */
     enum SizeConstraintRect {
         scrInnerRect ///< Minimum/Maximum size constraints apply to inner rect
         , scrOuterRect ///< Minimum/Maximum size constraints apply to outer rect, thus include layout element margins
@@ -269,12 +269,12 @@ Q_OBJECT
 public:
 
     /*!
-      Defines in which direction the grid is filled when using \ref addElement(QCPLayoutElement*).
-      The column/row at which wrapping into the next row/column occurs can be specified with \ref
-      setWrap.
+    Defines in which direction the grid is filled when using \ref addElement(QCPLayoutElement*).
+    The column/row at which wrapping into the next row/column occurs can be specified with \ref
+    setWrap.
 
-      \see setFillOrder
-    */
+    \see setFillOrder
+  */
     enum FillOrder {
         foRowsFirst    ///< Rows are filled first, and a new element is wrapped to the next column if the row count would exceed \ref setWrap.
         , foColumnsFirst ///< Columns are filled first, and a new element is wrapped to the next row if the column count would exceed \ref setWrap.
@@ -382,8 +382,8 @@ class QCP_LIB_DECL QCPLayoutInset : public QCPLayout {
 Q_OBJECT
 public:
     /*!
-      Defines how the placement and sizing is handled for a certain element in a QCPLayoutInset.
-    */
+    Defines how the placement and sizing is handled for a certain element in a QCPLayoutInset.
+  */
     enum InsetPlacement {
         ipFree            ///< The element may be positioned/sized arbitrarily, see \ref setInsetRect
         , ipBorderAligned  ///< The element is aligned to one of the layout sides, see \ref setInsetAlignment
