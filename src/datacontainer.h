@@ -35,64 +35,88 @@
 
   \see QCPDataContainer::sort
 */
-template <class DataType>
+template<class DataType>
 inline bool qcpLessThanSortKey(const DataType &a, const DataType &b) { return a.sortKey() < b.sortKey(); }
 
-template <class DataType>
+template<class DataType>
 class QCPDataContainer // no QCP_LIB_DECL, template class ends up in header (cpp included below)
 {
 public:
-  typedef typename QVector<DataType>::const_iterator const_iterator;
-  typedef typename QVector<DataType>::iterator iterator;
-  
-  QCPDataContainer();
-  
-  // getters:
-  int size() const { return mData.size()-mPreallocSize; }
-  bool isEmpty() const { return size() == 0; }
-  bool autoSqueeze() const { return mAutoSqueeze; }
-  
-  // setters:
-  void setAutoSqueeze(bool enabled);
-  
-  // non-virtual methods:
-  void set(const QCPDataContainer<DataType> &data);
-  void set(const QVector<DataType> &data, bool alreadySorted=false);
-  void add(const QCPDataContainer<DataType> &data);
-  void add(const QVector<DataType> &data, bool alreadySorted=false);
-  void add(const DataType &data);
-  void removeBefore(double sortKey);
-  void removeAfter(double sortKey);
-  void remove(double sortKeyFrom, double sortKeyTo);
-  void remove(double sortKey);
-  void clear();
-  void sort();
-  void squeeze(bool preAllocation=true, bool postAllocation=true);
-  
-  const_iterator constBegin() const { return mData.constBegin()+mPreallocSize; }
-  const_iterator constEnd() const { return mData.constEnd(); }
-  iterator begin() { return mData.begin()+mPreallocSize; }
-  iterator end() { return mData.end(); }
-  const_iterator findBegin(double sortKey, bool expandedRange=true) const;
-  const_iterator findEnd(double sortKey, bool expandedRange=true) const;
-  const_iterator at(int index) const { return constBegin()+qBound(0, index, size()); }
-  QCPRange keyRange(bool &foundRange, QCP::SignDomain signDomain=QCP::sdBoth);
-  QCPRange valueRange(bool &foundRange, QCP::SignDomain signDomain=QCP::sdBoth, const QCPRange &inKeyRange=QCPRange());
-  QCPDataRange dataRange() const { return QCPDataRange(0, size()); }
-  void limitIteratorsToDataRange(const_iterator &begin, const_iterator &end, const QCPDataRange &dataRange) const;
-  
+    typedef typename QVector<DataType>::const_iterator const_iterator;
+    typedef typename QVector<DataType>::iterator iterator;
+
+    QCPDataContainer();
+
+    // getters:
+    int size() const { return mData.size() - mPreallocSize; }
+
+    bool isEmpty() const { return size() == 0; }
+
+    bool autoSqueeze() const { return mAutoSqueeze; }
+
+    // setters:
+    void setAutoSqueeze(bool enabled);
+
+    // non-virtual methods:
+    void set(const QCPDataContainer<DataType> &data);
+
+    void set(const QVector<DataType> &data, bool alreadySorted = false);
+
+    void add(const QCPDataContainer<DataType> &data);
+
+    void add(const QVector<DataType> &data, bool alreadySorted = false);
+
+    void add(const DataType &data);
+
+    void removeBefore(double sortKey);
+
+    void removeAfter(double sortKey);
+
+    void remove(double sortKeyFrom, double sortKeyTo);
+
+    void remove(double sortKey);
+
+    void clear();
+
+    void sort();
+
+    void squeeze(bool preAllocation = true, bool postAllocation = true);
+
+    const_iterator constBegin() const { return mData.constBegin() + mPreallocSize; }
+
+    const_iterator constEnd() const { return mData.constEnd(); }
+
+    iterator begin() { return mData.begin() + mPreallocSize; }
+
+    iterator end() { return mData.end(); }
+
+    const_iterator findBegin(double sortKey, bool expandedRange = true) const;
+
+    const_iterator findEnd(double sortKey, bool expandedRange = true) const;
+
+    const_iterator at(int index) const { return constBegin() + qBound(0, index, size()); }
+
+    QCPRange keyRange(bool &foundRange, QCP::SignDomain signDomain = QCP::sdBoth);
+
+    QCPRange valueRange(bool &foundRange, QCP::SignDomain signDomain = QCP::sdBoth, const QCPRange &inKeyRange = QCPRange());
+
+    QCPDataRange dataRange() const { return QCPDataRange(0, size()); }
+
+    void limitIteratorsToDataRange(const_iterator &begin, const_iterator &end, const QCPDataRange &dataRange) const;
+
 protected:
-  // property members:
-  bool mAutoSqueeze;
-  
-  // non-property memebers:
-  QVector<DataType> mData;
-  int mPreallocSize;
-  int mPreallocIteration;
-  
-  // non-virtual methods:
-  void preallocateGrow(int minimumPreallocSize);
-  void performAutoSqueeze();
+    // property members:
+    bool mAutoSqueeze;
+
+    // non-property memebers:
+    QVector<DataType> mData;
+    int mPreallocSize;
+    int mPreallocIteration;
+
+    // non-virtual methods:
+    void preallocateGrow(int minimumPreallocSize);
+
+    void performAutoSqueeze();
 };
 
 // include implementation in header since it is a class template:

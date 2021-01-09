@@ -49,13 +49,12 @@
   managed by a QSharedPointer, which then can be passed to QCPAxis::setTicker.
 */
 QCPAxisTickerPi::QCPAxisTickerPi() :
-  mPiSymbol(QLatin1String(" ")+QChar(0x03C0)),
-  mPiValue(M_PI),
-  mPeriodicity(0),
-  mFractionStyle(fsUnicodeFractions),
-  mPiTickStep(0)
-{
-  setTickCount(4);
+        mPiSymbol(QLatin1String(" ") + QChar(0x03C0)),
+        mPiValue(M_PI),
+        mPeriodicity(0),
+        mFractionStyle(fsUnicodeFractions),
+        mPiTickStep(0) {
+    setTickCount(4);
 }
 
 /*!
@@ -65,9 +64,8 @@ QCPAxisTickerPi::QCPAxisTickerPi() :
   If a space shall appear between the number and the symbol, make sure the space is contained in \a
   symbol.
 */
-void QCPAxisTickerPi::setPiSymbol(QString symbol)
-{
-  mPiSymbol = symbol;
+void QCPAxisTickerPi::setPiSymbol(QString symbol) {
+    mPiSymbol = symbol;
 }
 
 /*!
@@ -76,9 +74,8 @@ void QCPAxisTickerPi::setPiSymbol(QString symbol)
   This will be used to place the appropriate fractions of the symbol at the respective axis
   coordinates.
 */
-void QCPAxisTickerPi::setPiValue(double pi)
-{
-  mPiValue = pi;
+void QCPAxisTickerPi::setPiValue(double pi) {
+    mPiValue = pi;
 }
 
 /*!
@@ -89,18 +86,16 @@ void QCPAxisTickerPi::setPiValue(double pi)
   
   For example, an axis that identifies 0 with 2pi would set \a multiplesOfPi to two.
 */
-void QCPAxisTickerPi::setPeriodicity(int multiplesOfPi)
-{
-  mPeriodicity = qAbs(multiplesOfPi);
+void QCPAxisTickerPi::setPeriodicity(int multiplesOfPi) {
+    mPeriodicity = qAbs(multiplesOfPi);
 }
 
 /*!
   Sets how the numerical/fractional part preceding the symbolic constant is displayed in tick
   labels. See \ref FractionStyle for the various options.
 */
-void QCPAxisTickerPi::setFractionStyle(QCPAxisTickerPi::FractionStyle style)
-{
-  mFractionStyle = style;
+void QCPAxisTickerPi::setFractionStyle(QCPAxisTickerPi::FractionStyle style) {
+    mFractionStyle = style;
 }
 
 /*! \internal
@@ -111,11 +106,11 @@ void QCPAxisTickerPi::setFractionStyle(QCPAxisTickerPi::FractionStyle style)
   
   \seebaseclassmethod
 */
-double QCPAxisTickerPi::getTickStep(const QCPRange &range)
-{
-  mPiTickStep = range.size()/mPiValue/(double)(mTickCount+1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
-  mPiTickStep = cleanMantissa(mPiTickStep);
-  return mPiTickStep*mPiValue;
+double QCPAxisTickerPi::getTickStep(const QCPRange &range) {
+    mPiTickStep = range.size() / mPiValue /
+                  (double) (mTickCount + 1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
+    mPiTickStep = cleanMantissa(mPiTickStep);
+    return mPiTickStep * mPiValue;
 }
 
 /*! \internal
@@ -126,9 +121,8 @@ double QCPAxisTickerPi::getTickStep(const QCPRange &range)
   
   \seebaseclassmethod
 */
-int QCPAxisTickerPi::getSubTickCount(double tickStep)
-{
-  return QCPAxisTicker::getSubTickCount(tickStep/mPiValue);
+int QCPAxisTickerPi::getSubTickCount(double tickStep) {
+    return QCPAxisTicker::getSubTickCount(tickStep / mPiValue);
 }
 
 /*! \internal
@@ -139,33 +133,30 @@ int QCPAxisTickerPi::getSubTickCount(double tickStep)
   
   \seebaseclassmethod
 */
-QString QCPAxisTickerPi::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision)
-{
-  double tickInPis = tick/mPiValue;
-  if (mPeriodicity > 0)
-    tickInPis = fmod(tickInPis, mPeriodicity);
-  
-  if (mFractionStyle != fsFloatingPoint && mPiTickStep > 0.09 && mPiTickStep < 50)
-  {
-    // simply construct fraction from decimal like 1.234 -> 1234/1000 and then simplify fraction, smaller digits are irrelevant due to mPiTickStep conditional above
-    int denominator = 1000;
-    int numerator = qRound(tickInPis*denominator);
-    simplifyFraction(numerator, denominator);
-    if (qAbs(numerator) == 1 && denominator == 1)
-      return (numerator < 0 ? QLatin1String("-") : QLatin1String("")) + mPiSymbol.trimmed();
-    else if (numerator == 0)
-      return QLatin1String("0");
-    else
-      return fractionToString(numerator, denominator) + mPiSymbol;
-  } else
-  {
-    if (qFuzzyIsNull(tickInPis))
-      return QLatin1String("0");
-    else if (qFuzzyCompare(qAbs(tickInPis), 1.0))
-      return (tickInPis < 0 ? QLatin1String("-") : QLatin1String("")) + mPiSymbol.trimmed();
-    else
-      return QCPAxisTicker::getTickLabel(tickInPis, locale, formatChar, precision) + mPiSymbol;
-  }
+QString QCPAxisTickerPi::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
+    double tickInPis = tick / mPiValue;
+    if (mPeriodicity > 0)
+        tickInPis = fmod(tickInPis, mPeriodicity);
+
+    if (mFractionStyle != fsFloatingPoint && mPiTickStep > 0.09 && mPiTickStep < 50) {
+        // simply construct fraction from decimal like 1.234 -> 1234/1000 and then simplify fraction, smaller digits are irrelevant due to mPiTickStep conditional above
+        int denominator = 1000;
+        int numerator = qRound(tickInPis * denominator);
+        simplifyFraction(numerator, denominator);
+        if (qAbs(numerator) == 1 && denominator == 1)
+            return (numerator < 0 ? QLatin1String("-") : QLatin1String("")) + mPiSymbol.trimmed();
+        else if (numerator == 0)
+            return QLatin1String("0");
+        else
+            return fractionToString(numerator, denominator) + mPiSymbol;
+    } else {
+        if (qFuzzyIsNull(tickInPis))
+            return QLatin1String("0");
+        else if (qFuzzyCompare(qAbs(tickInPis), 1.0))
+            return (tickInPis < 0 ? QLatin1String("-") : QLatin1String("")) + mPiSymbol.trimmed();
+        else
+            return QCPAxisTicker::getTickLabel(tickInPis, locale, formatChar, precision) + mPiSymbol;
+    }
 }
 
 /*! \internal
@@ -174,22 +165,21 @@ QString QCPAxisTickerPi::getTickLabel(double tick, const QLocale &locale, QChar 
   the fraction is in irreducible form, i.e. numerator and denominator don't share any common
   factors which could be cancelled.
 */
-void QCPAxisTickerPi::simplifyFraction(int &numerator, int &denominator) const
-{
-  if (numerator == 0 || denominator == 0)
-    return;
-  
-  int num = numerator;
-  int denom = denominator;
-  while (denom != 0) // euclidean gcd algorithm
-  {
-    int oldDenom = denom;
-    denom = num % denom;
-    num = oldDenom;
-  }
-  // num is now gcd of numerator and denominator
-  numerator /= num;
-  denominator /= num;
+void QCPAxisTickerPi::simplifyFraction(int &numerator, int &denominator) const {
+    if (numerator == 0 || denominator == 0)
+        return;
+
+    int num = numerator;
+    int denom = denominator;
+    while (denom != 0) // euclidean gcd algorithm
+    {
+        int oldDenom = denom;
+        denom = num % denom;
+        num = oldDenom;
+    }
+    // num is now gcd of numerator and denominator
+    numerator /= num;
+    denominator /= num;
 }
 
 /*! \internal
@@ -201,51 +191,43 @@ void QCPAxisTickerPi::simplifyFraction(int &numerator, int &denominator) const
   simplifies the passed fraction to an irreducible form using \ref simplifyFraction and factors out
   any integer parts of the fraction (e.g. "10/4" becomes "2 1/2").
 */
-QString QCPAxisTickerPi::fractionToString(int numerator, int denominator) const
-{
-  if (denominator == 0)
-  {
-    qDebug() << Q_FUNC_INFO << "called with zero denominator";
-    return QString();
-  }
-  if (mFractionStyle == fsFloatingPoint) // should never be the case when calling this function
-  {
-    qDebug() << Q_FUNC_INFO << "shouldn't be called with fraction style fsDecimal";
-    return QString::number(numerator/(double)denominator); // failsafe
-  }
-  int sign = numerator*denominator < 0 ? -1 : 1;
-  numerator = qAbs(numerator);
-  denominator = qAbs(denominator);
-  
-  if (denominator == 1)
-  {
-    return QString::number(sign*numerator);
-  } else
-  {
-    int integerPart = numerator/denominator;
-    int remainder = numerator%denominator;
-    if (remainder == 0)
-    {
-      return QString::number(sign*integerPart);
-    } else
-    {
-      if (mFractionStyle == fsAsciiFractions)
-      {
-        return QString(QLatin1String("%1%2%3/%4"))
-            .arg(sign == -1 ? QLatin1String("-") : QLatin1String(""))
-            .arg(integerPart > 0 ? QString::number(integerPart)+QLatin1String(" ") : QLatin1String(""))
-            .arg(remainder)
-            .arg(denominator);
-      } else if (mFractionStyle == fsUnicodeFractions)
-      {
-        return QString(QLatin1String("%1%2%3"))
-            .arg(sign == -1 ? QLatin1String("-") : QLatin1String(""))
-            .arg(integerPart > 0 ? QString::number(integerPart) : QLatin1String(""))
-            .arg(unicodeFraction(remainder, denominator));
-      }
+QString QCPAxisTickerPi::fractionToString(int numerator, int denominator) const {
+    if (denominator == 0) {
+        qDebug() << Q_FUNC_INFO << "called with zero denominator";
+        return QString();
     }
-  }
-  return QString();
+    if (mFractionStyle == fsFloatingPoint) // should never be the case when calling this function
+    {
+        qDebug() << Q_FUNC_INFO << "shouldn't be called with fraction style fsDecimal";
+        return QString::number(numerator / (double) denominator); // failsafe
+    }
+    int sign = numerator * denominator < 0 ? -1 : 1;
+    numerator = qAbs(numerator);
+    denominator = qAbs(denominator);
+
+    if (denominator == 1) {
+        return QString::number(sign * numerator);
+    } else {
+        int integerPart = numerator / denominator;
+        int remainder = numerator % denominator;
+        if (remainder == 0) {
+            return QString::number(sign * integerPart);
+        } else {
+            if (mFractionStyle == fsAsciiFractions) {
+                return QString(QLatin1String("%1%2%3/%4"))
+                        .arg(sign == -1 ? QLatin1String("-") : QLatin1String(""))
+                        .arg(integerPart > 0 ? QString::number(integerPart) + QLatin1String(" ") : QLatin1String(""))
+                        .arg(remainder)
+                        .arg(denominator);
+            } else if (mFractionStyle == fsUnicodeFractions) {
+                return QString(QLatin1String("%1%2%3"))
+                        .arg(sign == -1 ? QLatin1String("-") : QLatin1String(""))
+                        .arg(integerPart > 0 ? QString::number(integerPart) : QLatin1String(""))
+                        .arg(unicodeFraction(remainder, denominator));
+            }
+        }
+    }
+    return QString();
 }
 
 /*! \internal
@@ -257,9 +239,8 @@ QString QCPAxisTickerPi::fractionToString(int numerator, int denominator) const
   This method doesn't use the single-character common fractions but builds each fraction from a
   superscript unicode number, the unicode fraction character, and a subscript unicode number.
 */
-QString QCPAxisTickerPi::unicodeFraction(int numerator, int denominator) const
-{
-  return unicodeSuperscript(numerator)+QChar(0x2044)+unicodeSubscript(denominator);
+QString QCPAxisTickerPi::unicodeFraction(int numerator, int denominator) const {
+    return unicodeSuperscript(numerator) + QChar(0x2044) + unicodeSubscript(denominator);
 }
 
 /*! \internal
@@ -267,25 +248,34 @@ QString QCPAxisTickerPi::unicodeFraction(int numerator, int denominator) const
   Returns the unicode string representing \a number as superscript. This is used to build
   unicode fractions in \ref unicodeFraction.
 */
-QString QCPAxisTickerPi::unicodeSuperscript(int number) const
-{
-  if (number == 0)
-    return QString(QChar(0x2070));
-  
-  QString result;
-  while (number > 0)
-  {
-    const int digit = number%10;
-    switch (digit)
-    {
-      case 1: { result.prepend(QChar(0x00B9)); break; }
-      case 2: { result.prepend(QChar(0x00B2)); break; }
-      case 3: { result.prepend(QChar(0x00B3)); break; }
-      default: { result.prepend(QChar(0x2070+digit)); break; }
+QString QCPAxisTickerPi::unicodeSuperscript(int number) const {
+    if (number == 0)
+        return QString(QChar(0x2070));
+
+    QString result;
+    while (number > 0) {
+        const int digit = number % 10;
+        switch (digit) {
+            case 1: {
+                result.prepend(QChar(0x00B9));
+                break;
+            }
+            case 2: {
+                result.prepend(QChar(0x00B2));
+                break;
+            }
+            case 3: {
+                result.prepend(QChar(0x00B3));
+                break;
+            }
+            default: {
+                result.prepend(QChar(0x2070 + digit));
+                break;
+            }
+        }
+        number /= 10;
     }
-    number /= 10;
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -293,16 +283,14 @@ QString QCPAxisTickerPi::unicodeSuperscript(int number) const
   Returns the unicode string representing \a number as subscript. This is used to build unicode
   fractions in \ref unicodeFraction.
 */
-QString QCPAxisTickerPi::unicodeSubscript(int number) const
-{
-  if (number == 0)
-    return QString(QChar(0x2080));
-  
-  QString result;
-  while (number > 0)
-  {
-    result.prepend(QChar(0x2080+number%10));
-    number /= 10;
-  }
-  return result;
+QString QCPAxisTickerPi::unicodeSubscript(int number) const {
+    if (number == 0)
+        return QString(QChar(0x2080));
+
+    QString result;
+    while (number > 0) {
+        result.prepend(QChar(0x2080 + number % 10));
+        number /= 10;
+    }
+    return result;
 }

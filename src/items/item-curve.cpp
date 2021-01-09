@@ -56,23 +56,21 @@
   ownership of the item, so do not delete it manually but use QCustomPlot::removeItem() instead.
 */
 QCPItemCurve::QCPItemCurve(QCustomPlot *parentPlot) :
-  QCPAbstractItem(parentPlot),
-  start(createPosition(QLatin1String("start"))),
-  startDir(createPosition(QLatin1String("startDir"))),
-  endDir(createPosition(QLatin1String("endDir"))),
-  end(createPosition(QLatin1String("end")))
-{
-  start->setCoords(0, 0);
-  startDir->setCoords(0.5, 0);
-  endDir->setCoords(0, 0.5);
-  end->setCoords(1, 1);
-  
-  setPen(QPen(Qt::black));
-  setSelectedPen(QPen(Qt::blue,2));
+        QCPAbstractItem(parentPlot),
+        start(createPosition(QLatin1String("start"))),
+        startDir(createPosition(QLatin1String("startDir"))),
+        endDir(createPosition(QLatin1String("endDir"))),
+        end(createPosition(QLatin1String("end"))) {
+    start->setCoords(0, 0);
+    startDir->setCoords(0.5, 0);
+    endDir->setCoords(0, 0.5);
+    end->setCoords(1, 1);
+
+    setPen(QPen(Qt::black));
+    setSelectedPen(QPen(Qt::blue, 2));
 }
 
-QCPItemCurve::~QCPItemCurve()
-{
+QCPItemCurve::~QCPItemCurve() {
 }
 
 /*!
@@ -80,9 +78,8 @@ QCPItemCurve::~QCPItemCurve()
   
   \see setSelectedPen
 */
-void QCPItemCurve::setPen(const QPen &pen)
-{
-  mPen = pen;
+void QCPItemCurve::setPen(const QPen &pen) {
+    mPen = pen;
 }
 
 /*!
@@ -90,9 +87,8 @@ void QCPItemCurve::setPen(const QPen &pen)
   
   \see setPen, setSelected
 */
-void QCPItemCurve::setSelectedPen(const QPen &pen)
-{
-  mSelectedPen = pen;
+void QCPItemCurve::setSelectedPen(const QPen &pen) {
+    mSelectedPen = pen;
 }
 
 /*!
@@ -103,9 +99,8 @@ void QCPItemCurve::setSelectedPen(const QPen &pen)
   
   \see setTail
 */
-void QCPItemCurve::setHead(const QCPLineEnding &head)
-{
-  mHead = head;
+void QCPItemCurve::setHead(const QCPLineEnding &head) {
+    mHead = head;
 }
 
 /*!
@@ -116,69 +111,64 @@ void QCPItemCurve::setHead(const QCPLineEnding &head)
   
   \see setHead
 */
-void QCPItemCurve::setTail(const QCPLineEnding &tail)
-{
-  mTail = tail;
+void QCPItemCurve::setTail(const QCPLineEnding &tail) {
+    mTail = tail;
 }
 
 /* inherits documentation from base class */
-double QCPItemCurve::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if (onlySelectable && !mSelectable)
-    return -1;
-  
-  QPointF startVec(start->pixelPosition());
-  QPointF startDirVec(startDir->pixelPosition());
-  QPointF endDirVec(endDir->pixelPosition());
-  QPointF endVec(end->pixelPosition());
+double QCPItemCurve::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if (onlySelectable && !mSelectable)
+        return -1;
 
-  QPainterPath cubicPath(startVec);
-  cubicPath.cubicTo(startDirVec, endDirVec, endVec);
-  
-  QList<QPolygonF> polygons = cubicPath.toSubpathPolygons();
-  if (polygons.isEmpty())
-    return -1;
-  const QPolygonF polygon = polygons.first();
-  QCPVector2D p(pos);
-  double minDistSqr = (std::numeric_limits<double>::max)();
-  for (int i=1; i<polygon.size(); ++i)
-  {
-    double distSqr = p.distanceSquaredToLine(polygon.at(i-1), polygon.at(i));
-    if (distSqr < minDistSqr)
-      minDistSqr = distSqr;
-  }
-  return qSqrt(minDistSqr);
+    QPointF startVec(start->pixelPosition());
+    QPointF startDirVec(startDir->pixelPosition());
+    QPointF endDirVec(endDir->pixelPosition());
+    QPointF endVec(end->pixelPosition());
+
+    QPainterPath cubicPath(startVec);
+    cubicPath.cubicTo(startDirVec, endDirVec, endVec);
+
+    QList<QPolygonF> polygons = cubicPath.toSubpathPolygons();
+    if (polygons.isEmpty())
+        return -1;
+    const QPolygonF polygon = polygons.first();
+    QCPVector2D p(pos);
+    double minDistSqr = (std::numeric_limits<double>::max)();
+    for (int i = 1; i < polygon.size(); ++i) {
+        double distSqr = p.distanceSquaredToLine(polygon.at(i - 1), polygon.at(i));
+        if (distSqr < minDistSqr)
+            minDistSqr = distSqr;
+    }
+    return qSqrt(minDistSqr);
 }
 
 /* inherits documentation from base class */
-void QCPItemCurve::draw(QCPPainter *painter)
-{
-  QCPVector2D startVec(start->pixelPosition());
-  QCPVector2D startDirVec(startDir->pixelPosition());
-  QCPVector2D endDirVec(endDir->pixelPosition());
-  QCPVector2D endVec(end->pixelPosition());
-  if ((endVec-startVec).length() > 1e10) // too large curves cause crash
-    return;
+void QCPItemCurve::draw(QCPPainter *painter) {
+    QCPVector2D startVec(start->pixelPosition());
+    QCPVector2D startDirVec(startDir->pixelPosition());
+    QCPVector2D endDirVec(endDir->pixelPosition());
+    QCPVector2D endVec(end->pixelPosition());
+    if ((endVec - startVec).length() > 1e10) // too large curves cause crash
+        return;
 
-  QPainterPath cubicPath(startVec.toPointF());
-  cubicPath.cubicTo(startDirVec.toPointF(), endDirVec.toPointF(), endVec.toPointF());
+    QPainterPath cubicPath(startVec.toPointF());
+    cubicPath.cubicTo(startDirVec.toPointF(), endDirVec.toPointF(), endVec.toPointF());
 
-  // paint visible segment, if existent:
-  QRect clip = clipRect().adjusted(-mainPen().widthF(), -mainPen().widthF(), mainPen().widthF(), mainPen().widthF());
-  QRect cubicRect = cubicPath.controlPointRect().toRect();
-  if (cubicRect.isEmpty()) // may happen when start and end exactly on same x or y position
-    cubicRect.adjust(0, 0, 1, 1);
-  if (clip.intersects(cubicRect))
-  {
-    painter->setPen(mainPen());
-    painter->drawPath(cubicPath);
-    painter->setBrush(Qt::SolidPattern);
-    if (mTail.style() != QCPLineEnding::esNone)
-      mTail.draw(painter, startVec, M_PI-cubicPath.angleAtPercent(0)/180.0*M_PI);
-    if (mHead.style() != QCPLineEnding::esNone)
-      mHead.draw(painter, endVec, -cubicPath.angleAtPercent(1)/180.0*M_PI);
-  }
+    // paint visible segment, if existent:
+    QRect clip = clipRect().adjusted(-mainPen().widthF(), -mainPen().widthF(), mainPen().widthF(), mainPen().widthF());
+    QRect cubicRect = cubicPath.controlPointRect().toRect();
+    if (cubicRect.isEmpty()) // may happen when start and end exactly on same x or y position
+        cubicRect.adjust(0, 0, 1, 1);
+    if (clip.intersects(cubicRect)) {
+        painter->setPen(mainPen());
+        painter->drawPath(cubicPath);
+        painter->setBrush(Qt::SolidPattern);
+        if (mTail.style() != QCPLineEnding::esNone)
+            mTail.draw(painter, startVec, M_PI - cubicPath.angleAtPercent(0) / 180.0 * M_PI);
+        if (mHead.style() != QCPLineEnding::esNone)
+            mHead.draw(painter, endVec, -cubicPath.angleAtPercent(1) / 180.0 * M_PI);
+    }
 }
 
 /*! \internal
@@ -186,7 +176,6 @@ void QCPItemCurve::draw(QCPPainter *painter)
   Returns the pen that should be used for drawing lines. Returns mPen when the
   item is not selected and mSelectedPen when it is.
 */
-QPen QCPItemCurve::mainPen() const
-{
-  return mSelected ? mSelectedPen : mPen;
+QPen QCPItemCurve::mainPen() const {
+    return mSelected ? mSelectedPen : mPen;
 }

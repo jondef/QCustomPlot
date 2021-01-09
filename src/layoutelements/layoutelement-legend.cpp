@@ -72,17 +72,16 @@
   cause the item to be added to \a parent, so \ref QCPLegend::addItem must be called separately.
 */
 QCPAbstractLegendItem::QCPAbstractLegendItem(QCPLegend *parent) :
-  QCPLayoutElement(parent->parentPlot()),
-  mParentLegend(parent),
-  mFont(parent->font()),
-  mTextColor(parent->textColor()),
-  mSelectedFont(parent->selectedFont()),
-  mSelectedTextColor(parent->selectedTextColor()),
-  mSelectable(true),
-  mSelected(false)
-{
-  setLayer(QLatin1String("legend"));
-  setMargins(QMargins(0, 0, 0, 0));
+        QCPLayoutElement(parent->parentPlot()),
+        mParentLegend(parent),
+        mFont(parent->font()),
+        mTextColor(parent->textColor()),
+        mSelectedFont(parent->selectedFont()),
+        mSelectedTextColor(parent->selectedTextColor()),
+        mSelectable(true),
+        mSelected(false) {
+    setLayer(QLatin1String("legend"));
+    setMargins(QMargins(0, 0, 0, 0));
 }
 
 /*!
@@ -90,9 +89,8 @@ QCPAbstractLegendItem::QCPAbstractLegendItem(QCPLegend *parent) :
   
   \see setTextColor, QCPLegend::setFont
 */
-void QCPAbstractLegendItem::setFont(const QFont &font)
-{
-  mFont = font;
+void QCPAbstractLegendItem::setFont(const QFont &font) {
+    mFont = font;
 }
 
 /*!
@@ -100,9 +98,8 @@ void QCPAbstractLegendItem::setFont(const QFont &font)
   
   \see setFont, QCPLegend::setTextColor
 */
-void QCPAbstractLegendItem::setTextColor(const QColor &color)
-{
-  mTextColor = color;
+void QCPAbstractLegendItem::setTextColor(const QColor &color) {
+    mTextColor = color;
 }
 
 /*!
@@ -111,9 +108,8 @@ void QCPAbstractLegendItem::setTextColor(const QColor &color)
   
   \see setFont, QCPLegend::setSelectedFont
 */
-void QCPAbstractLegendItem::setSelectedFont(const QFont &font)
-{
-  mSelectedFont = font;
+void QCPAbstractLegendItem::setSelectedFont(const QFont &font) {
+    mSelectedFont = font;
 }
 
 /*!
@@ -122,9 +118,8 @@ void QCPAbstractLegendItem::setSelectedFont(const QFont &font)
   
   \see setTextColor, QCPLegend::setSelectedTextColor
 */
-void QCPAbstractLegendItem::setSelectedTextColor(const QColor &color)
-{
-  mSelectedTextColor = color;
+void QCPAbstractLegendItem::setSelectedTextColor(const QColor &color) {
+    mSelectedTextColor = color;
 }
 
 /*!
@@ -132,13 +127,11 @@ void QCPAbstractLegendItem::setSelectedTextColor(const QColor &color)
   
   \see setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAbstractLegendItem::setSelectable(bool selectable)
-{
-  if (mSelectable != selectable)
-  {
-    mSelectable = selectable;
-    emit selectableChanged(mSelectable);
-  }
+void QCPAbstractLegendItem::setSelectable(bool selectable) {
+    if (mSelectable != selectable) {
+        mSelectable = selectable;
+        emit selectableChanged(mSelectable);
+    }
 }
 
 /*!
@@ -149,65 +142,56 @@ void QCPAbstractLegendItem::setSelectable(bool selectable)
   
   \see setSelectableParts, QCustomPlot::setInteractions
 */
-void QCPAbstractLegendItem::setSelected(bool selected)
-{
-  if (mSelected != selected)
-  {
-    mSelected = selected;
-    emit selectionChanged(mSelected);
-  }
+void QCPAbstractLegendItem::setSelected(bool selected) {
+    if (mSelected != selected) {
+        mSelected = selected;
+        emit selectionChanged(mSelected);
+    }
 }
 
 /* inherits documentation from base class */
-double QCPAbstractLegendItem::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if (!mParentPlot) return -1;
-  if (onlySelectable && (!mSelectable || !mParentLegend->selectableParts().testFlag(QCPLegend::spItems)))
-    return -1;
-  
-  if (mRect.contains(pos.toPoint()))
-    return mParentPlot->selectionTolerance()*0.99;
-  else
-    return -1;
+double QCPAbstractLegendItem::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if (!mParentPlot) return -1;
+    if (onlySelectable && (!mSelectable || !mParentLegend->selectableParts().testFlag(QCPLegend::spItems)))
+        return -1;
+
+    if (mRect.contains(pos.toPoint()))
+        return mParentPlot->selectionTolerance() * 0.99;
+    else
+        return -1;
 }
 
 /* inherits documentation from base class */
-void QCPAbstractLegendItem::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeLegendItems);
+void QCPAbstractLegendItem::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeLegendItems);
 }
 
 /* inherits documentation from base class */
-QRect QCPAbstractLegendItem::clipRect() const
-{
-  return mOuterRect;
+QRect QCPAbstractLegendItem::clipRect() const {
+    return mOuterRect;
 }
 
 /* inherits documentation from base class */
-void QCPAbstractLegendItem::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  Q_UNUSED(details)
-  if (mSelectable && mParentLegend->selectableParts().testFlag(QCPLegend::spItems))
-  {
-    bool selBefore = mSelected;
-    setSelected(additive ? !mSelected : true);
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelected != selBefore;
-  }
+void QCPAbstractLegendItem::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    Q_UNUSED(details)
+    if (mSelectable && mParentLegend->selectableParts().testFlag(QCPLegend::spItems)) {
+        bool selBefore = mSelected;
+        setSelected(additive ? !mSelected : true);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelected != selBefore;
+    }
 }
 
 /* inherits documentation from base class */
-void QCPAbstractLegendItem::deselectEvent(bool *selectionStateChanged)
-{
-  if (mSelectable && mParentLegend->selectableParts().testFlag(QCPLegend::spItems))
-  {
-    bool selBefore = mSelected;
-    setSelected(false);
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelected != selBefore;
-  }
+void QCPAbstractLegendItem::deselectEvent(bool *selectionStateChanged) {
+    if (mSelectable && mParentLegend->selectableParts().testFlag(QCPLegend::spItems)) {
+        bool selBefore = mSelected;
+        setSelected(false);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelected != selBefore;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,10 +230,9 @@ void QCPAbstractLegendItem::deselectEvent(bool *selectionStateChanged)
   QCPAbstractPlottable::addToLegend and \ref QCPAbstractPlottable::removeFromLegend.
 */
 QCPPlottableLegendItem::QCPPlottableLegendItem(QCPLegend *parent, QCPAbstractPlottable *plottable) :
-  QCPAbstractLegendItem(parent),
-  mPlottable(plottable)
-{
-  setAntialiased(false);
+        QCPAbstractLegendItem(parent),
+        mPlottable(plottable) {
+    setAntialiased(false);
 }
 
 /*! \internal
@@ -257,9 +240,8 @@ QCPPlottableLegendItem::QCPPlottableLegendItem(QCPLegend *parent, QCPAbstractPlo
   Returns the pen that shall be used to draw the icon border, taking into account the selection
   state of this item.
 */
-QPen QCPPlottableLegendItem::getIconBorderPen() const
-{
-  return mSelected ? mParentLegend->selectedIconBorderPen() : mParentLegend->iconBorderPen();
+QPen QCPPlottableLegendItem::getIconBorderPen() const {
+    return mSelected ? mParentLegend->selectedIconBorderPen() : mParentLegend->iconBorderPen();
 }
 
 /*! \internal
@@ -267,9 +249,8 @@ QPen QCPPlottableLegendItem::getIconBorderPen() const
   Returns the text color that shall be used to draw text, taking into account the selection state
   of this item.
 */
-QColor QCPPlottableLegendItem::getTextColor() const
-{
-  return mSelected ? mSelectedTextColor : mTextColor;
+QColor QCPPlottableLegendItem::getTextColor() const {
+    return mSelected ? mSelectedTextColor : mTextColor;
 }
 
 /*! \internal
@@ -277,9 +258,8 @@ QColor QCPPlottableLegendItem::getTextColor() const
   Returns the font that shall be used to draw text, taking into account the selection state of this
   item.
 */
-QFont QCPPlottableLegendItem::getFont() const
-{
-  return mSelected ? mSelectedFont : mFont;
+QFont QCPPlottableLegendItem::getFont() const {
+    return mSelected ? mSelectedFont : mFont;
 }
 
 /*! \internal
@@ -288,30 +268,31 @@ QFont QCPPlottableLegendItem::getFont() const
   parent layout (typically a \ref QCPLegend) and the \ref minimumOuterSizeHint and \ref
   maximumOuterSizeHint of this legend item.
 */
-void QCPPlottableLegendItem::draw(QCPPainter *painter)
-{
-  if (!mPlottable) return;
-  painter->setFont(getFont());
-  painter->setPen(QPen(getTextColor()));
-  QSizeF iconSize = mParentLegend->iconSize();
-  QRectF textRect = painter->fontMetrics().boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
-  QRectF iconRect(mRect.topLeft(), iconSize);
-  int textHeight = qMax(textRect.height(), iconSize.height());  // if text has smaller height than icon, center text vertically in icon height, else align tops
-  painter->drawText(mRect.x()+iconSize.width()+mParentLegend->iconTextPadding(), mRect.y(), textRect.width(), textHeight, Qt::TextDontClip, mPlottable->name());
-  // draw icon:
-  painter->save();
-  painter->setClipRect(iconRect, Qt::IntersectClip);
-  mPlottable->drawLegendIcon(painter, iconRect);
-  painter->restore();
-  // draw icon border:
-  if (getIconBorderPen().style() != Qt::NoPen)
-  {
-    painter->setPen(getIconBorderPen());
-    painter->setBrush(Qt::NoBrush);
-    int halfPen = qCeil(painter->pen().widthF()*0.5)+1;
-    painter->setClipRect(mOuterRect.adjusted(-halfPen, -halfPen, halfPen, halfPen)); // extend default clip rect so thicker pens (especially during selection) are not clipped
-    painter->drawRect(iconRect);
-  }
+void QCPPlottableLegendItem::draw(QCPPainter *painter) {
+    if (!mPlottable) return;
+    painter->setFont(getFont());
+    painter->setPen(QPen(getTextColor()));
+    QSizeF iconSize = mParentLegend->iconSize();
+    QRectF textRect = painter->fontMetrics().boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
+    QRectF iconRect(mRect.topLeft(), iconSize);
+    int textHeight = qMax(textRect.height(),
+                          iconSize.height());  // if text has smaller height than icon, center text vertically in icon height, else align tops
+    painter->drawText(mRect.x() + iconSize.width() + mParentLegend->iconTextPadding(), mRect.y(), textRect.width(), textHeight, Qt::TextDontClip,
+                      mPlottable->name());
+    // draw icon:
+    painter->save();
+    painter->setClipRect(iconRect, Qt::IntersectClip);
+    mPlottable->drawLegendIcon(painter, iconRect);
+    painter->restore();
+    // draw icon border:
+    if (getIconBorderPen().style() != Qt::NoPen) {
+        painter->setPen(getIconBorderPen());
+        painter->setBrush(Qt::NoBrush);
+        int halfPen = qCeil(painter->pen().widthF() * 0.5) + 1;
+        painter->setClipRect(mOuterRect.adjusted(-halfPen, -halfPen, halfPen,
+                                                 halfPen)); // extend default clip rect so thicker pens (especially during selection) are not clipped
+        painter->drawRect(iconRect);
+    }
 }
 
 /*! \internal
@@ -321,19 +302,18 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter)
   
   \seebaseclassmethod
 */
-QSize QCPPlottableLegendItem::minimumOuterSizeHint() const
-{
-  if (!mPlottable) return QSize();
-  QSize result(0, 0);
-  QRect textRect;
-  QFontMetrics fontMetrics(getFont());
-  QSize iconSize = mParentLegend->iconSize();
-  textRect = fontMetrics.boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
-  result.setWidth(iconSize.width() + mParentLegend->iconTextPadding() + textRect.width());
-  result.setHeight(qMax(textRect.height(), iconSize.height()));
-  result.rwidth() += mMargins.left()+mMargins.right();
-  result.rheight() += mMargins.top()+mMargins.bottom();
-  return result;
+QSize QCPPlottableLegendItem::minimumOuterSizeHint() const {
+    if (!mPlottable) return QSize();
+    QSize result(0, 0);
+    QRect textRect;
+    QFontMetrics fontMetrics(getFont());
+    QSize iconSize = mParentLegend->iconSize();
+    textRect = fontMetrics.boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
+    result.setWidth(iconSize.width() + mParentLegend->iconTextPadding() + textRect.width());
+    result.setHeight(qMax(textRect.height(), iconSize.height()));
+    result.rwidth() += mMargins.left() + mMargins.right();
+    result.rheight() += mMargins.top() + mMargins.bottom();
+    return result;
 }
 
 
@@ -392,72 +372,66 @@ QSize QCPPlottableLegendItem::minimumOuterSizeHint() const
   Note that by default, QCustomPlot already contains a legend ready to be used as \ref
   QCustomPlot::legend
 */
-QCPLegend::QCPLegend()
-{
-  setFillOrder(QCPLayoutGrid::foRowsFirst);
-  setWrap(0);
-  
-  setRowSpacing(3);
-  setColumnSpacing(8);
-  setMargins(QMargins(7, 5, 7, 4));
-  setAntialiased(false);
-  setIconSize(32, 18);
-  
-  setIconTextPadding(7);
-  
-  setSelectableParts(spLegendBox | spItems);
-  setSelectedParts(spNone);
-  
-  setBorderPen(QPen(Qt::black, 0));
-  setSelectedBorderPen(QPen(Qt::blue, 2));
-  setIconBorderPen(Qt::NoPen);
-  setSelectedIconBorderPen(QPen(Qt::blue, 2));
-  setBrush(Qt::white);
-  setSelectedBrush(Qt::white);
-  setTextColor(Qt::black);
-  setSelectedTextColor(Qt::blue);
+QCPLegend::QCPLegend() {
+    setFillOrder(QCPLayoutGrid::foRowsFirst);
+    setWrap(0);
+
+    setRowSpacing(3);
+    setColumnSpacing(8);
+    setMargins(QMargins(7, 5, 7, 4));
+    setAntialiased(false);
+    setIconSize(32, 18);
+
+    setIconTextPadding(7);
+
+    setSelectableParts(spLegendBox | spItems);
+    setSelectedParts(spNone);
+
+    setBorderPen(QPen(Qt::black, 0));
+    setSelectedBorderPen(QPen(Qt::blue, 2));
+    setIconBorderPen(Qt::NoPen);
+    setSelectedIconBorderPen(QPen(Qt::blue, 2));
+    setBrush(Qt::white);
+    setSelectedBrush(Qt::white);
+    setTextColor(Qt::black);
+    setSelectedTextColor(Qt::blue);
 }
 
-QCPLegend::~QCPLegend()
-{
-  clearItems();
-  if (qobject_cast<QCustomPlot*>(mParentPlot)) // make sure this isn't called from QObject dtor when QCustomPlot is already destructed (happens when the legend is not in any layout and thus QObject-child of QCustomPlot)
-    mParentPlot->legendRemoved(this);
+QCPLegend::~QCPLegend() {
+    clearItems();
+    if (qobject_cast<QCustomPlot *>(
+            mParentPlot)) // make sure this isn't called from QObject dtor when QCustomPlot is already destructed (happens when the legend is not in any layout and thus QObject-child of QCustomPlot)
+        mParentPlot->legendRemoved(this);
 }
 
 /* no doc for getter, see setSelectedParts */
-QCPLegend::SelectableParts QCPLegend::selectedParts() const
-{
-  // check whether any legend elements selected, if yes, add spItems to return value
-  bool hasSelectedItems = false;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item(i) && item(i)->selected())
-    {
-      hasSelectedItems = true;
-      break;
+QCPLegend::SelectableParts QCPLegend::selectedParts() const {
+    // check whether any legend elements selected, if yes, add spItems to return value
+    bool hasSelectedItems = false;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item(i) && item(i)->selected()) {
+            hasSelectedItems = true;
+            break;
+        }
     }
-  }
-  if (hasSelectedItems)
-    return mSelectedParts | spItems;
-  else
-    return mSelectedParts & ~spItems;
+    if (hasSelectedItems)
+        return mSelectedParts | spItems;
+    else
+        return mSelectedParts & ~spItems;
 }
 
 /*!
   Sets the pen, the border of the entire legend is drawn with.
 */
-void QCPLegend::setBorderPen(const QPen &pen)
-{
-  mBorderPen = pen;
+void QCPLegend::setBorderPen(const QPen &pen) {
+    mBorderPen = pen;
 }
 
 /*!
   Sets the brush of the legend background.
 */
-void QCPLegend::setBrush(const QBrush &brush)
-{
-  mBrush = brush;
+void QCPLegend::setBrush(const QBrush &brush) {
+    mBrush = brush;
 }
 
 /*!
@@ -469,14 +443,12 @@ void QCPLegend::setBrush(const QBrush &brush)
   
   \see QCPAbstractLegendItem::setFont
 */
-void QCPLegend::setFont(const QFont &font)
-{
-  mFont = font;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item(i))
-      item(i)->setFont(mFont);
-  }
+void QCPLegend::setFont(const QFont &font) {
+    mFont = font;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item(i))
+            item(i)->setFont(mFont);
+    }
 }
 
 /*!
@@ -488,31 +460,27 @@ void QCPLegend::setFont(const QFont &font)
   
   \see QCPAbstractLegendItem::setTextColor
 */
-void QCPLegend::setTextColor(const QColor &color)
-{
-  mTextColor = color;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item(i))
-      item(i)->setTextColor(color);
-  }
+void QCPLegend::setTextColor(const QColor &color) {
+    mTextColor = color;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item(i))
+            item(i)->setTextColor(color);
+    }
 }
 
 /*!
   Sets the size of legend icons. Legend items that draw an icon (e.g. a visual
   representation of the graph) will use this size by default.
 */
-void QCPLegend::setIconSize(const QSize &size)
-{
-  mIconSize = size;
+void QCPLegend::setIconSize(const QSize &size) {
+    mIconSize = size;
 }
 
 /*! \overload
 */
-void QCPLegend::setIconSize(int width, int height)
-{
-  mIconSize.setWidth(width);
-  mIconSize.setHeight(height);
+void QCPLegend::setIconSize(int width, int height) {
+    mIconSize.setWidth(width);
+    mIconSize.setHeight(height);
 }
 
 /*!
@@ -520,9 +488,8 @@ void QCPLegend::setIconSize(int width, int height)
   Legend items that draw an icon (e.g. a visual representation of the graph) and text (e.g. the
   name of the graph) will use this space by default.
 */
-void QCPLegend::setIconTextPadding(int padding)
-{
-  mIconTextPadding = padding;
+void QCPLegend::setIconTextPadding(int padding) {
+    mIconTextPadding = padding;
 }
 
 /*!
@@ -531,9 +498,8 @@ void QCPLegend::setIconTextPadding(int padding)
   
   If no border is wanted, set this to \a Qt::NoPen.
 */
-void QCPLegend::setIconBorderPen(const QPen &pen)
-{
-  mIconBorderPen = pen;
+void QCPLegend::setIconBorderPen(const QPen &pen) {
+    mIconBorderPen = pen;
 }
 
 /*!
@@ -546,13 +512,11 @@ void QCPLegend::setIconBorderPen(const QPen &pen)
   
   \see SelectablePart, setSelectedParts
 */
-void QCPLegend::setSelectableParts(const SelectableParts &selectable)
-{
-  if (mSelectableParts != selectable)
-  {
-    mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
-  }
+void QCPLegend::setSelectableParts(const SelectableParts &selectable) {
+    if (mSelectableParts != selectable) {
+        mSelectableParts = selectable;
+        emit selectableChanged(mSelectableParts);
+    }
 }
 
 /*!
@@ -576,29 +540,26 @@ void QCPLegend::setSelectableParts(const SelectableParts &selectable)
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBorderPen, setSelectedIconBorderPen, setSelectedBrush,
   setSelectedFont
 */
-void QCPLegend::setSelectedParts(const SelectableParts &selected)
-{
-  SelectableParts newSelected = selected;
-  mSelectedParts = this->selectedParts(); // update mSelectedParts in case item selection changed
+void QCPLegend::setSelectedParts(const SelectableParts &selected) {
+    SelectableParts newSelected = selected;
+    mSelectedParts = this->selectedParts(); // update mSelectedParts in case item selection changed
 
-  if (mSelectedParts != newSelected)
-  {
-    if (!mSelectedParts.testFlag(spItems) && newSelected.testFlag(spItems)) // attempt to set spItems flag (can't do that)
-    {
-      qDebug() << Q_FUNC_INFO << "spItems flag can not be set, it can only be unset with this function";
-      newSelected &= ~spItems;
+    if (mSelectedParts != newSelected) {
+        if (!mSelectedParts.testFlag(spItems) && newSelected.testFlag(spItems)) // attempt to set spItems flag (can't do that)
+        {
+            qDebug() << Q_FUNC_INFO << "spItems flag can not be set, it can only be unset with this function";
+            newSelected &= ~spItems;
+        }
+        if (mSelectedParts.testFlag(spItems) && !newSelected.testFlag(spItems)) // spItems flag was unset, so clear item selection
+        {
+            for (int i = 0; i < itemCount(); ++i) {
+                if (item(i))
+                    item(i)->setSelected(false);
+            }
+        }
+        mSelectedParts = newSelected;
+        emit selectionChanged(mSelectedParts);
     }
-    if (mSelectedParts.testFlag(spItems) && !newSelected.testFlag(spItems)) // spItems flag was unset, so clear item selection
-    {
-      for (int i=0; i<itemCount(); ++i)
-      {
-        if (item(i))
-          item(i)->setSelected(false);
-      }
-    }
-    mSelectedParts = newSelected;
-    emit selectionChanged(mSelectedParts);
-  }
 }
 
 /*!
@@ -607,9 +568,8 @@ void QCPLegend::setSelectedParts(const SelectableParts &selected)
 
   \see setSelectedParts, setSelectableParts, setSelectedBrush
 */
-void QCPLegend::setSelectedBorderPen(const QPen &pen)
-{
-  mSelectedBorderPen = pen;
+void QCPLegend::setSelectedBorderPen(const QPen &pen) {
+    mSelectedBorderPen = pen;
 }
 
 /*!
@@ -617,9 +577,8 @@ void QCPLegend::setSelectedBorderPen(const QPen &pen)
 
   \see setSelectedParts, setSelectableParts, setSelectedFont
 */
-void QCPLegend::setSelectedIconBorderPen(const QPen &pen)
-{
-  mSelectedIconBorderPen = pen;
+void QCPLegend::setSelectedIconBorderPen(const QPen &pen) {
+    mSelectedIconBorderPen = pen;
 }
 
 /*!
@@ -628,9 +587,8 @@ void QCPLegend::setSelectedIconBorderPen(const QPen &pen)
 
   \see setSelectedParts, setSelectableParts, setSelectedBorderPen
 */
-void QCPLegend::setSelectedBrush(const QBrush &brush)
-{
-  mSelectedBrush = brush;
+void QCPLegend::setSelectedBrush(const QBrush &brush) {
+    mSelectedBrush = brush;
 }
 
 /*!
@@ -640,14 +598,12 @@ void QCPLegend::setSelectedBrush(const QBrush &brush)
 
   \see setFont, QCPAbstractLegendItem::setSelectedFont
 */
-void QCPLegend::setSelectedFont(const QFont &font)
-{
-  mSelectedFont = font;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item(i))
-      item(i)->setSelectedFont(font);
-  }
+void QCPLegend::setSelectedFont(const QFont &font) {
+    mSelectedFont = font;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item(i))
+            item(i)->setSelectedFont(font);
+    }
 }
 
 /*!
@@ -657,14 +613,12 @@ void QCPLegend::setSelectedFont(const QFont &font)
 
   \see setTextColor, QCPAbstractLegendItem::setSelectedTextColor
 */
-void QCPLegend::setSelectedTextColor(const QColor &color)
-{
-  mSelectedTextColor = color;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item(i))
-      item(i)->setSelectedTextColor(color);
-  }
+void QCPLegend::setSelectedTextColor(const QColor &color) {
+    mSelectedTextColor = color;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item(i))
+            item(i)->setSelectedTextColor(color);
+    }
 }
 
 /*!
@@ -674,9 +628,8 @@ void QCPLegend::setSelectedTextColor(const QColor &color)
 
   \see itemCount, addItem, itemWithPlottable
 */
-QCPAbstractLegendItem *QCPLegend::item(int index) const
-{
-  return qobject_cast<QCPAbstractLegendItem*>(elementAt(index));
+QCPAbstractLegendItem *QCPLegend::item(int index) const {
+    return qobject_cast<QCPAbstractLegendItem *>(elementAt(index));
 }
 
 /*!
@@ -685,17 +638,14 @@ QCPAbstractLegendItem *QCPLegend::item(int index) const
   
   \see hasItemWithPlottable
 */
-QCPPlottableLegendItem *QCPLegend::itemWithPlottable(const QCPAbstractPlottable *plottable) const
-{
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (QCPPlottableLegendItem *pli = qobject_cast<QCPPlottableLegendItem*>(item(i)))
-    {
-      if (pli->plottable() == plottable)
-        return pli;
+QCPPlottableLegendItem *QCPLegend::itemWithPlottable(const QCPAbstractPlottable *plottable) const {
+    for (int i = 0; i < itemCount(); ++i) {
+        if (QCPPlottableLegendItem *pli = qobject_cast<QCPPlottableLegendItem *>(item(i))) {
+            if (pli->plottable() == plottable)
+                return pli;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 /*!
@@ -706,9 +656,8 @@ QCPPlottableLegendItem *QCPLegend::itemWithPlottable(const QCPAbstractPlottable 
 
   \see item
 */
-int QCPLegend::itemCount() const
-{
-  return elementCount();
+int QCPLegend::itemCount() const {
+    return elementCount();
 }
 
 /*!
@@ -716,14 +665,12 @@ int QCPLegend::itemCount() const
   
   \see hasItemWithPlottable
 */
-bool QCPLegend::hasItem(QCPAbstractLegendItem *item) const
-{
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (item == this->item(i))
-        return true;
-  }
-  return false;
+bool QCPLegend::hasItem(QCPAbstractLegendItem *item) const {
+    for (int i = 0; i < itemCount(); ++i) {
+        if (item == this->item(i))
+            return true;
+    }
+    return false;
 }
 
 /*!
@@ -732,9 +679,8 @@ bool QCPLegend::hasItem(QCPAbstractLegendItem *item) const
   
   \see itemWithPlottable
 */
-bool QCPLegend::hasItemWithPlottable(const QCPAbstractPlottable *plottable) const
-{
-  return itemWithPlottable(plottable);
+bool QCPLegend::hasItemWithPlottable(const QCPAbstractPlottable *plottable) const {
+    return itemWithPlottable(plottable);
 }
 
 /*!
@@ -747,9 +693,8 @@ bool QCPLegend::hasItemWithPlottable(const QCPAbstractPlottable *plottable) cons
 
   \see removeItem, item, hasItem
 */
-bool QCPLegend::addItem(QCPAbstractLegendItem *item)
-{
-  return addElement(item);
+bool QCPLegend::addItem(QCPAbstractLegendItem *item) {
+    return addElement(item);
 }
 
 /*! \overload
@@ -765,16 +710,14 @@ bool QCPLegend::addItem(QCPAbstractLegendItem *item)
 
   \see itemCount, clearItems
 */
-bool QCPLegend::removeItem(int index)
-{
-  if (QCPAbstractLegendItem *ali = item(index))
-  {
-    bool success = remove(ali);
-    if (success)
-      setFillOrder(fillOrder(), true); // gets rid of empty cell by reordering
-    return success;
-  } else
-    return false;
+bool QCPLegend::removeItem(int index) {
+    if (QCPAbstractLegendItem *ali = item(index)) {
+        bool success = remove(ali);
+        if (success)
+            setFillOrder(fillOrder(), true); // gets rid of empty cell by reordering
+        return success;
+    } else
+        return false;
 }
 
 /*! \overload
@@ -789,21 +732,19 @@ bool QCPLegend::removeItem(int index)
 
   \see clearItems
 */
-bool QCPLegend::removeItem(QCPAbstractLegendItem *item)
-{
-  bool success = remove(item);
-  if (success)
-    setFillOrder(fillOrder(), true); // gets rid of empty cell by reordering
-  return success;
+bool QCPLegend::removeItem(QCPAbstractLegendItem *item) {
+    bool success = remove(item);
+    if (success)
+        setFillOrder(fillOrder(), true); // gets rid of empty cell by reordering
+    return success;
 }
 
 /*!
   Removes all items from the legend.
 */
-void QCPLegend::clearItems()
-{
-  for (int i=itemCount()-1; i>=0; --i)
-    removeItem(i);
+void QCPLegend::clearItems() {
+    for (int i = itemCount() - 1; i >= 0; --i)
+        removeItem(i);
 }
 
 /*!
@@ -812,18 +753,15 @@ void QCPLegend::clearItems()
   
   \see QCPAbstractLegendItem::setSelected, setSelectable
 */
-QList<QCPAbstractLegendItem *> QCPLegend::selectedItems() const
-{
-  QList<QCPAbstractLegendItem*> result;
-  for (int i=0; i<itemCount(); ++i)
-  {
-    if (QCPAbstractLegendItem *ali = item(i))
-    {
-      if (ali->selected())
-        result.append(ali);
+QList<QCPAbstractLegendItem *> QCPLegend::selectedItems() const {
+    QList<QCPAbstractLegendItem *> result;
+    for (int i = 0; i < itemCount(); ++i) {
+        if (QCPAbstractLegendItem *ali = item(i)) {
+            if (ali->selected())
+                result.append(ali);
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -841,9 +779,8 @@ QList<QCPAbstractLegendItem *> QCPLegend::selectedItems() const
   
   \see setAntialiased
 */
-void QCPLegend::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeLegend);
+void QCPLegend::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeLegend);
 }
 
 /*! \internal
@@ -851,9 +788,8 @@ void QCPLegend::applyDefaultAntialiasingHint(QCPPainter *painter) const
   Returns the pen used to paint the border of the legend, taking into account the selection state
   of the legend box.
 */
-QPen QCPLegend::getBorderPen() const
-{
-  return mSelectedParts.testFlag(spLegendBox) ? mSelectedBorderPen : mBorderPen;
+QPen QCPLegend::getBorderPen() const {
+    return mSelectedParts.testFlag(spLegendBox) ? mSelectedBorderPen : mBorderPen;
 }
 
 /*! \internal
@@ -861,9 +797,8 @@ QPen QCPLegend::getBorderPen() const
   Returns the brush used to paint the background of the legend, taking into account the selection
   state of the legend box.
 */
-QBrush QCPLegend::getBrush() const
-{
-  return mSelectedParts.testFlag(spLegendBox) ? mSelectedBrush : mBrush;
+QBrush QCPLegend::getBrush() const {
+    return mSelectedParts.testFlag(spLegendBox) ? mSelectedBrush : mBrush;
 }
 
 /*! \internal
@@ -871,71 +806,62 @@ QBrush QCPLegend::getBrush() const
   Draws the legend box with the provided \a painter. The individual legend items are layerables
   themselves, thus are drawn independently.
 */
-void QCPLegend::draw(QCPPainter *painter)
-{
-  // draw background rect:
-  painter->setBrush(getBrush());
-  painter->setPen(getBorderPen());
-  painter->drawRect(mOuterRect);
+void QCPLegend::draw(QCPPainter *painter) {
+    // draw background rect:
+    painter->setBrush(getBrush());
+    painter->setPen(getBorderPen());
+    painter->drawRect(mOuterRect);
 }
 
 /* inherits documentation from base class */
-double QCPLegend::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  if (!mParentPlot) return -1;
-  if (onlySelectable && !mSelectableParts.testFlag(spLegendBox))
+double QCPLegend::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    if (!mParentPlot) return -1;
+    if (onlySelectable && !mSelectableParts.testFlag(spLegendBox))
+        return -1;
+
+    if (mOuterRect.contains(pos.toPoint())) {
+        if (details) details->setValue(spLegendBox);
+        return mParentPlot->selectionTolerance() * 0.99;
+    }
     return -1;
-  
-  if (mOuterRect.contains(pos.toPoint()))
-  {
-    if (details) details->setValue(spLegendBox);
-    return mParentPlot->selectionTolerance()*0.99;
-  }
-  return -1;
 }
 
 /* inherits documentation from base class */
-void QCPLegend::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  mSelectedParts = selectedParts(); // in case item selection has changed
-  if (details.value<SelectablePart>() == spLegendBox && mSelectableParts.testFlag(spLegendBox))
-  {
-    SelectableParts selBefore = mSelectedParts;
-    setSelectedParts(additive ? mSelectedParts^spLegendBox : mSelectedParts|spLegendBox); // no need to unset spItems in !additive case, because they will be deselected by QCustomPlot (they're normal QCPLayerables with own deselectEvent)
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelectedParts != selBefore;
-  }
+void QCPLegend::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    mSelectedParts = selectedParts(); // in case item selection has changed
+    if (details.value<SelectablePart>() == spLegendBox && mSelectableParts.testFlag(spLegendBox)) {
+        SelectableParts selBefore = mSelectedParts;
+        setSelectedParts(additive ? mSelectedParts ^ spLegendBox : mSelectedParts |
+                                                                   spLegendBox); // no need to unset spItems in !additive case, because they will be deselected by QCustomPlot (they're normal QCPLayerables with own deselectEvent)
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelectedParts != selBefore;
+    }
 }
 
 /* inherits documentation from base class */
-void QCPLegend::deselectEvent(bool *selectionStateChanged)
-{
-  mSelectedParts = selectedParts(); // in case item selection has changed
-  if (mSelectableParts.testFlag(spLegendBox))
-  {
-    SelectableParts selBefore = mSelectedParts;
-    setSelectedParts(selectedParts() & ~spLegendBox);
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelectedParts != selBefore;
-  }
+void QCPLegend::deselectEvent(bool *selectionStateChanged) {
+    mSelectedParts = selectedParts(); // in case item selection has changed
+    if (mSelectableParts.testFlag(spLegendBox)) {
+        SelectableParts selBefore = mSelectedParts;
+        setSelectedParts(selectedParts() & ~spLegendBox);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelectedParts != selBefore;
+    }
 }
 
 /* inherits documentation from base class */
-QCP::Interaction QCPLegend::selectionCategory() const
-{
-  return QCP::iSelectLegend;
+QCP::Interaction QCPLegend::selectionCategory() const {
+    return QCP::iSelectLegend;
 }
 
 /* inherits documentation from base class */
-QCP::Interaction QCPAbstractLegendItem::selectionCategory() const
-{
-  return QCP::iSelectLegend;
+QCP::Interaction QCPAbstractLegendItem::selectionCategory() const {
+    return QCP::iSelectLegend;
 }
 
 /* inherits documentation from base class */
-void QCPLegend::parentPlotInitialized(QCustomPlot *parentPlot)
-{
-  if (parentPlot && !parentPlot->legend)
-    parentPlot->legend = this;
+void QCPLegend::parentPlotInitialized(QCustomPlot *parentPlot) {
+    if (parentPlot && !parentPlot->legend)
+        parentPlot->legend = this;
 }

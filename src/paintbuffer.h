@@ -30,58 +30,67 @@
 
 class QCPPainter;
 
-class QCP_LIB_DECL QCPAbstractPaintBuffer
-{
+class QCP_LIB_DECL QCPAbstractPaintBuffer {
 public:
-  explicit QCPAbstractPaintBuffer(const QSize &size, double devicePixelRatio);
-  virtual ~QCPAbstractPaintBuffer();
-  
-  // getters:
-  QSize size() const { return mSize; }
-  bool invalidated() const { return mInvalidated; }
-  double devicePixelRatio() const { return mDevicePixelRatio; }
-  
-  // setters:
-  void setSize(const QSize &size);
-  void setInvalidated(bool invalidated=true);
-  void setDevicePixelRatio(double ratio);
-  
-  // introduced virtual methods:
-  virtual QCPPainter *startPainting() = 0;
-  virtual void donePainting() {}
-  virtual void draw(QCPPainter *painter) const = 0;
-  virtual void clear(const QColor &color) = 0;
-  
+    explicit QCPAbstractPaintBuffer(const QSize &size, double devicePixelRatio);
+
+    virtual ~QCPAbstractPaintBuffer();
+
+    // getters:
+    QSize size() const { return mSize; }
+
+    bool invalidated() const { return mInvalidated; }
+
+    double devicePixelRatio() const { return mDevicePixelRatio; }
+
+    // setters:
+    void setSize(const QSize &size);
+
+    void setInvalidated(bool invalidated = true);
+
+    void setDevicePixelRatio(double ratio);
+
+    // introduced virtual methods:
+    virtual QCPPainter *startPainting() = 0;
+
+    virtual void donePainting() {}
+
+    virtual void draw(QCPPainter *painter) const = 0;
+
+    virtual void clear(const QColor &color) = 0;
+
 protected:
-  // property members:
-  QSize mSize;
-  double mDevicePixelRatio;
-  
-  // non-property members:
-  bool mInvalidated;
-  
-  // introduced virtual methods:
-  virtual void reallocateBuffer() = 0;
+    // property members:
+    QSize mSize;
+    double mDevicePixelRatio;
+
+    // non-property members:
+    bool mInvalidated;
+
+    // introduced virtual methods:
+    virtual void reallocateBuffer() = 0;
 };
 
 
-class QCP_LIB_DECL QCPPaintBufferPixmap : public QCPAbstractPaintBuffer
-{
+class QCP_LIB_DECL QCPPaintBufferPixmap : public QCPAbstractPaintBuffer {
 public:
-  explicit QCPPaintBufferPixmap(const QSize &size, double devicePixelRatio);
-  virtual ~QCPPaintBufferPixmap();
-  
-  // reimplemented virtual methods:
-  virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
-  virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
-  void clear(const QColor &color) Q_DECL_OVERRIDE;
-  
+    explicit QCPPaintBufferPixmap(const QSize &size, double devicePixelRatio);
+
+    virtual ~QCPPaintBufferPixmap();
+
+    // reimplemented virtual methods:
+    virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
+
+    virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
+
+    void clear(const QColor &color) Q_DECL_OVERRIDE;
+
 protected:
-  // non-property members:
-  QPixmap mBuffer;
-  
-  // reimplemented virtual methods:
-  virtual void reallocateBuffer() Q_DECL_OVERRIDE;
+    // non-property members:
+    QPixmap mBuffer;
+
+    // reimplemented virtual methods:
+    virtual void reallocateBuffer() Q_DECL_OVERRIDE;
 };
 
 

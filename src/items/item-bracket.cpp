@@ -59,22 +59,20 @@
   ownership of the item, so do not delete it manually but use QCustomPlot::removeItem() instead.
 */
 QCPItemBracket::QCPItemBracket(QCustomPlot *parentPlot) :
-  QCPAbstractItem(parentPlot),
-  left(createPosition(QLatin1String("left"))),
-  right(createPosition(QLatin1String("right"))),
-  center(createAnchor(QLatin1String("center"), aiCenter)),
-  mLength(8),
-  mStyle(bsCalligraphic)
-{
-  left->setCoords(0, 0);
-  right->setCoords(1, 1);
-  
-  setPen(QPen(Qt::black));
-  setSelectedPen(QPen(Qt::blue, 2));
+        QCPAbstractItem(parentPlot),
+        left(createPosition(QLatin1String("left"))),
+        right(createPosition(QLatin1String("right"))),
+        center(createAnchor(QLatin1String("center"), aiCenter)),
+        mLength(8),
+        mStyle(bsCalligraphic) {
+    left->setCoords(0, 0);
+    right->setCoords(1, 1);
+
+    setPen(QPen(Qt::black));
+    setSelectedPen(QPen(Qt::blue, 2));
 }
 
-QCPItemBracket::~QCPItemBracket()
-{
+QCPItemBracket::~QCPItemBracket() {
 }
 
 /*!
@@ -86,9 +84,8 @@ QCPItemBracket::~QCPItemBracket()
   
   \see setSelectedPen
 */
-void QCPItemBracket::setPen(const QPen &pen)
-{
-  mPen = pen;
+void QCPItemBracket::setPen(const QPen &pen) {
+    mPen = pen;
 }
 
 /*!
@@ -96,9 +93,8 @@ void QCPItemBracket::setPen(const QPen &pen)
   
   \see setPen, setSelected
 */
-void QCPItemBracket::setSelectedPen(const QPen &pen)
-{
-  mSelectedPen = pen;
+void QCPItemBracket::setSelectedPen(const QPen &pen) {
+    mSelectedPen = pen;
 }
 
 /*!
@@ -109,9 +105,8 @@ void QCPItemBracket::setSelectedPen(const QPen &pen)
   <center>Demonstrating the effect of different values for \ref setLength, for styles \ref
   bsCalligraphic and \ref bsSquare. Anchors and positions are displayed for reference.</center>
 */
-void QCPItemBracket::setLength(double length)
-{
-  mLength = length;
+void QCPItemBracket::setLength(double length) {
+    mLength = length;
 }
 
 /*!
@@ -119,138 +114,130 @@ void QCPItemBracket::setLength(double length)
   
   \see setPen
 */
-void QCPItemBracket::setStyle(QCPItemBracket::BracketStyle style)
-{
-  mStyle = style;
+void QCPItemBracket::setStyle(QCPItemBracket::BracketStyle style) {
+    mStyle = style;
 }
 
 /* inherits documentation from base class */
-double QCPItemBracket::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if (onlySelectable && !mSelectable)
+double QCPItemBracket::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if (onlySelectable && !mSelectable)
+        return -1;
+
+    QCPVector2D p(pos);
+    QCPVector2D leftVec(left->pixelPosition());
+    QCPVector2D rightVec(right->pixelPosition());
+    if (leftVec.toPoint() == rightVec.toPoint())
+        return -1;
+
+    QCPVector2D widthVec = (rightVec - leftVec) * 0.5;
+    QCPVector2D lengthVec = widthVec.perpendicular().normalized() * mLength;
+    QCPVector2D centerVec = (rightVec + leftVec) * 0.5 - lengthVec;
+
+    switch (mStyle) {
+        case QCPItemBracket::bsSquare:
+        case QCPItemBracket::bsRound: {
+            double a = p.distanceSquaredToLine(centerVec - widthVec, centerVec + widthVec);
+            double b = p.distanceSquaredToLine(centerVec - widthVec + lengthVec, centerVec - widthVec);
+            double c = p.distanceSquaredToLine(centerVec + widthVec + lengthVec, centerVec + widthVec);
+            return qSqrt(qMin(qMin(a, b), c));
+        }
+        case QCPItemBracket::bsCurly:
+        case QCPItemBracket::bsCalligraphic: {
+            double a = p.distanceSquaredToLine(centerVec - widthVec * 0.75 + lengthVec * 0.15, centerVec + lengthVec * 0.3);
+            double b = p.distanceSquaredToLine(centerVec - widthVec + lengthVec * 0.7, centerVec - widthVec * 0.75 + lengthVec * 0.15);
+            double c = p.distanceSquaredToLine(centerVec + widthVec * 0.75 + lengthVec * 0.15, centerVec + lengthVec * 0.3);
+            double d = p.distanceSquaredToLine(centerVec + widthVec + lengthVec * 0.7, centerVec + widthVec * 0.75 + lengthVec * 0.15);
+            return qSqrt(qMin(qMin(a, b), qMin(c, d)));
+        }
+    }
     return -1;
-  
-  QCPVector2D p(pos);
-  QCPVector2D leftVec(left->pixelPosition());
-  QCPVector2D rightVec(right->pixelPosition());
-  if (leftVec.toPoint() == rightVec.toPoint())
-    return -1;
-  
-  QCPVector2D widthVec = (rightVec-leftVec)*0.5;
-  QCPVector2D lengthVec = widthVec.perpendicular().normalized()*mLength;
-  QCPVector2D centerVec = (rightVec+leftVec)*0.5-lengthVec;
-  
-  switch (mStyle)
-  {
-    case QCPItemBracket::bsSquare:
-    case QCPItemBracket::bsRound:
-    {
-      double a = p.distanceSquaredToLine(centerVec-widthVec, centerVec+widthVec);
-      double b = p.distanceSquaredToLine(centerVec-widthVec+lengthVec, centerVec-widthVec);
-      double c = p.distanceSquaredToLine(centerVec+widthVec+lengthVec, centerVec+widthVec);
-      return qSqrt(qMin(qMin(a, b), c));
-    }
-    case QCPItemBracket::bsCurly:
-    case QCPItemBracket::bsCalligraphic:
-    {
-      double a = p.distanceSquaredToLine(centerVec-widthVec*0.75+lengthVec*0.15, centerVec+lengthVec*0.3);
-      double b = p.distanceSquaredToLine(centerVec-widthVec+lengthVec*0.7, centerVec-widthVec*0.75+lengthVec*0.15);
-      double c = p.distanceSquaredToLine(centerVec+widthVec*0.75+lengthVec*0.15, centerVec+lengthVec*0.3);
-      double d = p.distanceSquaredToLine(centerVec+widthVec+lengthVec*0.7, centerVec+widthVec*0.75+lengthVec*0.15);
-      return qSqrt(qMin(qMin(a, b), qMin(c, d)));
-    }
-  }
-  return -1;
 }
 
 /* inherits documentation from base class */
-void QCPItemBracket::draw(QCPPainter *painter)
-{
-  QCPVector2D leftVec(left->pixelPosition());
-  QCPVector2D rightVec(right->pixelPosition());
-  if (leftVec.toPoint() == rightVec.toPoint())
-    return;
-  
-  QCPVector2D widthVec = (rightVec-leftVec)*0.5;
-  QCPVector2D lengthVec = widthVec.perpendicular().normalized()*mLength;
-  QCPVector2D centerVec = (rightVec+leftVec)*0.5-lengthVec;
+void QCPItemBracket::draw(QCPPainter *painter) {
+    QCPVector2D leftVec(left->pixelPosition());
+    QCPVector2D rightVec(right->pixelPosition());
+    if (leftVec.toPoint() == rightVec.toPoint())
+        return;
 
-  QPolygon boundingPoly;
-  boundingPoly << leftVec.toPoint() << rightVec.toPoint()
-               << (rightVec-lengthVec).toPoint() << (leftVec-lengthVec).toPoint();
-  QRect clip = clipRect().adjusted(-mainPen().widthF(), -mainPen().widthF(), mainPen().widthF(), mainPen().widthF());
-  if (clip.intersects(boundingPoly.boundingRect()))
-  {
-    painter->setPen(mainPen());
-    switch (mStyle)
-    {
-      case bsSquare:
-      {
-        painter->drawLine((centerVec+widthVec).toPointF(), (centerVec-widthVec).toPointF());
-        painter->drawLine((centerVec+widthVec).toPointF(), (centerVec+widthVec+lengthVec).toPointF());
-        painter->drawLine((centerVec-widthVec).toPointF(), (centerVec-widthVec+lengthVec).toPointF());
-        break;
-      }
-      case bsRound:
-      {
-        painter->setBrush(Qt::NoBrush);
-        QPainterPath path;
-        path.moveTo((centerVec+widthVec+lengthVec).toPointF());
-        path.cubicTo((centerVec+widthVec).toPointF(), (centerVec+widthVec).toPointF(), centerVec.toPointF());
-        path.cubicTo((centerVec-widthVec).toPointF(), (centerVec-widthVec).toPointF(), (centerVec-widthVec+lengthVec).toPointF());
-        painter->drawPath(path);
-        break;
-      }
-      case bsCurly:
-      {
-        painter->setBrush(Qt::NoBrush);
-        QPainterPath path;
-        path.moveTo((centerVec+widthVec+lengthVec).toPointF());
-        path.cubicTo((centerVec+widthVec-lengthVec*0.8).toPointF(), (centerVec+0.4*widthVec+lengthVec).toPointF(), centerVec.toPointF());
-        path.cubicTo((centerVec-0.4*widthVec+lengthVec).toPointF(), (centerVec-widthVec-lengthVec*0.8).toPointF(), (centerVec-widthVec+lengthVec).toPointF());
-        painter->drawPath(path);
-        break;
-      }
-      case bsCalligraphic:
-      {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QBrush(mainPen().color()));
-        QPainterPath path;
-        path.moveTo((centerVec+widthVec+lengthVec).toPointF());
-        
-        path.cubicTo((centerVec+widthVec-lengthVec*0.8).toPointF(), (centerVec+0.4*widthVec+0.8*lengthVec).toPointF(), centerVec.toPointF());
-        path.cubicTo((centerVec-0.4*widthVec+0.8*lengthVec).toPointF(), (centerVec-widthVec-lengthVec*0.8).toPointF(), (centerVec-widthVec+lengthVec).toPointF());
-        
-        path.cubicTo((centerVec-widthVec-lengthVec*0.5).toPointF(), (centerVec-0.2*widthVec+1.2*lengthVec).toPointF(), (centerVec+lengthVec*0.2).toPointF());
-        path.cubicTo((centerVec+0.2*widthVec+1.2*lengthVec).toPointF(), (centerVec+widthVec-lengthVec*0.5).toPointF(), (centerVec+widthVec+lengthVec).toPointF());
-        
-        painter->drawPath(path);
-        break;
-      }
+    QCPVector2D widthVec = (rightVec - leftVec) * 0.5;
+    QCPVector2D lengthVec = widthVec.perpendicular().normalized() * mLength;
+    QCPVector2D centerVec = (rightVec + leftVec) * 0.5 - lengthVec;
+
+    QPolygon boundingPoly;
+    boundingPoly << leftVec.toPoint() << rightVec.toPoint()
+                 << (rightVec - lengthVec).toPoint() << (leftVec - lengthVec).toPoint();
+    QRect clip = clipRect().adjusted(-mainPen().widthF(), -mainPen().widthF(), mainPen().widthF(), mainPen().widthF());
+    if (clip.intersects(boundingPoly.boundingRect())) {
+        painter->setPen(mainPen());
+        switch (mStyle) {
+            case bsSquare: {
+                painter->drawLine((centerVec + widthVec).toPointF(), (centerVec - widthVec).toPointF());
+                painter->drawLine((centerVec + widthVec).toPointF(), (centerVec + widthVec + lengthVec).toPointF());
+                painter->drawLine((centerVec - widthVec).toPointF(), (centerVec - widthVec + lengthVec).toPointF());
+                break;
+            }
+            case bsRound: {
+                painter->setBrush(Qt::NoBrush);
+                QPainterPath path;
+                path.moveTo((centerVec + widthVec + lengthVec).toPointF());
+                path.cubicTo((centerVec + widthVec).toPointF(), (centerVec + widthVec).toPointF(), centerVec.toPointF());
+                path.cubicTo((centerVec - widthVec).toPointF(), (centerVec - widthVec).toPointF(), (centerVec - widthVec + lengthVec).toPointF());
+                painter->drawPath(path);
+                break;
+            }
+            case bsCurly: {
+                painter->setBrush(Qt::NoBrush);
+                QPainterPath path;
+                path.moveTo((centerVec + widthVec + lengthVec).toPointF());
+                path.cubicTo((centerVec + widthVec - lengthVec * 0.8).toPointF(), (centerVec + 0.4 * widthVec + lengthVec).toPointF(),
+                             centerVec.toPointF());
+                path.cubicTo((centerVec - 0.4 * widthVec + lengthVec).toPointF(), (centerVec - widthVec - lengthVec * 0.8).toPointF(),
+                             (centerVec - widthVec + lengthVec).toPointF());
+                painter->drawPath(path);
+                break;
+            }
+            case bsCalligraphic: {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(QBrush(mainPen().color()));
+                QPainterPath path;
+                path.moveTo((centerVec + widthVec + lengthVec).toPointF());
+
+                path.cubicTo((centerVec + widthVec - lengthVec * 0.8).toPointF(), (centerVec + 0.4 * widthVec + 0.8 * lengthVec).toPointF(),
+                             centerVec.toPointF());
+                path.cubicTo((centerVec - 0.4 * widthVec + 0.8 * lengthVec).toPointF(), (centerVec - widthVec - lengthVec * 0.8).toPointF(),
+                             (centerVec - widthVec + lengthVec).toPointF());
+
+                path.cubicTo((centerVec - widthVec - lengthVec * 0.5).toPointF(), (centerVec - 0.2 * widthVec + 1.2 * lengthVec).toPointF(),
+                             (centerVec + lengthVec * 0.2).toPointF());
+                path.cubicTo((centerVec + 0.2 * widthVec + 1.2 * lengthVec).toPointF(), (centerVec + widthVec - lengthVec * 0.5).toPointF(),
+                             (centerVec + widthVec + lengthVec).toPointF());
+
+                painter->drawPath(path);
+                break;
+            }
+        }
     }
-  }
 }
 
 /* inherits documentation from base class */
-QPointF QCPItemBracket::anchorPixelPosition(int anchorId) const
-{
-  QCPVector2D leftVec(left->pixelPosition());
-  QCPVector2D rightVec(right->pixelPosition());
-  if (leftVec.toPoint() == rightVec.toPoint())
-    return leftVec.toPointF();
-  
-  QCPVector2D widthVec = (rightVec-leftVec)*0.5;
-  QCPVector2D lengthVec = widthVec.perpendicular().normalized()*mLength;
-  QCPVector2D centerVec = (rightVec+leftVec)*0.5-lengthVec;
-  
-  switch (anchorId)
-  {
-    case aiCenter:
-      return centerVec.toPointF();
-  }
-  qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
-  return QPointF();
+QPointF QCPItemBracket::anchorPixelPosition(int anchorId) const {
+    QCPVector2D leftVec(left->pixelPosition());
+    QCPVector2D rightVec(right->pixelPosition());
+    if (leftVec.toPoint() == rightVec.toPoint())
+        return leftVec.toPointF();
+
+    QCPVector2D widthVec = (rightVec - leftVec) * 0.5;
+    QCPVector2D lengthVec = widthVec.perpendicular().normalized() * mLength;
+    QCPVector2D centerVec = (rightVec + leftVec) * 0.5 - lengthVec;
+
+    switch (anchorId) {
+        case aiCenter:
+            return centerVec.toPointF();
+    }
+    qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
+    return QPointF();
 }
 
 /*! \internal
@@ -258,7 +245,6 @@ QPointF QCPItemBracket::anchorPixelPosition(int anchorId) const
   Returns the pen that should be used for drawing lines. Returns mPen when the
   item is not selected and mSelectedPen when it is.
 */
-QPen QCPItemBracket::mainPen() const
-{
+QPen QCPItemBracket::mainPen() const {
     return mSelected ? mSelectedPen : mPen;
 }

@@ -56,18 +56,17 @@
   You shouldn't instantiate grids on their own, since every QCPAxis brings its own QCPGrid.
 */
 QCPGrid::QCPGrid(QCPAxis *parentAxis) :
-  QCPLayerable(parentAxis->parentPlot(), QString(), parentAxis),
-  mParentAxis(parentAxis)
-{
-  // warning: this is called in QCPAxis constructor, so parentAxis members should not be accessed/called
-  setParent(parentAxis);
-  setPen(QPen(QColor(200,200,200), 0, Qt::DotLine));
-  setSubGridPen(QPen(QColor(220,220,220), 0, Qt::DotLine));
-  setZeroLinePen(QPen(QColor(200,200,200), 0, Qt::SolidLine));
-  setSubGridVisible(false);
-  setAntialiased(false);
-  setAntialiasedSubGrid(false);
-  setAntialiasedZeroLine(false);
+        QCPLayerable(parentAxis->parentPlot(), QString(), parentAxis),
+        mParentAxis(parentAxis) {
+    // warning: this is called in QCPAxis constructor, so parentAxis members should not be accessed/called
+    setParent(parentAxis);
+    setPen(QPen(QColor(200, 200, 200), 0, Qt::DotLine));
+    setSubGridPen(QPen(QColor(220, 220, 220), 0, Qt::DotLine));
+    setZeroLinePen(QPen(QColor(200, 200, 200), 0, Qt::SolidLine));
+    setSubGridVisible(false);
+    setAntialiased(false);
+    setAntialiasedSubGrid(false);
+    setAntialiasedZeroLine(false);
 }
 
 /*!
@@ -75,41 +74,36 @@ QCPGrid::QCPGrid(QCPAxis *parentAxis) :
   
   \see setSubGridPen
 */
-void QCPGrid::setSubGridVisible(bool visible)
-{
-  mSubGridVisible = visible;
+void QCPGrid::setSubGridVisible(bool visible) {
+    mSubGridVisible = visible;
 }
 
 /*!
   Sets whether sub grid lines are drawn antialiased.
 */
-void QCPGrid::setAntialiasedSubGrid(bool enabled)
-{
-  mAntialiasedSubGrid = enabled;
+void QCPGrid::setAntialiasedSubGrid(bool enabled) {
+    mAntialiasedSubGrid = enabled;
 }
 
 /*!
   Sets whether zero lines are drawn antialiased.
 */
-void QCPGrid::setAntialiasedZeroLine(bool enabled)
-{
-  mAntialiasedZeroLine = enabled;
+void QCPGrid::setAntialiasedZeroLine(bool enabled) {
+    mAntialiasedZeroLine = enabled;
 }
 
 /*!
   Sets the pen with which (major) grid lines are drawn.
 */
-void QCPGrid::setPen(const QPen &pen)
-{
-  mPen = pen;
+void QCPGrid::setPen(const QPen &pen) {
+    mPen = pen;
 }
 
 /*!
   Sets the pen with which sub grid lines are drawn.
 */
-void QCPGrid::setSubGridPen(const QPen &pen)
-{
-  mSubGridPen = pen;
+void QCPGrid::setSubGridPen(const QPen &pen) {
+    mSubGridPen = pen;
 }
 
 /*!
@@ -118,9 +112,8 @@ void QCPGrid::setSubGridPen(const QPen &pen)
   Zero lines are lines at value coordinate 0 which may be drawn with a different pen than other grid
   lines. To disable zero lines and just draw normal grid lines at zero, set \a pen to Qt::NoPen.
 */
-void QCPGrid::setZeroLinePen(const QPen &pen)
-{
-  mZeroLinePen = pen;
+void QCPGrid::setZeroLinePen(const QPen &pen) {
+    mZeroLinePen = pen;
 }
 
 /*! \internal
@@ -136,9 +129,8 @@ void QCPGrid::setZeroLinePen(const QPen &pen)
   
   \see setAntialiased
 */
-void QCPGrid::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeGrid);
+void QCPGrid::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeGrid);
 }
 
 /*! \internal
@@ -146,13 +138,15 @@ void QCPGrid::applyDefaultAntialiasingHint(QCPPainter *painter) const
   Draws grid lines and sub grid lines at the positions of (sub) ticks of the parent axis, spanning
   over the complete axis rect. Also draws the zero line, if appropriate (\ref setZeroLinePen).
 */
-void QCPGrid::draw(QCPPainter *painter)
-{
-  if (!mParentAxis) { qDebug() << Q_FUNC_INFO << "invalid parent axis"; return; }
-  
-  if (mParentAxis->subTicks() && mSubGridVisible)
-    drawSubGridLines(painter);
-  drawGridLines(painter);
+void QCPGrid::draw(QCPPainter *painter) {
+    if (!mParentAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid parent axis";
+        return;
+    }
+
+    if (mParentAxis->subTicks() && mSubGridVisible)
+        drawSubGridLines(painter);
+    drawGridLines(painter);
 }
 
 /*! \internal
@@ -161,71 +155,63 @@ void QCPGrid::draw(QCPPainter *painter)
   
   This is a helper function called by \ref draw.
 */
-void QCPGrid::drawGridLines(QCPPainter *painter) const
-{
-  if (!mParentAxis) { qDebug() << Q_FUNC_INFO << "invalid parent axis"; return; }
-  
-  const int tickCount = mParentAxis->mTickVector.size();
-  double t; // helper variable, result of coordinate-to-pixel transforms
-  if (mParentAxis->orientation() == Qt::Horizontal)
-  {
-    // draw zeroline:
-    int zeroLineIndex = -1;
-    if (mZeroLinePen.style() != Qt::NoPen && mParentAxis->mRange.lower < 0 && mParentAxis->mRange.upper > 0)
-    {
-      applyAntialiasingHint(painter, mAntialiasedZeroLine, QCP::aeZeroLine);
-      painter->setPen(mZeroLinePen);
-      double epsilon = mParentAxis->range().size()*1E-6; // for comparing double to zero
-      for (int i=0; i<tickCount; ++i)
-      {
-        if (qAbs(mParentAxis->mTickVector.at(i)) < epsilon)
-        {
-          zeroLineIndex = i;
-          t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // x
-          painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
-          break;
+void QCPGrid::drawGridLines(QCPPainter *painter) const {
+    if (!mParentAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid parent axis";
+        return;
+    }
+
+    const int tickCount = mParentAxis->mTickVector.size();
+    double t; // helper variable, result of coordinate-to-pixel transforms
+    if (mParentAxis->orientation() == Qt::Horizontal) {
+        // draw zeroline:
+        int zeroLineIndex = -1;
+        if (mZeroLinePen.style() != Qt::NoPen && mParentAxis->mRange.lower < 0 && mParentAxis->mRange.upper > 0) {
+            applyAntialiasingHint(painter, mAntialiasedZeroLine, QCP::aeZeroLine);
+            painter->setPen(mZeroLinePen);
+            double epsilon = mParentAxis->range().size() * 1E-6; // for comparing double to zero
+            for (int i = 0; i < tickCount; ++i) {
+                if (qAbs(mParentAxis->mTickVector.at(i)) < epsilon) {
+                    zeroLineIndex = i;
+                    t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // x
+                    painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
+                    break;
+                }
+            }
         }
-      }
-    }
-    // draw grid lines:
-    applyDefaultAntialiasingHint(painter);
-    painter->setPen(mPen);
-    for (int i=0; i<tickCount; ++i)
-    {
-      if (i == zeroLineIndex) continue; // don't draw a gridline on top of the zeroline
-      t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // x
-      painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
-    }
-  } else
-  {
-    // draw zeroline:
-    int zeroLineIndex = -1;
-    if (mZeroLinePen.style() != Qt::NoPen && mParentAxis->mRange.lower < 0 && mParentAxis->mRange.upper > 0)
-    {
-      applyAntialiasingHint(painter, mAntialiasedZeroLine, QCP::aeZeroLine);
-      painter->setPen(mZeroLinePen);
-      double epsilon = mParentAxis->mRange.size()*1E-6; // for comparing double to zero
-      for (int i=0; i<tickCount; ++i)
-      {
-        if (qAbs(mParentAxis->mTickVector.at(i)) < epsilon)
-        {
-          zeroLineIndex = i;
-          t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // y
-          painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
-          break;
+        // draw grid lines:
+        applyDefaultAntialiasingHint(painter);
+        painter->setPen(mPen);
+        for (int i = 0; i < tickCount; ++i) {
+            if (i == zeroLineIndex) continue; // don't draw a gridline on top of the zeroline
+            t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // x
+            painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
         }
-      }
+    } else {
+        // draw zeroline:
+        int zeroLineIndex = -1;
+        if (mZeroLinePen.style() != Qt::NoPen && mParentAxis->mRange.lower < 0 && mParentAxis->mRange.upper > 0) {
+            applyAntialiasingHint(painter, mAntialiasedZeroLine, QCP::aeZeroLine);
+            painter->setPen(mZeroLinePen);
+            double epsilon = mParentAxis->mRange.size() * 1E-6; // for comparing double to zero
+            for (int i = 0; i < tickCount; ++i) {
+                if (qAbs(mParentAxis->mTickVector.at(i)) < epsilon) {
+                    zeroLineIndex = i;
+                    t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // y
+                    painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
+                    break;
+                }
+            }
+        }
+        // draw grid lines:
+        applyDefaultAntialiasingHint(painter);
+        painter->setPen(mPen);
+        for (int i = 0; i < tickCount; ++i) {
+            if (i == zeroLineIndex) continue; // don't draw a gridline on top of the zeroline
+            t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // y
+            painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
+        }
     }
-    // draw grid lines:
-    applyDefaultAntialiasingHint(painter);
-    painter->setPen(mPen);
-    for (int i=0; i<tickCount; ++i)
-    {
-      if (i == zeroLineIndex) continue; // don't draw a gridline on top of the zeroline
-      t = mParentAxis->coordToPixel(mParentAxis->mTickVector.at(i)); // y
-      painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
-    }
-  }
 }
 
 /*! \internal
@@ -234,28 +220,26 @@ void QCPGrid::drawGridLines(QCPPainter *painter) const
   
   This is a helper function called by \ref draw.
 */
-void QCPGrid::drawSubGridLines(QCPPainter *painter) const
-{
-  if (!mParentAxis) { qDebug() << Q_FUNC_INFO << "invalid parent axis"; return; }
-  
-  applyAntialiasingHint(painter, mAntialiasedSubGrid, QCP::aeSubGrid);
-  double t; // helper variable, result of coordinate-to-pixel transforms
-  painter->setPen(mSubGridPen);
-  if (mParentAxis->orientation() == Qt::Horizontal)
-  {
-    for (int i=0; i<mParentAxis->mSubTickVector.size(); ++i)
-    {
-      t = mParentAxis->coordToPixel(mParentAxis->mSubTickVector.at(i)); // x
-      painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
+void QCPGrid::drawSubGridLines(QCPPainter *painter) const {
+    if (!mParentAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid parent axis";
+        return;
     }
-  } else
-  {
-    for (int i=0; i<mParentAxis->mSubTickVector.size(); ++i)
-    {
-      t = mParentAxis->coordToPixel(mParentAxis->mSubTickVector.at(i)); // y
-      painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
+
+    applyAntialiasingHint(painter, mAntialiasedSubGrid, QCP::aeSubGrid);
+    double t; // helper variable, result of coordinate-to-pixel transforms
+    painter->setPen(mSubGridPen);
+    if (mParentAxis->orientation() == Qt::Horizontal) {
+        for (int i = 0; i < mParentAxis->mSubTickVector.size(); ++i) {
+            t = mParentAxis->coordToPixel(mParentAxis->mSubTickVector.at(i)); // x
+            painter->drawLine(QLineF(t, mParentAxis->mAxisRect->bottom(), t, mParentAxis->mAxisRect->top()));
+        }
+    } else {
+        for (int i = 0; i < mParentAxis->mSubTickVector.size(); ++i) {
+            t = mParentAxis->coordToPixel(mParentAxis->mSubTickVector.at(i)); // y
+            painter->drawLine(QLineF(mParentAxis->mAxisRect->left(), t, mParentAxis->mAxisRect->right(), t));
+        }
     }
-  }
 }
 
 
@@ -394,157 +378,138 @@ void QCPGrid::drawSubGridLines(QCPPainter *painter) const
   create them manually and then inject them also via \ref QCPAxisRect::addAxis.
 */
 QCPAxis::QCPAxis(QCPAxisRect *parent, AxisType type) :
-  QCPLayerable(parent->parentPlot(), QString(), parent),
-  // axis base:
-  mAxisType(type),
-  mAxisRect(parent),
-  mPadding(5),
-  mOrientation(orientation(type)),
-  mSelectableParts(spAxis | spTickLabels | spAxisLabel),
-  mSelectedParts(spNone),
-  mBasePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedBasePen(QPen(Qt::blue, 2)),
-  // axis label:
-  mLabel(),
-  mLabelFont(mParentPlot->font()),
-  mSelectedLabelFont(QFont(mLabelFont.family(), mLabelFont.pointSize(), QFont::Bold)),
-  mLabelColor(Qt::black),
-  mSelectedLabelColor(Qt::blue),
-  // tick labels:
-  mTickLabels(true),
-  mTickLabelFont(mParentPlot->font()),
-  mSelectedTickLabelFont(QFont(mTickLabelFont.family(), mTickLabelFont.pointSize(), QFont::Bold)),
-  mTickLabelColor(Qt::black),
-  mSelectedTickLabelColor(Qt::blue),
-  mNumberPrecision(6),
-  mNumberFormatChar('g'),
-  mNumberBeautifulPowers(true),
-  // ticks and subticks:
-  mTicks(true),
-  mSubTicks(true),
-  mTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedTickPen(QPen(Qt::blue, 2)),
-  mSubTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedSubTickPen(QPen(Qt::blue, 2)),
-  // scale and range:
-  mRange(0, 5),
-  mRangeReversed(false),
-  mScaleType(stLinear),
-  // internal members:
-  mGrid(new QCPGrid(this)),
-  mAxisPainter(new QCPAxisPainterPrivate(parent->parentPlot())),
-  mTicker(new QCPAxisTicker),
-  mCachedMarginValid(false),
-  mCachedMargin(0)
-{
-  setParent(parent);
-  mGrid->setVisible(false);
-  setAntialiased(false);
-  setLayer(mParentPlot->currentLayer()); // it's actually on that layer already, but we want it in front of the grid, so we place it on there again
-  
-  if (type == atTop)
-  {
-    setTickLabelPadding(3);
-    setLabelPadding(6);
-  } else if (type == atRight)
-  {
-    setTickLabelPadding(7);
-    setLabelPadding(12);
-  } else if (type == atBottom)
-  {
-    setTickLabelPadding(3);
-    setLabelPadding(3);
-  } else if (type == atLeft)
-  {
-    setTickLabelPadding(5);
-    setLabelPadding(10);
-  }
+        QCPLayerable(parent->parentPlot(), QString(), parent),
+        // axis base:
+        mAxisType(type),
+        mAxisRect(parent),
+        mPadding(5),
+        mOrientation(orientation(type)),
+        mSelectableParts(spAxis | spTickLabels | spAxisLabel),
+        mSelectedParts(spNone),
+        mBasePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedBasePen(QPen(Qt::blue, 2)),
+        // axis label:
+        mLabel(),
+        mLabelFont(mParentPlot->font()),
+        mSelectedLabelFont(QFont(mLabelFont.family(), mLabelFont.pointSize(), QFont::Bold)),
+        mLabelColor(Qt::black),
+        mSelectedLabelColor(Qt::blue),
+        // tick labels:
+        mTickLabels(true),
+        mTickLabelFont(mParentPlot->font()),
+        mSelectedTickLabelFont(QFont(mTickLabelFont.family(), mTickLabelFont.pointSize(), QFont::Bold)),
+        mTickLabelColor(Qt::black),
+        mSelectedTickLabelColor(Qt::blue),
+        mNumberPrecision(6),
+        mNumberFormatChar('g'),
+        mNumberBeautifulPowers(true),
+        // ticks and subticks:
+        mTicks(true),
+        mSubTicks(true),
+        mTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedTickPen(QPen(Qt::blue, 2)),
+        mSubTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedSubTickPen(QPen(Qt::blue, 2)),
+        // scale and range:
+        mRange(0, 5),
+        mRangeReversed(false),
+        mScaleType(stLinear),
+        // internal members:
+        mGrid(new QCPGrid(this)),
+        mAxisPainter(new QCPAxisPainterPrivate(parent->parentPlot())),
+        mTicker(new QCPAxisTicker),
+        mCachedMarginValid(false),
+        mCachedMargin(0) {
+    setParent(parent);
+    mGrid->setVisible(false);
+    setAntialiased(false);
+    setLayer(mParentPlot->currentLayer()); // it's actually on that layer already, but we want it in front of the grid, so we place it on there again
+
+    if (type == atTop) {
+        setTickLabelPadding(3);
+        setLabelPadding(6);
+    } else if (type == atRight) {
+        setTickLabelPadding(7);
+        setLabelPadding(12);
+    } else if (type == atBottom) {
+        setTickLabelPadding(3);
+        setLabelPadding(3);
+    } else if (type == atLeft) {
+        setTickLabelPadding(5);
+        setLabelPadding(10);
+    }
 }
 
-QCPAxis::~QCPAxis()
-{
-  delete mAxisPainter;
-  delete mGrid; // delete grid here instead of via parent ~QObject for better defined deletion order
+QCPAxis::~QCPAxis() {
+    delete mAxisPainter;
+    delete mGrid; // delete grid here instead of via parent ~QObject for better defined deletion order
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::tickLabelPadding() const
-{
-  return mAxisPainter->tickLabelPadding;
+int QCPAxis::tickLabelPadding() const {
+    return mAxisPainter->tickLabelPadding;
 }
 
 /* No documentation as it is a property getter */
-double QCPAxis::tickLabelRotation() const
-{
-  return mAxisPainter->tickLabelRotation;
+double QCPAxis::tickLabelRotation() const {
+    return mAxisPainter->tickLabelRotation;
 }
 
 /* No documentation as it is a property getter */
-QCPAxis::LabelSide QCPAxis::tickLabelSide() const
-{
-  return mAxisPainter->tickLabelSide;
+QCPAxis::LabelSide QCPAxis::tickLabelSide() const {
+    return mAxisPainter->tickLabelSide;
 }
 
 /* No documentation as it is a property getter */
-QString QCPAxis::numberFormat() const
-{
-  QString result;
-  result.append(mNumberFormatChar);
-  if (mNumberBeautifulPowers)
-  {
-    result.append(QLatin1Char('b'));
-    if (mAxisPainter->numberMultiplyCross)
-      result.append(QLatin1Char('c'));
-  }
-  return result;
+QString QCPAxis::numberFormat() const {
+    QString result;
+    result.append(mNumberFormatChar);
+    if (mNumberBeautifulPowers) {
+        result.append(QLatin1Char('b'));
+        if (mAxisPainter->numberMultiplyCross)
+            result.append(QLatin1Char('c'));
+    }
+    return result;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::tickLengthIn() const
-{
-  return mAxisPainter->tickLengthIn;
+int QCPAxis::tickLengthIn() const {
+    return mAxisPainter->tickLengthIn;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::tickLengthOut() const
-{
-  return mAxisPainter->tickLengthOut;
+int QCPAxis::tickLengthOut() const {
+    return mAxisPainter->tickLengthOut;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::subTickLengthIn() const
-{
-  return mAxisPainter->subTickLengthIn;
+int QCPAxis::subTickLengthIn() const {
+    return mAxisPainter->subTickLengthIn;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::subTickLengthOut() const
-{
-  return mAxisPainter->subTickLengthOut;
+int QCPAxis::subTickLengthOut() const {
+    return mAxisPainter->subTickLengthOut;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::labelPadding() const
-{
-  return mAxisPainter->labelPadding;
+int QCPAxis::labelPadding() const {
+    return mAxisPainter->labelPadding;
 }
 
 /* No documentation as it is a property getter */
-int QCPAxis::offset() const
-{
-  return mAxisPainter->offset;
+int QCPAxis::offset() const {
+    return mAxisPainter->offset;
 }
 
 /* No documentation as it is a property getter */
-QCPLineEnding QCPAxis::lowerEnding() const
-{
-  return mAxisPainter->lowerEnding;
+QCPLineEnding QCPAxis::lowerEnding() const {
+    return mAxisPainter->lowerEnding;
 }
 
 /* No documentation as it is a property getter */
-QCPLineEnding QCPAxis::upperEnding() const
-{
-  return mAxisPainter->upperEnding;
+QCPLineEnding QCPAxis::upperEnding() const {
+    return mAxisPainter->upperEnding;
 }
 
 /*!
@@ -561,16 +526,14 @@ QCPLineEnding QCPAxis::upperEnding() const
   
   \ref setNumberPrecision
 */
-void QCPAxis::setScaleType(QCPAxis::ScaleType type)
-{
-  if (mScaleType != type)
-  {
-    mScaleType = type;
-    if (mScaleType == stLogarithmic)
-      setRange(mRange.sanitizedForLogScale());
-    mCachedMarginValid = false;
-    emit scaleTypeChanged(mScaleType);
-  }
+void QCPAxis::setScaleType(QCPAxis::ScaleType type) {
+    if (mScaleType != type) {
+        mScaleType = type;
+        if (mScaleType == stLogarithmic)
+            setRange(mRange.sanitizedForLogScale());
+        mCachedMarginValid = false;
+        emit scaleTypeChanged(mScaleType);
+    }
 }
 
 /*!
@@ -581,22 +544,19 @@ void QCPAxis::setScaleType(QCPAxis::ScaleType type)
   
   To invert the direction of an axis, use \ref setRangeReversed.
 */
-void QCPAxis::setRange(const QCPRange &range)
-{
-  if (range.lower == mRange.lower && range.upper == mRange.upper)
-    return;
-  
-  if (!QCPRange::validRange(range)) return;
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = range.sanitizedForLogScale();
-  } else
-  {
-    mRange = range.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPAxis::setRange(const QCPRange &range) {
+    if (range.lower == mRange.lower && range.upper == mRange.upper)
+        return;
+
+    if (!QCPRange::validRange(range)) return;
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLogarithmic) {
+        mRange = range.sanitizedForLogScale();
+    } else {
+        mRange = range.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -609,13 +569,11 @@ void QCPAxis::setRange(const QCPRange &range)
   
   \see SelectablePart, setSelectedParts
 */
-void QCPAxis::setSelectableParts(const SelectableParts &selectable)
-{
-  if (mSelectableParts != selectable)
-  {
-    mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
-  }
+void QCPAxis::setSelectableParts(const SelectableParts &selectable) {
+    if (mSelectableParts != selectable) {
+        mSelectableParts = selectable;
+        emit selectableChanged(mSelectableParts);
+    }
 }
 
 /*!
@@ -633,13 +591,11 @@ void QCPAxis::setSelectableParts(const SelectableParts &selectable)
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
 */
-void QCPAxis::setSelectedParts(const SelectableParts &selected)
-{
-  if (mSelectedParts != selected)
-  {
-    mSelectedParts = selected;
-    emit selectionChanged(mSelectedParts);
-  }
+void QCPAxis::setSelectedParts(const SelectableParts &selected) {
+    if (mSelectedParts != selected) {
+        mSelectedParts = selected;
+        emit selectionChanged(mSelectedParts);
+    }
 }
 
 /*!
@@ -651,24 +607,21 @@ void QCPAxis::setSelectedParts(const SelectableParts &selected)
   
   There is also a slot to set a range, see \ref setRange(const QCPRange &range).
 */
-void QCPAxis::setRange(double lower, double upper)
-{
-  if (lower == mRange.lower && upper == mRange.upper)
-    return;
-  
-  if (!QCPRange::validRange(lower, upper)) return;
-  QCPRange oldRange = mRange;
-  mRange.lower = lower;
-  mRange.upper = upper;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPAxis::setRange(double lower, double upper) {
+    if (lower == mRange.lower && upper == mRange.upper)
+        return;
+
+    if (!QCPRange::validRange(lower, upper)) return;
+    QCPRange oldRange = mRange;
+    mRange.lower = lower;
+    mRange.upper = upper;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -682,58 +635,51 @@ void QCPAxis::setRange(double lower, double upper)
   or center of the range to be aligned with \a position. Any other values of \a alignment will
   default to Qt::AlignCenter.
 */
-void QCPAxis::setRange(double position, double size, Qt::AlignmentFlag alignment)
-{
-  if (alignment == Qt::AlignLeft)
-    setRange(position, position+size);
-  else if (alignment == Qt::AlignRight)
-    setRange(position-size, position);
-  else // alignment == Qt::AlignCenter
-    setRange(position-size/2.0, position+size/2.0);
+void QCPAxis::setRange(double position, double size, Qt::AlignmentFlag alignment) {
+    if (alignment == Qt::AlignLeft)
+        setRange(position, position + size);
+    else if (alignment == Qt::AlignRight)
+        setRange(position - size, position);
+    else // alignment == Qt::AlignCenter
+        setRange(position - size / 2.0, position + size / 2.0);
 }
 
 /*!
   Sets the lower bound of the axis range. The upper bound is not changed.
   \see setRange
 */
-void QCPAxis::setRangeLower(double lower)
-{
-  if (mRange.lower == lower)
-    return;
-  
-  QCPRange oldRange = mRange;
-  mRange.lower = lower;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPAxis::setRangeLower(double lower) {
+    if (mRange.lower == lower)
+        return;
+
+    QCPRange oldRange = mRange;
+    mRange.lower = lower;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
   Sets the upper bound of the axis range. The lower bound is not changed.
   \see setRange
 */
-void QCPAxis::setRangeUpper(double upper)
-{
-  if (mRange.upper == upper)
-    return;
-  
-  QCPRange oldRange = mRange;
-  mRange.upper = upper;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPAxis::setRangeUpper(double upper) {
+    if (mRange.upper == upper)
+        return;
+
+    QCPRange oldRange = mRange;
+    mRange.upper = upper;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -745,9 +691,8 @@ void QCPAxis::setRangeUpper(double upper)
   of the \ref setRange interface will still reference the mathematically smaller number than the \a
   upper part.
 */
-void QCPAxis::setRangeReversed(bool reversed)
-{
-  mRangeReversed = reversed;
+void QCPAxis::setRangeReversed(bool reversed) {
+    mRangeReversed = reversed;
 }
 
 /*!
@@ -763,13 +708,12 @@ void QCPAxis::setRangeReversed(bool reversed)
   
   \see ticker
 */
-void QCPAxis::setTicker(QSharedPointer<QCPAxisTicker> ticker)
-{
-  if (ticker)
-    mTicker = ticker;
-  else
-    qDebug() << Q_FUNC_INFO << "can not set 0 as axis ticker";
-  // no need to invalidate margin cache here because produced tick labels are checked for changes in setupTickVector
+void QCPAxis::setTicker(QSharedPointer<QCPAxisTicker> ticker) {
+    if (ticker)
+        mTicker = ticker;
+    else
+        qDebug() << Q_FUNC_INFO << "can not set 0 as axis ticker";
+    // no need to invalidate margin cache here because produced tick labels are checked for changes in setupTickVector
 }
 
 /*!
@@ -780,40 +724,34 @@ void QCPAxis::setTicker(QSharedPointer<QCPAxisTicker> ticker)
   
   \see setSubTicks
 */
-void QCPAxis::setTicks(bool show)
-{
-  if (mTicks != show)
-  {
-    mTicks = show;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setTicks(bool show) {
+    if (mTicks != show) {
+        mTicks = show;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
   Sets whether tick labels are displayed. Tick labels are the numbers drawn next to tick marks.
 */
-void QCPAxis::setTickLabels(bool show)
-{
-  if (mTickLabels != show)
-  {
-    mTickLabels = show;
-    mCachedMarginValid = false;
-    if (!mTickLabels)
-      mTickVectorLabels.clear();
-  }
+void QCPAxis::setTickLabels(bool show) {
+    if (mTickLabels != show) {
+        mTickLabels = show;
+        mCachedMarginValid = false;
+        if (!mTickLabels)
+            mTickVectorLabels.clear();
+    }
 }
 
 /*!
   Sets the distance between the axis base line (including any outward ticks) and the tick labels.
   \see setLabelPadding, setPadding
 */
-void QCPAxis::setTickLabelPadding(int padding)
-{
-  if (mAxisPainter->tickLabelPadding != padding)
-  {
-    mAxisPainter->tickLabelPadding = padding;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setTickLabelPadding(int padding) {
+    if (mAxisPainter->tickLabelPadding != padding) {
+        mAxisPainter->tickLabelPadding = padding;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -821,13 +759,11 @@ void QCPAxis::setTickLabelPadding(int padding)
   
   \see setTickLabels, setTickLabelColor
 */
-void QCPAxis::setTickLabelFont(const QFont &font)
-{
-  if (font != mTickLabelFont)
-  {
-    mTickLabelFont = font;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setTickLabelFont(const QFont &font) {
+    if (font != mTickLabelFont) {
+        mTickLabelFont = font;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -835,9 +771,8 @@ void QCPAxis::setTickLabelFont(const QFont &font)
   
   \see setTickLabels, setTickLabelFont
 */
-void QCPAxis::setTickLabelColor(const QColor &color)
-{
-  mTickLabelColor = color;
+void QCPAxis::setTickLabelColor(const QColor &color) {
+    mTickLabelColor = color;
 }
 
 /*!
@@ -849,13 +784,11 @@ void QCPAxis::setTickLabelColor(const QColor &color)
   other angles, the label is drawn with an offset such that it seems to point toward or away from
   the tick mark.
 */
-void QCPAxis::setTickLabelRotation(double degrees)
-{
-  if (!qFuzzyIsNull(degrees-mAxisPainter->tickLabelRotation))
-  {
-    mAxisPainter->tickLabelRotation = qBound(-90.0, degrees, 90.0);
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setTickLabelRotation(double degrees) {
+    if (!qFuzzyIsNull(degrees - mAxisPainter->tickLabelRotation)) {
+        mAxisPainter->tickLabelRotation = qBound(-90.0, degrees, 90.0);
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -865,10 +798,9 @@ void QCPAxis::setTickLabelRotation(double degrees)
   to be inside the axis rect, to save space. If \a side is set to \ref lsInside, the tick labels
   appear on the inside are additionally clipped to the axis rect.
 */
-void QCPAxis::setTickLabelSide(LabelSide side)
-{
-  mAxisPainter->tickLabelSide = side;
-  mCachedMarginValid = false;
+void QCPAxis::setTickLabelSide(LabelSide side) {
+    mAxisPainter->tickLabelSide = side;
+    mCachedMarginValid = false;
 }
 
 /*!
@@ -901,59 +833,48 @@ void QCPAxis::setTickLabelSide(LabelSide side)
   \li \c hello illegal format code, since first char is not 'e', 'E', 'f', 'g' or 'G'. Current format
   code will not be changed.
 */
-void QCPAxis::setNumberFormat(const QString &formatCode)
-{
-  if (formatCode.isEmpty())
-  {
-    qDebug() << Q_FUNC_INFO << "Passed formatCode is empty";
-    return;
-  }
-  mCachedMarginValid = false;
-  
-  // interpret first char as number format char:
-  QString allowedFormatChars(QLatin1String("eEfgG"));
-  if (allowedFormatChars.contains(formatCode.at(0)))
-  {
-    mNumberFormatChar = QLatin1Char(formatCode.at(0).toLatin1());
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "Invalid number format code (first char not in 'eEfgG'):" << formatCode;
-    return;
-  }
-  if (formatCode.length() < 2)
-  {
-    mNumberBeautifulPowers = false;
-    mAxisPainter->numberMultiplyCross = false;
-    return;
-  }
-  
-  // interpret second char as indicator for beautiful decimal powers:
-  if (formatCode.at(1) == QLatin1Char('b') && (mNumberFormatChar == QLatin1Char('e') || mNumberFormatChar == QLatin1Char('g')))
-  {
-    mNumberBeautifulPowers = true;
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "Invalid number format code (second char not 'b' or first char neither 'e' nor 'g'):" << formatCode;
-    return;
-  }
-  if (formatCode.length() < 3)
-  {
-    mAxisPainter->numberMultiplyCross = false;
-    return;
-  }
-  
-  // interpret third char as indicator for dot or cross multiplication symbol:
-  if (formatCode.at(2) == QLatin1Char('c'))
-  {
-    mAxisPainter->numberMultiplyCross = true;
-  } else if (formatCode.at(2) == QLatin1Char('d'))
-  {
-    mAxisPainter->numberMultiplyCross = false;
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "Invalid number format code (third char neither 'c' nor 'd'):" << formatCode;
-    return;
-  }
+void QCPAxis::setNumberFormat(const QString &formatCode) {
+    if (formatCode.isEmpty()) {
+        qDebug() << Q_FUNC_INFO << "Passed formatCode is empty";
+        return;
+    }
+    mCachedMarginValid = false;
+
+    // interpret first char as number format char:
+    QString allowedFormatChars(QLatin1String("eEfgG"));
+    if (allowedFormatChars.contains(formatCode.at(0))) {
+        mNumberFormatChar = QLatin1Char(formatCode.at(0).toLatin1());
+    } else {
+        qDebug() << Q_FUNC_INFO << "Invalid number format code (first char not in 'eEfgG'):" << formatCode;
+        return;
+    }
+    if (formatCode.length() < 2) {
+        mNumberBeautifulPowers = false;
+        mAxisPainter->numberMultiplyCross = false;
+        return;
+    }
+
+    // interpret second char as indicator for beautiful decimal powers:
+    if (formatCode.at(1) == QLatin1Char('b') && (mNumberFormatChar == QLatin1Char('e') || mNumberFormatChar == QLatin1Char('g'))) {
+        mNumberBeautifulPowers = true;
+    } else {
+        qDebug() << Q_FUNC_INFO << "Invalid number format code (second char not 'b' or first char neither 'e' nor 'g'):" << formatCode;
+        return;
+    }
+    if (formatCode.length() < 3) {
+        mAxisPainter->numberMultiplyCross = false;
+        return;
+    }
+
+    // interpret third char as indicator for dot or cross multiplication symbol:
+    if (formatCode.at(2) == QLatin1Char('c')) {
+        mAxisPainter->numberMultiplyCross = true;
+    } else if (formatCode.at(2) == QLatin1Char('d')) {
+        mAxisPainter->numberMultiplyCross = false;
+    } else {
+        qDebug() << Q_FUNC_INFO << "Invalid number format code (third char neither 'c' nor 'd'):" << formatCode;
+        return;
+    }
 }
 
 /*!
@@ -961,13 +882,11 @@ void QCPAxis::setNumberFormat(const QString &formatCode)
   for details. The effect of precisions are most notably for number Formats starting with 'e', see
   \ref setNumberFormat
 */
-void QCPAxis::setNumberPrecision(int precision)
-{
-  if (mNumberPrecision != precision)
-  {
-    mNumberPrecision = precision;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setNumberPrecision(int precision) {
+    if (mNumberPrecision != precision) {
+        mNumberPrecision = precision;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -978,10 +897,9 @@ void QCPAxis::setNumberPrecision(int precision)
   
   \see setSubTickLength, setTickLengthIn, setTickLengthOut
 */
-void QCPAxis::setTickLength(int inside, int outside)
-{
-  setTickLengthIn(inside);
-  setTickLengthOut(outside);
+void QCPAxis::setTickLength(int inside, int outside) {
+    setTickLengthIn(inside);
+    setTickLengthOut(outside);
 }
 
 /*!
@@ -990,12 +908,10 @@ void QCPAxis::setTickLength(int inside, int outside)
   
   \see setTickLengthOut, setTickLength, setSubTickLength
 */
-void QCPAxis::setTickLengthIn(int inside)
-{
-  if (mAxisPainter->tickLengthIn != inside)
-  {
-    mAxisPainter->tickLengthIn = inside;
-  }
+void QCPAxis::setTickLengthIn(int inside) {
+    if (mAxisPainter->tickLengthIn != inside) {
+        mAxisPainter->tickLengthIn = inside;
+    }
 }
 
 /*!
@@ -1005,13 +921,11 @@ void QCPAxis::setTickLengthIn(int inside)
   
   \see setTickLengthIn, setTickLength, setSubTickLength
 */
-void QCPAxis::setTickLengthOut(int outside)
-{
-  if (mAxisPainter->tickLengthOut != outside)
-  {
-    mAxisPainter->tickLengthOut = outside;
-    mCachedMarginValid = false; // only outside tick length can change margin
-  }
+void QCPAxis::setTickLengthOut(int outside) {
+    if (mAxisPainter->tickLengthOut != outside) {
+        mAxisPainter->tickLengthOut = outside;
+        mCachedMarginValid = false; // only outside tick length can change margin
+    }
 }
 
 /*!
@@ -1021,13 +935,11 @@ void QCPAxis::setTickLengthOut(int outside)
   
   \see setTicks
 */
-void QCPAxis::setSubTicks(bool show)
-{
-  if (mSubTicks != show)
-  {
-    mSubTicks = show;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setSubTicks(bool show) {
+    if (mSubTicks != show) {
+        mSubTicks = show;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -1038,10 +950,9 @@ void QCPAxis::setSubTicks(bool show)
   
   \see setTickLength, setSubTickLengthIn, setSubTickLengthOut
 */
-void QCPAxis::setSubTickLength(int inside, int outside)
-{
-  setSubTickLengthIn(inside);
-  setSubTickLengthOut(outside);
+void QCPAxis::setSubTickLength(int inside, int outside) {
+    setSubTickLengthIn(inside);
+    setSubTickLengthOut(outside);
 }
 
 /*!
@@ -1050,12 +961,10 @@ void QCPAxis::setSubTickLength(int inside, int outside)
   
   \see setSubTickLengthOut, setSubTickLength, setTickLength
 */
-void QCPAxis::setSubTickLengthIn(int inside)
-{
-  if (mAxisPainter->subTickLengthIn != inside)
-  {
-    mAxisPainter->subTickLengthIn = inside;
-  }
+void QCPAxis::setSubTickLengthIn(int inside) {
+    if (mAxisPainter->subTickLengthIn != inside) {
+        mAxisPainter->subTickLengthIn = inside;
+    }
 }
 
 /*!
@@ -1065,13 +974,11 @@ void QCPAxis::setSubTickLengthIn(int inside)
   
   \see setSubTickLengthIn, setSubTickLength, setTickLength
 */
-void QCPAxis::setSubTickLengthOut(int outside)
-{
-  if (mAxisPainter->subTickLengthOut != outside)
-  {
-    mAxisPainter->subTickLengthOut = outside;
-    mCachedMarginValid = false; // only outside tick length can change margin
-  }
+void QCPAxis::setSubTickLengthOut(int outside) {
+    if (mAxisPainter->subTickLengthOut != outside) {
+        mAxisPainter->subTickLengthOut = outside;
+        mCachedMarginValid = false; // only outside tick length can change margin
+    }
 }
 
 /*!
@@ -1079,9 +986,8 @@ void QCPAxis::setSubTickLengthOut(int outside)
   
   \see setTickPen, setSubTickPen
 */
-void QCPAxis::setBasePen(const QPen &pen)
-{
-  mBasePen = pen;
+void QCPAxis::setBasePen(const QPen &pen) {
+    mBasePen = pen;
 }
 
 /*!
@@ -1089,9 +995,8 @@ void QCPAxis::setBasePen(const QPen &pen)
   
   \see setTickLength, setBasePen
 */
-void QCPAxis::setTickPen(const QPen &pen)
-{
-  mTickPen = pen;
+void QCPAxis::setTickPen(const QPen &pen) {
+    mTickPen = pen;
 }
 
 /*!
@@ -1099,9 +1004,8 @@ void QCPAxis::setTickPen(const QPen &pen)
   
   \see setSubTickCount, setSubTickLength, setBasePen
 */
-void QCPAxis::setSubTickPen(const QPen &pen)
-{
-  mSubTickPen = pen;
+void QCPAxis::setSubTickPen(const QPen &pen) {
+    mSubTickPen = pen;
 }
 
 /*!
@@ -1109,13 +1013,11 @@ void QCPAxis::setSubTickPen(const QPen &pen)
   
   \see setLabelColor
 */
-void QCPAxis::setLabelFont(const QFont &font)
-{
-  if (mLabelFont != font)
-  {
-    mLabelFont = font;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setLabelFont(const QFont &font) {
+    if (mLabelFont != font) {
+        mLabelFont = font;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -1123,22 +1025,19 @@ void QCPAxis::setLabelFont(const QFont &font)
   
   \see setLabelFont
 */
-void QCPAxis::setLabelColor(const QColor &color)
-{
-  mLabelColor = color;
+void QCPAxis::setLabelColor(const QColor &color) {
+    mLabelColor = color;
 }
 
 /*!
   Sets the text of the axis label that will be shown below/above or next to the axis, depending on
   its orientation. To disable axis labels, pass an empty string as \a str.
 */
-void QCPAxis::setLabel(const QString &str)
-{
-  if (mLabel != str)
-  {
-    mLabel = str;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setLabel(const QString &str) {
+    if (mLabel != str) {
+        mLabel = str;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -1146,13 +1045,11 @@ void QCPAxis::setLabel(const QString &str)
   
   \see setTickLabelPadding, setPadding
 */
-void QCPAxis::setLabelPadding(int padding)
-{
-  if (mAxisPainter->labelPadding != padding)
-  {
-    mAxisPainter->labelPadding = padding;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setLabelPadding(int padding) {
+    if (mAxisPainter->labelPadding != padding) {
+        mAxisPainter->labelPadding = padding;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -1165,13 +1062,11 @@ void QCPAxis::setLabelPadding(int padding)
   
   \see setLabelPadding, setTickLabelPadding
 */
-void QCPAxis::setPadding(int padding)
-{
-  if (mPadding != padding)
-  {
-    mPadding = padding;
-    mCachedMarginValid = false;
-  }
+void QCPAxis::setPadding(int padding) {
+    if (mPadding != padding) {
+        mPadding = padding;
+        mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -1182,9 +1077,8 @@ void QCPAxis::setPadding(int padding)
   offset of the other, outer axes is controlled automatically, to place them at appropriate
   positions.
 */
-void QCPAxis::setOffset(int offset)
-{
-  mAxisPainter->offset = offset;
+void QCPAxis::setOffset(int offset) {
+    mAxisPainter->offset = offset;
 }
 
 /*!
@@ -1192,13 +1086,11 @@ void QCPAxis::setOffset(int offset)
   
   \see setTickLabelFont, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedTickLabelFont(const QFont &font)
-{
-  if (font != mSelectedTickLabelFont)
-  {
-    mSelectedTickLabelFont = font;
-    // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
-  }
+void QCPAxis::setSelectedTickLabelFont(const QFont &font) {
+    if (font != mSelectedTickLabelFont) {
+        mSelectedTickLabelFont = font;
+        // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
+    }
 }
 
 /*!
@@ -1206,10 +1098,9 @@ void QCPAxis::setSelectedTickLabelFont(const QFont &font)
   
   \see setLabelFont, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedLabelFont(const QFont &font)
-{
-  mSelectedLabelFont = font;
-  // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
+void QCPAxis::setSelectedLabelFont(const QFont &font) {
+    mSelectedLabelFont = font;
+    // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
 }
 
 /*!
@@ -1217,12 +1108,10 @@ void QCPAxis::setSelectedLabelFont(const QFont &font)
   
   \see setTickLabelColor, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedTickLabelColor(const QColor &color)
-{
-  if (color != mSelectedTickLabelColor)
-  {
-    mSelectedTickLabelColor = color;
-  }
+void QCPAxis::setSelectedTickLabelColor(const QColor &color) {
+    if (color != mSelectedTickLabelColor) {
+        mSelectedTickLabelColor = color;
+    }
 }
 
 /*!
@@ -1230,9 +1119,8 @@ void QCPAxis::setSelectedTickLabelColor(const QColor &color)
   
   \see setLabelColor, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedLabelColor(const QColor &color)
-{
-  mSelectedLabelColor = color;
+void QCPAxis::setSelectedLabelColor(const QColor &color) {
+    mSelectedLabelColor = color;
 }
 
 /*!
@@ -1240,9 +1128,8 @@ void QCPAxis::setSelectedLabelColor(const QColor &color)
   
   \see setBasePen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedBasePen(const QPen &pen)
-{
-  mSelectedBasePen = pen;
+void QCPAxis::setSelectedBasePen(const QPen &pen) {
+    mSelectedBasePen = pen;
 }
 
 /*!
@@ -1250,9 +1137,8 @@ void QCPAxis::setSelectedBasePen(const QPen &pen)
   
   \see setTickPen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedTickPen(const QPen &pen)
-{
-  mSelectedTickPen = pen;
+void QCPAxis::setSelectedTickPen(const QPen &pen) {
+    mSelectedTickPen = pen;
 }
 
 /*!
@@ -1260,9 +1146,8 @@ void QCPAxis::setSelectedTickPen(const QPen &pen)
   
   \see setSubTickPen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPAxis::setSelectedSubTickPen(const QPen &pen)
-{
-  mSelectedSubTickPen = pen;
+void QCPAxis::setSelectedSubTickPen(const QPen &pen) {
+    mSelectedSubTickPen = pen;
 }
 
 /*!
@@ -1275,9 +1160,8 @@ void QCPAxis::setSelectedSubTickPen(const QPen &pen)
   
   \see setUpperEnding
 */
-void QCPAxis::setLowerEnding(const QCPLineEnding &ending)
-{
-  mAxisPainter->lowerEnding = ending;
+void QCPAxis::setLowerEnding(const QCPLineEnding &ending) {
+    mAxisPainter->lowerEnding = ending;
 }
 
 /*!
@@ -1290,9 +1174,8 @@ void QCPAxis::setLowerEnding(const QCPLineEnding &ending)
   
   \see setLowerEnding
 */
-void QCPAxis::setUpperEnding(const QCPLineEnding &ending)
-{
-  mAxisPainter->upperEnding = ending;
+void QCPAxis::setUpperEnding(const QCPLineEnding &ending) {
+    mAxisPainter->upperEnding = ending;
 }
 
 /*!
@@ -1302,20 +1185,18 @@ void QCPAxis::setUpperEnding(const QCPLineEnding &ending)
   If the scale type is \ref stLogarithmic, the range bounds are multiplied by \a diff. This
   corresponds to an apparent "linear" move in logarithmic scaling by a distance of log(diff).
 */
-void QCPAxis::moveRange(double diff)
-{
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLinear)
-  {
-    mRange.lower += diff;
-    mRange.upper += diff;
-  } else // mScaleType == stLogarithmic
-  {
-    mRange.lower *= diff;
-    mRange.upper *= diff;
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPAxis::moveRange(double diff) {
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLinear) {
+        mRange.lower += diff;
+        mRange.upper += diff;
+    } else // mScaleType == stLogarithmic
+    {
+        mRange.lower *= diff;
+        mRange.upper *= diff;
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -1327,9 +1208,8 @@ void QCPAxis::moveRange(double diff)
   If you wish to scale around a different coordinate than the current axis range center, use the
   overload \ref scaleRange(double factor, double center).
 */
-void QCPAxis::scaleRange(double factor)
-{
-  scaleRange(factor, range().center());
+void QCPAxis::scaleRange(double factor) {
+    scaleRange(factor, range().center());
 }
 
 /*! \overload
@@ -1341,30 +1221,28 @@ void QCPAxis::scaleRange(double factor)
 
   \see scaleRange(double factor)
 */
-void QCPAxis::scaleRange(double factor, double center)
-{
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLinear)
-  {
-    QCPRange newRange;
-    newRange.lower = (mRange.lower-center)*factor + center;
-    newRange.upper = (mRange.upper-center)*factor + center;
-    if (QCPRange::validRange(newRange))
-      mRange = newRange.sanitizedForLinScale();
-  } else // mScaleType == stLogarithmic
-  {
-    if ((mRange.upper < 0 && center < 0) || (mRange.upper > 0 && center > 0)) // make sure center has same sign as range
+void QCPAxis::scaleRange(double factor, double center) {
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLinear) {
+        QCPRange newRange;
+        newRange.lower = (mRange.lower - center) * factor + center;
+        newRange.upper = (mRange.upper - center) * factor + center;
+        if (QCPRange::validRange(newRange))
+            mRange = newRange.sanitizedForLinScale();
+    } else // mScaleType == stLogarithmic
     {
-      QCPRange newRange;
-      newRange.lower = qPow(mRange.lower/center, factor)*center;
-      newRange.upper = qPow(mRange.upper/center, factor)*center;
-      if (QCPRange::validRange(newRange))
-        mRange = newRange.sanitizedForLogScale();
-    } else
-      qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+        if ((mRange.upper < 0 && center < 0) || (mRange.upper > 0 && center > 0)) // make sure center has same sign as range
+        {
+            QCPRange newRange;
+            newRange.lower = qPow(mRange.lower / center, factor) * center;
+            newRange.upper = qPow(mRange.upper / center, factor) * center;
+            if (QCPRange::validRange(newRange))
+                mRange = newRange.sanitizedForLogScale();
+        } else
+            qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -1380,22 +1258,21 @@ void QCPAxis::scaleRange(double factor, double center)
   won't have the desired effect, since the widget dimensions aren't defined yet, and a resizeEvent
   will follow.
 */
-void QCPAxis::setScaleRatio(const QCPAxis *otherAxis, double ratio)
-{
-  int otherPixelSize, ownPixelSize;
-  
-  if (otherAxis->orientation() == Qt::Horizontal)
-    otherPixelSize = otherAxis->axisRect()->width();
-  else
-    otherPixelSize = otherAxis->axisRect()->height();
-  
-  if (orientation() == Qt::Horizontal)
-    ownPixelSize = axisRect()->width();
-  else
-    ownPixelSize = axisRect()->height();
-  
-  double newRangeSize = ratio*otherAxis->range().size()*ownPixelSize/(double)otherPixelSize;
-  setRange(range().center(), newRangeSize, Qt::AlignCenter);
+void QCPAxis::setScaleRatio(const QCPAxis *otherAxis, double ratio) {
+    int otherPixelSize, ownPixelSize;
+
+    if (otherAxis->orientation() == Qt::Horizontal)
+        otherPixelSize = otherAxis->axisRect()->width();
+    else
+        otherPixelSize = otherAxis->axisRect()->height();
+
+    if (orientation() == Qt::Horizontal)
+        ownPixelSize = axisRect()->width();
+    else
+        ownPixelSize = axisRect()->height();
+
+    double newRangeSize = ratio * otherAxis->range().size() * ownPixelSize / (double) otherPixelSize;
+    setRange(range().center(), newRangeSize, Qt::AlignCenter);
 }
 
 /*!
@@ -1404,140 +1281,127 @@ void QCPAxis::setScaleRatio(const QCPAxis *otherAxis, double ratio)
   
   \see QCPAbstractPlottable::rescaleAxes, QCustomPlot::rescaleAxes
 */
-void QCPAxis::rescale(bool onlyVisiblePlottables)
-{
-  QList<QCPAbstractPlottable*> p = plottables();
-  QCPRange newRange;
-  bool haveRange = false;
-  for (int i=0; i<p.size(); ++i)
-  {
-    if (!p.at(i)->realVisibility() && onlyVisiblePlottables)
-      continue;
-    QCPRange plottableRange;
-    bool currentFoundRange;
-    QCP::SignDomain signDomain = QCP::sdBoth;
-    if (mScaleType == stLogarithmic)
-      signDomain = (mRange.upper < 0 ? QCP::sdNegative : QCP::sdPositive);
-    if (p.at(i)->keyAxis() == this)
-      plottableRange = p.at(i)->getKeyRange(currentFoundRange, signDomain);
-    else
-      plottableRange = p.at(i)->getValueRange(currentFoundRange, signDomain);
-    if (currentFoundRange)
-    {
-      if (!haveRange)
-        newRange = plottableRange;
-      else
-        newRange.expand(plottableRange);
-      haveRange = true;
+void QCPAxis::rescale(bool onlyVisiblePlottables) {
+    QList<QCPAbstractPlottable *> p = plottables();
+    QCPRange newRange;
+    bool haveRange = false;
+    for (int i = 0; i < p.size(); ++i) {
+        if (!p.at(i)->realVisibility() && onlyVisiblePlottables)
+            continue;
+        QCPRange plottableRange;
+        bool currentFoundRange;
+        QCP::SignDomain signDomain = QCP::sdBoth;
+        if (mScaleType == stLogarithmic)
+            signDomain = (mRange.upper < 0 ? QCP::sdNegative : QCP::sdPositive);
+        if (p.at(i)->keyAxis() == this)
+            plottableRange = p.at(i)->getKeyRange(currentFoundRange, signDomain);
+        else
+            plottableRange = p.at(i)->getValueRange(currentFoundRange, signDomain);
+        if (currentFoundRange) {
+            if (!haveRange)
+                newRange = plottableRange;
+            else
+                newRange.expand(plottableRange);
+            haveRange = true;
+        }
     }
-  }
-  if (haveRange)
-  {
-    if (!QCPRange::validRange(newRange)) // likely due to range being zero (plottable has only constant data in this axis dimension), shift current range to at least center the plottable
-    {
-      double center = (newRange.lower+newRange.upper)*0.5; // upper and lower should be equal anyway, but just to make sure, incase validRange returned false for other reason
-      if (mScaleType == stLinear)
-      {
-        newRange.lower = center-mRange.size()/2.0;
-        newRange.upper = center+mRange.size()/2.0;
-      } else // mScaleType == stLogarithmic
-      {
-        newRange.lower = center/qSqrt(mRange.upper/mRange.lower);
-        newRange.upper = center*qSqrt(mRange.upper/mRange.lower);
-      }
+    if (haveRange) {
+        if (!QCPRange::validRange(
+                newRange)) // likely due to range being zero (plottable has only constant data in this axis dimension), shift current range to at least center the plottable
+        {
+            double center = (newRange.lower + newRange.upper) *
+                            0.5; // upper and lower should be equal anyway, but just to make sure, incase validRange returned false for other reason
+            if (mScaleType == stLinear) {
+                newRange.lower = center - mRange.size() / 2.0;
+                newRange.upper = center + mRange.size() / 2.0;
+            } else // mScaleType == stLogarithmic
+            {
+                newRange.lower = center / qSqrt(mRange.upper / mRange.lower);
+                newRange.upper = center * qSqrt(mRange.upper / mRange.lower);
+            }
+        }
+        setRange(newRange);
     }
-    setRange(newRange);
-  }
 }
 
 /*!
   Transforms \a value, in pixel coordinates of the QCustomPlot widget, to axis coordinates.
 */
-double QCPAxis::pixelToCoord(double value) const
-{
-  if (orientation() == Qt::Horizontal)
-  {
-    if (mScaleType == stLinear)
+double QCPAxis::pixelToCoord(double value) const {
+    if (orientation() == Qt::Horizontal) {
+        if (mScaleType == stLinear) {
+            if (!mRangeReversed)
+                return (value - mAxisRect->left()) / (double) mAxisRect->width() * mRange.size() + mRange.lower;
+            else
+                return -(value - mAxisRect->left()) / (double) mAxisRect->width() * mRange.size() + mRange.upper;
+        } else // mScaleType == stLogarithmic
+        {
+            if (!mRangeReversed)
+                return qPow(mRange.upper / mRange.lower, (value - mAxisRect->left()) / (double) mAxisRect->width()) * mRange.lower;
+            else
+                return qPow(mRange.upper / mRange.lower, (mAxisRect->left() - value) / (double) mAxisRect->width()) * mRange.upper;
+        }
+    } else // orientation() == Qt::Vertical
     {
-      if (!mRangeReversed)
-        return (value-mAxisRect->left())/(double)mAxisRect->width()*mRange.size()+mRange.lower;
-      else
-        return -(value-mAxisRect->left())/(double)mAxisRect->width()*mRange.size()+mRange.upper;
-    } else // mScaleType == stLogarithmic
-    {
-      if (!mRangeReversed)
-        return qPow(mRange.upper/mRange.lower, (value-mAxisRect->left())/(double)mAxisRect->width())*mRange.lower;
-      else
-        return qPow(mRange.upper/mRange.lower, (mAxisRect->left()-value)/(double)mAxisRect->width())*mRange.upper;
+        if (mScaleType == stLinear) {
+            if (!mRangeReversed)
+                return (mAxisRect->bottom() - value) / (double) mAxisRect->height() * mRange.size() + mRange.lower;
+            else
+                return -(mAxisRect->bottom() - value) / (double) mAxisRect->height() * mRange.size() + mRange.upper;
+        } else // mScaleType == stLogarithmic
+        {
+            if (!mRangeReversed)
+                return qPow(mRange.upper / mRange.lower, (mAxisRect->bottom() - value) / (double) mAxisRect->height()) * mRange.lower;
+            else
+                return qPow(mRange.upper / mRange.lower, (value - mAxisRect->bottom()) / (double) mAxisRect->height()) * mRange.upper;
+        }
     }
-  } else // orientation() == Qt::Vertical
-  {
-    if (mScaleType == stLinear)
-    {
-      if (!mRangeReversed)
-        return (mAxisRect->bottom()-value)/(double)mAxisRect->height()*mRange.size()+mRange.lower;
-      else
-        return -(mAxisRect->bottom()-value)/(double)mAxisRect->height()*mRange.size()+mRange.upper;
-    } else // mScaleType == stLogarithmic
-    {
-      if (!mRangeReversed)
-        return qPow(mRange.upper/mRange.lower, (mAxisRect->bottom()-value)/(double)mAxisRect->height())*mRange.lower;
-      else
-        return qPow(mRange.upper/mRange.lower, (value-mAxisRect->bottom())/(double)mAxisRect->height())*mRange.upper;
-    }
-  }
 }
 
 /*!
   Transforms \a value, in coordinates of the axis, to pixel coordinates of the QCustomPlot widget.
 */
-double QCPAxis::coordToPixel(double value) const
-{
-  if (orientation() == Qt::Horizontal)
-  {
-    if (mScaleType == stLinear)
+double QCPAxis::coordToPixel(double value) const {
+    if (orientation() == Qt::Horizontal) {
+        if (mScaleType == stLinear) {
+            if (!mRangeReversed)
+                return (value - mRange.lower) / mRange.size() * mAxisRect->width() + mAxisRect->left();
+            else
+                return (mRange.upper - value) / mRange.size() * mAxisRect->width() + mAxisRect->left();
+        } else // mScaleType == stLogarithmic
+        {
+            if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? mAxisRect->right() + 200 : mAxisRect->left() - 200;
+            else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? mAxisRect->left() - 200 : mAxisRect->right() + 200;
+            else {
+                if (!mRangeReversed)
+                    return qLn(value / mRange.lower) / qLn(mRange.upper / mRange.lower) * mAxisRect->width() + mAxisRect->left();
+                else
+                    return qLn(mRange.upper / value) / qLn(mRange.upper / mRange.lower) * mAxisRect->width() + mAxisRect->left();
+            }
+        }
+    } else // orientation() == Qt::Vertical
     {
-      if (!mRangeReversed)
-        return (value-mRange.lower)/mRange.size()*mAxisRect->width()+mAxisRect->left();
-      else
-        return (mRange.upper-value)/mRange.size()*mAxisRect->width()+mAxisRect->left();
-    } else // mScaleType == stLogarithmic
-    {
-      if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
-        return !mRangeReversed ? mAxisRect->right()+200 : mAxisRect->left()-200;
-      else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
-        return !mRangeReversed ? mAxisRect->left()-200 : mAxisRect->right()+200;
-      else
-      {
-        if (!mRangeReversed)
-          return qLn(value/mRange.lower)/qLn(mRange.upper/mRange.lower)*mAxisRect->width()+mAxisRect->left();
-        else
-          return qLn(mRange.upper/value)/qLn(mRange.upper/mRange.lower)*mAxisRect->width()+mAxisRect->left();
-      }
+        if (mScaleType == stLinear) {
+            if (!mRangeReversed)
+                return mAxisRect->bottom() - (value - mRange.lower) / mRange.size() * mAxisRect->height();
+            else
+                return mAxisRect->bottom() - (mRange.upper - value) / mRange.size() * mAxisRect->height();
+        } else // mScaleType == stLogarithmic
+        {
+            if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? mAxisRect->top() - 200 : mAxisRect->bottom() + 200;
+            else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
+                return !mRangeReversed ? mAxisRect->bottom() + 200 : mAxisRect->top() - 200;
+            else {
+                if (!mRangeReversed)
+                    return mAxisRect->bottom() - qLn(value / mRange.lower) / qLn(mRange.upper / mRange.lower) * mAxisRect->height();
+                else
+                    return mAxisRect->bottom() - qLn(mRange.upper / value) / qLn(mRange.upper / mRange.lower) * mAxisRect->height();
+            }
+        }
     }
-  } else // orientation() == Qt::Vertical
-  {
-    if (mScaleType == stLinear)
-    {
-      if (!mRangeReversed)
-        return mAxisRect->bottom()-(value-mRange.lower)/mRange.size()*mAxisRect->height();
-      else
-        return mAxisRect->bottom()-(mRange.upper-value)/mRange.size()*mAxisRect->height();
-    } else // mScaleType == stLogarithmic
-    {
-      if (value >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just draw it outside visible range
-        return !mRangeReversed ? mAxisRect->top()-200 : mAxisRect->bottom()+200;
-      else if (value <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just draw it outside visible range
-        return !mRangeReversed ? mAxisRect->bottom()+200 : mAxisRect->top()-200;
-      else
-      {
-        if (!mRangeReversed)
-          return mAxisRect->bottom()-qLn(value/mRange.lower)/qLn(mRange.upper/mRange.lower)*mAxisRect->height();
-        else
-          return mAxisRect->bottom()-qLn(mRange.upper/value)/qLn(mRange.upper/mRange.lower)*mAxisRect->height();
-      }
-    }
-  }
 }
 
 /*!
@@ -1549,32 +1413,30 @@ double QCPAxis::coordToPixel(double value) const
   
   \see setSelectedParts, setSelectableParts, QCustomPlot::setInteractions
 */
-QCPAxis::SelectablePart QCPAxis::getPartAt(const QPointF &pos) const
-{
-  if (!mVisible)
-    return spNone;
-  
-  if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
-    return spAxis;
-  else if (mAxisPainter->tickLabelsSelectionBox().contains(pos.toPoint()))
-    return spTickLabels;
-  else if (mAxisPainter->labelSelectionBox().contains(pos.toPoint()))
-    return spAxisLabel;
-  else
-    return spNone;
+QCPAxis::SelectablePart QCPAxis::getPartAt(const QPointF &pos) const {
+    if (!mVisible)
+        return spNone;
+
+    if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
+        return spAxis;
+    else if (mAxisPainter->tickLabelsSelectionBox().contains(pos.toPoint()))
+        return spTickLabels;
+    else if (mAxisPainter->labelSelectionBox().contains(pos.toPoint()))
+        return spAxisLabel;
+    else
+        return spNone;
 }
 
 /* inherits documentation from base class */
-double QCPAxis::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  if (!mParentPlot) return -1;
-  SelectablePart part = getPartAt(pos);
-  if ((onlySelectable && !mSelectableParts.testFlag(part)) || part == spNone)
-    return -1;
-  
-  if (details)
-    details->setValue(part);
-  return mParentPlot->selectionTolerance()*0.99;
+double QCPAxis::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    if (!mParentPlot) return -1;
+    SelectablePart part = getPartAt(pos);
+    if ((onlySelectable && !mSelectableParts.testFlag(part)) || part == spNone)
+        return -1;
+
+    if (details)
+        details->setValue(part);
+    return mParentPlot->selectionTolerance() * 0.99;
 }
 
 /*!
@@ -1584,17 +1446,15 @@ double QCPAxis::selectTest(const QPointF &pos, bool onlySelectable, QVariant *de
   
   \see graphs, items
 */
-QList<QCPAbstractPlottable*> QCPAxis::plottables() const
-{
-  QList<QCPAbstractPlottable*> result;
-  if (!mParentPlot) return result;
-  
-  for (int i=0; i<mParentPlot->mPlottables.size(); ++i)
-  {
-    if (mParentPlot->mPlottables.at(i)->keyAxis() == this ||mParentPlot->mPlottables.at(i)->valueAxis() == this)
-      result.append(mParentPlot->mPlottables.at(i));
-  }
-  return result;
+QList<QCPAbstractPlottable *> QCPAxis::plottables() const {
+    QList<QCPAbstractPlottable *> result;
+    if (!mParentPlot) return result;
+
+    for (int i = 0; i < mParentPlot->mPlottables.size(); ++i) {
+        if (mParentPlot->mPlottables.at(i)->keyAxis() == this || mParentPlot->mPlottables.at(i)->valueAxis() == this)
+            result.append(mParentPlot->mPlottables.at(i));
+    }
+    return result;
 }
 
 /*!
@@ -1602,17 +1462,15 @@ QList<QCPAbstractPlottable*> QCPAxis::plottables() const
   
   \see plottables, items
 */
-QList<QCPGraph*> QCPAxis::graphs() const
-{
-  QList<QCPGraph*> result;
-  if (!mParentPlot) return result;
-  
-  for (int i=0; i<mParentPlot->mGraphs.size(); ++i)
-  {
-    if (mParentPlot->mGraphs.at(i)->keyAxis() == this || mParentPlot->mGraphs.at(i)->valueAxis() == this)
-      result.append(mParentPlot->mGraphs.at(i));
-  }
-  return result;
+QList<QCPGraph *> QCPAxis::graphs() const {
+    QList<QCPGraph *> result;
+    if (!mParentPlot) return result;
+
+    for (int i = 0; i < mParentPlot->mGraphs.size(); ++i) {
+        if (mParentPlot->mGraphs.at(i)->keyAxis() == this || mParentPlot->mGraphs.at(i)->valueAxis() == this)
+            result.append(mParentPlot->mGraphs.at(i));
+    }
+    return result;
 }
 
 /*!
@@ -1621,80 +1479,85 @@ QList<QCPGraph*> QCPAxis::graphs() const
   
   \see plottables, graphs
 */
-QList<QCPAbstractItem*> QCPAxis::items() const
-{
-  QList<QCPAbstractItem*> result;
-  if (!mParentPlot) return result;
-  
-  for (int itemId=0; itemId<mParentPlot->mItems.size(); ++itemId)
-  {
-    QList<QCPItemPosition*> positions = mParentPlot->mItems.at(itemId)->positions();
-    for (int posId=0; posId<positions.size(); ++posId)
-    {
-      if (positions.at(posId)->keyAxis() == this || positions.at(posId)->valueAxis() == this)
-      {
-        result.append(mParentPlot->mItems.at(itemId));
-        break;
-      }
+QList<QCPAbstractItem *> QCPAxis::items() const {
+    QList<QCPAbstractItem *> result;
+    if (!mParentPlot) return result;
+
+    for (int itemId = 0; itemId < mParentPlot->mItems.size(); ++itemId) {
+        QList<QCPItemPosition *> positions = mParentPlot->mItems.at(itemId)->positions();
+        for (int posId = 0; posId < positions.size(); ++posId) {
+            if (positions.at(posId)->keyAxis() == this || positions.at(posId)->valueAxis() == this) {
+                result.append(mParentPlot->mItems.at(itemId));
+                break;
+            }
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*!
   Transforms a margin side to the logically corresponding axis type. (QCP::msLeft to
   QCPAxis::atLeft, QCP::msRight to QCPAxis::atRight, etc.)
 */
-QCPAxis::AxisType QCPAxis::marginSideToAxisType(QCP::MarginSide side)
-{
-  switch (side)
-  {
-    case QCP::msLeft: return atLeft;
-    case QCP::msRight: return atRight;
-    case QCP::msTop: return atTop;
-    case QCP::msBottom: return atBottom;
-    default: break;
-  }
-  qDebug() << Q_FUNC_INFO << "Invalid margin side passed:" << (int)side;
-  return atLeft;
+QCPAxis::AxisType QCPAxis::marginSideToAxisType(QCP::MarginSide side) {
+    switch (side) {
+        case QCP::msLeft:
+            return atLeft;
+        case QCP::msRight:
+            return atRight;
+        case QCP::msTop:
+            return atTop;
+        case QCP::msBottom:
+            return atBottom;
+        default:
+            break;
+    }
+    qDebug() << Q_FUNC_INFO << "Invalid margin side passed:" << (int) side;
+    return atLeft;
 }
 
 /*!
   Returns the axis type that describes the opposite axis of an axis with the specified \a type.
 */
-QCPAxis::AxisType QCPAxis::opposite(QCPAxis::AxisType type)
-{
-  switch (type)
-  {
-    case atLeft: return atRight; break;
-    case atRight: return atLeft; break;
-    case atBottom: return atTop; break;
-    case atTop: return atBottom; break;
-    default: qDebug() << Q_FUNC_INFO << "invalid axis type"; return atLeft; break;
-  }
+QCPAxis::AxisType QCPAxis::opposite(QCPAxis::AxisType type) {
+    switch (type) {
+        case atLeft:
+            return atRight;
+            break;
+        case atRight:
+            return atLeft;
+            break;
+        case atBottom:
+            return atTop;
+            break;
+        case atTop:
+            return atBottom;
+            break;
+        default:
+            qDebug() << Q_FUNC_INFO << "invalid axis type";
+            return atLeft;
+            break;
+    }
 }
 
 /* inherits documentation from base class */
-void QCPAxis::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  SelectablePart part = details.value<SelectablePart>();
-  if (mSelectableParts.testFlag(part))
-  {
+void QCPAxis::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    SelectablePart part = details.value<SelectablePart>();
+    if (mSelectableParts.testFlag(part)) {
+        SelectableParts selBefore = mSelectedParts;
+        setSelectedParts(additive ? mSelectedParts ^ part : part);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelectedParts != selBefore;
+    }
+}
+
+/* inherits documentation from base class */
+void QCPAxis::deselectEvent(bool *selectionStateChanged) {
     SelectableParts selBefore = mSelectedParts;
-    setSelectedParts(additive ? mSelectedParts^part : part);
+    setSelectedParts(mSelectedParts & ~mSelectableParts);
     if (selectionStateChanged)
-      *selectionStateChanged = mSelectedParts != selBefore;
-  }
-}
-
-/* inherits documentation from base class */
-void QCPAxis::deselectEvent(bool *selectionStateChanged)
-{
-  SelectableParts selBefore = mSelectedParts;
-  setSelectedParts(mSelectedParts & ~mSelectableParts);
-  if (selectionStateChanged)
-    *selectionStateChanged = mSelectedParts != selBefore;
+        *selectionStateChanged = mSelectedParts != selBefore;
 }
 
 /*! \internal
@@ -1712,30 +1575,26 @@ void QCPAxis::deselectEvent(bool *selectionStateChanged)
   \note The dragging of possibly multiple axes at once by starting the drag anywhere in the axis
   rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::mousePressEvent.
 */
-void QCPAxis::mousePressEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag) ||
-      !mAxisRect->rangeDrag().testFlag(orientation()) ||
-      !mAxisRect->rangeDragAxes(orientation()).contains(this))
-  {
-    event->ignore();
-    return;
-  }
-  
-  if (event->buttons() & Qt::LeftButton)
-  {
-    mDragging = true;
-    // initialize antialiasing backup in case we start dragging:
-    if (mParentPlot->noAntialiasingOnDrag())
-    {
-      mAADragBackup = mParentPlot->antialiasedElements();
-      mNotAADragBackup = mParentPlot->notAntialiasedElements();
+void QCPAxis::mousePressEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag) ||
+        !mAxisRect->rangeDrag().testFlag(orientation()) ||
+        !mAxisRect->rangeDragAxes(orientation()).contains(this)) {
+        event->ignore();
+        return;
     }
-    // Mouse range dragging interaction:
-    if (mParentPlot->interactions().testFlag(QCP::iRangeDrag))
-      mDragStartRange = mRange;
-  }
+
+    if (event->buttons() & Qt::LeftButton) {
+        mDragging = true;
+        // initialize antialiasing backup in case we start dragging:
+        if (mParentPlot->noAntialiasingOnDrag()) {
+            mAADragBackup = mParentPlot->antialiasedElements();
+            mNotAADragBackup = mParentPlot->notAntialiasedElements();
+        }
+        // Mouse range dragging interaction:
+        if (mParentPlot->interactions().testFlag(QCP::iRangeDrag))
+            mDragStartRange = mRange;
+    }
 }
 
 /*! \internal
@@ -1750,26 +1609,22 @@ void QCPAxis::mousePressEvent(QMouseEvent *event, const QVariant &details)
   
   \see QCPAxis::mousePressEvent
 */
-void QCPAxis::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  if (mDragging)
-  {
-    const double startPixel = orientation() == Qt::Horizontal ? startPos.x() : startPos.y();
-    const double currentPixel = orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y();
-    if (mScaleType == QCPAxis::stLinear)
-    {
-      const double diff = pixelToCoord(startPixel) - pixelToCoord(currentPixel);
-      setRange(mDragStartRange.lower+diff, mDragStartRange.upper+diff);
-    } else if (mScaleType == QCPAxis::stLogarithmic)
-    {
-      const double diff = pixelToCoord(startPixel) / pixelToCoord(currentPixel);
-      setRange(mDragStartRange.lower*diff, mDragStartRange.upper*diff);
+void QCPAxis::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos) {
+    if (mDragging) {
+        const double startPixel = orientation() == Qt::Horizontal ? startPos.x() : startPos.y();
+        const double currentPixel = orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y();
+        if (mScaleType == QCPAxis::stLinear) {
+            const double diff = pixelToCoord(startPixel) - pixelToCoord(currentPixel);
+            setRange(mDragStartRange.lower + diff, mDragStartRange.upper + diff);
+        } else if (mScaleType == QCPAxis::stLogarithmic) {
+            const double diff = pixelToCoord(startPixel) / pixelToCoord(currentPixel);
+            setRange(mDragStartRange.lower * diff, mDragStartRange.upper * diff);
+        }
+
+        if (mParentPlot->noAntialiasingOnDrag())
+            mParentPlot->setNotAntialiasedElements(QCP::aeAll);
+        mParentPlot->replot(QCustomPlot::rpQueuedReplot);
     }
-    
-    if (mParentPlot->noAntialiasingOnDrag())
-      mParentPlot->setNotAntialiasedElements(QCP::aeAll);
-    mParentPlot->replot(QCustomPlot::rpQueuedReplot);
-  }
 }
 
 /*! \internal
@@ -1784,16 +1639,14 @@ void QCPAxis::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
   
   \see QCPAxis::mousePressEvent
 */
-void QCPAxis::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  Q_UNUSED(event)
-  Q_UNUSED(startPos)
-  mDragging = false;
-  if (mParentPlot->noAntialiasingOnDrag())
-  {
-    mParentPlot->setAntialiasedElements(mAADragBackup);
-    mParentPlot->setNotAntialiasedElements(mNotAADragBackup);
-  }
+void QCPAxis::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos) {
+    Q_UNUSED(event)
+    Q_UNUSED(startPos)
+    mDragging = false;
+    if (mParentPlot->noAntialiasingOnDrag()) {
+        mParentPlot->setAntialiasedElements(mAADragBackup);
+        mParentPlot->setNotAntialiasedElements(mNotAADragBackup);
+    }
 }
 
 /*! \internal
@@ -1811,21 +1664,19 @@ void QCPAxis::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
   \note The zooming of possibly multiple axes at once by performing the wheel event anywhere in the
   axis rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::wheelEvent.
 */
-void QCPAxis::wheelEvent(QWheelEvent *event)
-{
-  // Mouse range zooming interaction:
-  if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom) ||
-      !mAxisRect->rangeZoom().testFlag(orientation()) ||
-      !mAxisRect->rangeZoomAxes(orientation()).contains(this))
-  {
-    event->ignore();
-    return;
-  }
-  
-  const double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
-  const double factor = qPow(mAxisRect->rangeZoomFactor(orientation()), wheelSteps);
-  scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
-  mParentPlot->replot();
+void QCPAxis::wheelEvent(QWheelEvent *event) {
+    // Mouse range zooming interaction:
+    if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom) ||
+        !mAxisRect->rangeZoom().testFlag(orientation()) ||
+        !mAxisRect->rangeZoomAxes(orientation()).contains(this)) {
+        event->ignore();
+        return;
+    }
+
+    const double wheelSteps = event->delta() / 120.0; // a single step delta is +/-120 usually
+    const double factor = qPow(mAxisRect->rangeZoomFactor(orientation()), wheelSteps);
+    scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
+    mParentPlot->replot();
 }
 
 /*! \internal
@@ -1843,9 +1694,8 @@ void QCPAxis::wheelEvent(QWheelEvent *event)
   
   \see setAntialiased
 */
-void QCPAxis::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeAxes);
+void QCPAxis::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeAxes);
 }
 
 /*! \internal
@@ -1854,52 +1704,48 @@ void QCPAxis::applyDefaultAntialiasingHint(QCPPainter *painter) const
 
   \seebaseclassmethod
 */
-void QCPAxis::draw(QCPPainter *painter)
-{
-  QVector<double> subTickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
-  QVector<double> tickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
-  QVector<QString> tickLabels; // the final vector passed to QCPAxisPainter
-  tickPositions.reserve(mTickVector.size());
-  tickLabels.reserve(mTickVector.size());
-  subTickPositions.reserve(mSubTickVector.size());
-  
-  if (mTicks)
-  {
-    for (int i=0; i<mTickVector.size(); ++i)
-    {
-      tickPositions.append(coordToPixel(mTickVector.at(i)));
-      if (mTickLabels)
-        tickLabels.append(mTickVectorLabels.at(i));
+void QCPAxis::draw(QCPPainter *painter) {
+    QVector<double> subTickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
+    QVector<double> tickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
+    QVector<QString> tickLabels; // the final vector passed to QCPAxisPainter
+    tickPositions.reserve(mTickVector.size());
+    tickLabels.reserve(mTickVector.size());
+    subTickPositions.reserve(mSubTickVector.size());
+
+    if (mTicks) {
+        for (int i = 0; i < mTickVector.size(); ++i) {
+            tickPositions.append(coordToPixel(mTickVector.at(i)));
+            if (mTickLabels)
+                tickLabels.append(mTickVectorLabels.at(i));
+        }
+
+        if (mSubTicks) {
+            const int subTickCount = mSubTickVector.size();
+            for (int i = 0; i < subTickCount; ++i)
+                subTickPositions.append(coordToPixel(mSubTickVector.at(i)));
+        }
     }
 
-    if (mSubTicks)
-    {
-      const int subTickCount = mSubTickVector.size();
-      for (int i=0; i<subTickCount; ++i)
-        subTickPositions.append(coordToPixel(mSubTickVector.at(i)));
-    }
-  }
-  
-  // transfer all properties of this axis to QCPAxisPainterPrivate which it needs to draw the axis.
-  // Note that some axis painter properties are already set by direct feed-through with QCPAxis setters
-  mAxisPainter->type = mAxisType;
-  mAxisPainter->basePen = getBasePen();
-  mAxisPainter->labelFont = getLabelFont();
-  mAxisPainter->labelColor = getLabelColor();
-  mAxisPainter->label = mLabel;
-  mAxisPainter->substituteExponent = mNumberBeautifulPowers;
-  mAxisPainter->tickPen = getTickPen();
-  mAxisPainter->subTickPen = getSubTickPen();
-  mAxisPainter->tickLabelFont = getTickLabelFont();
-  mAxisPainter->tickLabelColor = getTickLabelColor();
-  mAxisPainter->axisRect = mAxisRect->rect();
-  mAxisPainter->viewportRect = mParentPlot->viewport();
-  mAxisPainter->abbreviateDecimalPowers = mScaleType == stLogarithmic;
-  mAxisPainter->reversedEndings = mRangeReversed;
-  mAxisPainter->tickPositions = tickPositions;
-  mAxisPainter->tickLabels = tickLabels;
-  mAxisPainter->subTickPositions = subTickPositions;
-  mAxisPainter->draw(painter);
+    // transfer all properties of this axis to QCPAxisPainterPrivate which it needs to draw the axis.
+    // Note that some axis painter properties are already set by direct feed-through with QCPAxis setters
+    mAxisPainter->type = mAxisType;
+    mAxisPainter->basePen = getBasePen();
+    mAxisPainter->labelFont = getLabelFont();
+    mAxisPainter->labelColor = getLabelColor();
+    mAxisPainter->label = mLabel;
+    mAxisPainter->substituteExponent = mNumberBeautifulPowers;
+    mAxisPainter->tickPen = getTickPen();
+    mAxisPainter->subTickPen = getSubTickPen();
+    mAxisPainter->tickLabelFont = getTickLabelFont();
+    mAxisPainter->tickLabelColor = getTickLabelColor();
+    mAxisPainter->axisRect = mAxisRect->rect();
+    mAxisPainter->viewportRect = mParentPlot->viewport();
+    mAxisPainter->abbreviateDecimalPowers = mScaleType == stLogarithmic;
+    mAxisPainter->reversedEndings = mRangeReversed;
+    mAxisPainter->tickPositions = tickPositions;
+    mAxisPainter->tickLabels = tickLabels;
+    mAxisPainter->subTickPositions = subTickPositions;
+    mAxisPainter->draw(painter);
 }
 
 /*! \internal
@@ -1910,14 +1756,14 @@ void QCPAxis::draw(QCPPainter *painter)
   If a change in the label text/count is detected, the cached axis margin is invalidated to make
   sure the next margin calculation recalculates the label sizes and returns an up-to-date value.
 */
-void QCPAxis::setupTickVectors()
-{
-  if (!mParentPlot) return;
-  if ((!mTicks && !mTickLabels && !mGrid->visible()) || mRange.size() <= 0) return;
-  
-  QVector<QString> oldLabels = mTickVectorLabels;
-  mTicker->generate(mRange, mParentPlot->locale(), mNumberFormatChar, mNumberPrecision, mTickVector, mSubTicks ? &mSubTickVector : 0, mTickLabels ? &mTickVectorLabels : 0);
-  mCachedMarginValid &= mTickVectorLabels == oldLabels; // if labels have changed, margin might have changed, too
+void QCPAxis::setupTickVectors() {
+    if (!mParentPlot) return;
+    if ((!mTicks && !mTickLabels && !mGrid->visible()) || mRange.size() <= 0) return;
+
+    QVector<QString> oldLabels = mTickVectorLabels;
+    mTicker->generate(mRange, mParentPlot->locale(), mNumberFormatChar, mNumberPrecision, mTickVector, mSubTicks ? &mSubTickVector : 0,
+                      mTickLabels ? &mTickVectorLabels : 0);
+    mCachedMarginValid &= mTickVectorLabels == oldLabels; // if labels have changed, margin might have changed, too
 }
 
 /*! \internal
@@ -1925,9 +1771,8 @@ void QCPAxis::setupTickVectors()
   Returns the pen that is used to draw the axis base line. Depending on the selection state, this
   is either mSelectedBasePen or mBasePen.
 */
-QPen QCPAxis::getBasePen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedBasePen : mBasePen;
+QPen QCPAxis::getBasePen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedBasePen : mBasePen;
 }
 
 /*! \internal
@@ -1935,9 +1780,8 @@ QPen QCPAxis::getBasePen() const
   Returns the pen that is used to draw the (major) ticks. Depending on the selection state, this
   is either mSelectedTickPen or mTickPen.
 */
-QPen QCPAxis::getTickPen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedTickPen : mTickPen;
+QPen QCPAxis::getTickPen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedTickPen : mTickPen;
 }
 
 /*! \internal
@@ -1945,9 +1789,8 @@ QPen QCPAxis::getTickPen() const
   Returns the pen that is used to draw the subticks. Depending on the selection state, this
   is either mSelectedSubTickPen or mSubTickPen.
 */
-QPen QCPAxis::getSubTickPen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedSubTickPen : mSubTickPen;
+QPen QCPAxis::getSubTickPen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedSubTickPen : mSubTickPen;
 }
 
 /*! \internal
@@ -1955,9 +1798,8 @@ QPen QCPAxis::getSubTickPen() const
   Returns the font that is used to draw the tick labels. Depending on the selection state, this
   is either mSelectedTickLabelFont or mTickLabelFont.
 */
-QFont QCPAxis::getTickLabelFont() const
-{
-  return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelFont : mTickLabelFont;
+QFont QCPAxis::getTickLabelFont() const {
+    return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelFont : mTickLabelFont;
 }
 
 /*! \internal
@@ -1965,9 +1807,8 @@ QFont QCPAxis::getTickLabelFont() const
   Returns the font that is used to draw the axis label. Depending on the selection state, this
   is either mSelectedLabelFont or mLabelFont.
 */
-QFont QCPAxis::getLabelFont() const
-{
-  return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelFont : mLabelFont;
+QFont QCPAxis::getLabelFont() const {
+    return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelFont : mLabelFont;
 }
 
 /*! \internal
@@ -1975,9 +1816,8 @@ QFont QCPAxis::getLabelFont() const
   Returns the color that is used to draw the tick labels. Depending on the selection state, this
   is either mSelectedTickLabelColor or mTickLabelColor.
 */
-QColor QCPAxis::getTickLabelColor() const
-{
-  return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelColor : mTickLabelColor;
+QColor QCPAxis::getTickLabelColor() const {
+    return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelColor : mTickLabelColor;
 }
 
 /*! \internal
@@ -1985,9 +1825,8 @@ QColor QCPAxis::getTickLabelColor() const
   Returns the color that is used to draw the axis label. Depending on the selection state, this
   is either mSelectedLabelColor or mLabelColor.
 */
-QColor QCPAxis::getLabelColor() const
-{
-  return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelColor : mLabelColor;
+QColor QCPAxis::getLabelColor() const {
+    return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelColor : mLabelColor;
 }
 
 /*! \internal
@@ -2004,53 +1843,49 @@ QColor QCPAxis::getLabelColor() const
   The margin is cached internally, so repeated calls while leaving the axis range, fonts, etc.
   unchanged are very fast.
 */
-int QCPAxis::calculateMargin()
-{
-  if (!mVisible) // if not visible, directly return 0, don't cache 0 because we can't react to setVisible in QCPAxis
-    return 0;
-  
-  if (mCachedMarginValid)
-    return mCachedMargin;
-  
-  // run through similar steps as QCPAxis::draw, and calculate margin needed to fit axis and its labels
-  int margin = 0;
-  
-  QVector<double> tickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
-  QVector<QString> tickLabels; // the final vector passed to QCPAxisPainter
-  tickPositions.reserve(mTickVector.size());
-  tickLabels.reserve(mTickVector.size());
-  
-  if (mTicks)
-  {
-    for (int i=0; i<mTickVector.size(); ++i)
-    {
-      tickPositions.append(coordToPixel(mTickVector.at(i)));
-      if (mTickLabels)
-        tickLabels.append(mTickVectorLabels.at(i));
-    }
-  }
-  // transfer all properties of this axis to QCPAxisPainterPrivate which it needs to calculate the size.
-  // Note that some axis painter properties are already set by direct feed-through with QCPAxis setters
-  mAxisPainter->type = mAxisType;
-  mAxisPainter->labelFont = getLabelFont();
-  mAxisPainter->label = mLabel;
-  mAxisPainter->tickLabelFont = mTickLabelFont;
-  mAxisPainter->axisRect = mAxisRect->rect();
-  mAxisPainter->viewportRect = mParentPlot->viewport();
-  mAxisPainter->tickPositions = tickPositions;
-  mAxisPainter->tickLabels = tickLabels;
-  margin += mAxisPainter->size();
-  margin += mPadding;
+int QCPAxis::calculateMargin() {
+    if (!mVisible) // if not visible, directly return 0, don't cache 0 because we can't react to setVisible in QCPAxis
+        return 0;
 
-  mCachedMargin = margin;
-  mCachedMarginValid = true;
-  return margin;
+    if (mCachedMarginValid)
+        return mCachedMargin;
+
+    // run through similar steps as QCPAxis::draw, and calculate margin needed to fit axis and its labels
+    int margin = 0;
+
+    QVector<double> tickPositions; // the final coordToPixel transformed vector passed to QCPAxisPainter
+    QVector<QString> tickLabels; // the final vector passed to QCPAxisPainter
+    tickPositions.reserve(mTickVector.size());
+    tickLabels.reserve(mTickVector.size());
+
+    if (mTicks) {
+        for (int i = 0; i < mTickVector.size(); ++i) {
+            tickPositions.append(coordToPixel(mTickVector.at(i)));
+            if (mTickLabels)
+                tickLabels.append(mTickVectorLabels.at(i));
+        }
+    }
+    // transfer all properties of this axis to QCPAxisPainterPrivate which it needs to calculate the size.
+    // Note that some axis painter properties are already set by direct feed-through with QCPAxis setters
+    mAxisPainter->type = mAxisType;
+    mAxisPainter->labelFont = getLabelFont();
+    mAxisPainter->label = mLabel;
+    mAxisPainter->tickLabelFont = mTickLabelFont;
+    mAxisPainter->axisRect = mAxisRect->rect();
+    mAxisPainter->viewportRect = mParentPlot->viewport();
+    mAxisPainter->tickPositions = tickPositions;
+    mAxisPainter->tickLabels = tickLabels;
+    margin += mAxisPainter->size();
+    margin += mPadding;
+
+    mCachedMargin = margin;
+    mCachedMarginValid = true;
+    return margin;
 }
 
 /* inherits documentation from base class */
-QCP::Interaction QCPAxis::selectionCategory() const
-{
-  return QCP::iSelectAxes;
+QCP::Interaction QCPAxis::selectionCategory() const {
+    return QCP::iSelectAxes;
 }
 
 
@@ -2075,32 +1910,31 @@ QCP::Interaction QCPAxis::selectionCategory() const
   redraw, to utilize the caching mechanisms.
 */
 QCPAxisPainterPrivate::QCPAxisPainterPrivate(QCustomPlot *parentPlot) :
-  type(QCPAxis::atLeft),
-  basePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  lowerEnding(QCPLineEnding::esNone),
-  upperEnding(QCPLineEnding::esNone),
-  labelPadding(0),
-  tickLabelPadding(0),
-  tickLabelRotation(0),
-  tickLabelSide(QCPAxis::lsOutside),
-  substituteExponent(true),
-  numberMultiplyCross(false),
-  tickLengthIn(5),
-  tickLengthOut(0),
-  subTickLengthIn(2),
-  subTickLengthOut(0),
-  tickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  subTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  offset(0),
-  abbreviateDecimalPowers(false),
-  reversedEndings(false),
-  mParentPlot(parentPlot),
-  mLabelCache(16) // cache at most 16 (tick) labels
+        type(QCPAxis::atLeft),
+        basePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        lowerEnding(QCPLineEnding::esNone),
+        upperEnding(QCPLineEnding::esNone),
+        labelPadding(0),
+        tickLabelPadding(0),
+        tickLabelRotation(0),
+        tickLabelSide(QCPAxis::lsOutside),
+        substituteExponent(true),
+        numberMultiplyCross(false),
+        tickLengthIn(5),
+        tickLengthOut(0),
+        subTickLengthIn(2),
+        subTickLengthOut(0),
+        tickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        subTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        offset(0),
+        abbreviateDecimalPowers(false),
+        reversedEndings(false),
+        mParentPlot(parentPlot),
+        mLabelCache(16) // cache at most 16 (tick) labels
 {
 }
 
-QCPAxisPainterPrivate::~QCPAxisPainterPrivate()
-{
+QCPAxisPainterPrivate::~QCPAxisPainterPrivate() {
 }
 
 /*! \internal
@@ -2110,192 +1944,199 @@ QCPAxisPainterPrivate::~QCPAxisPainterPrivate()
   The selection boxes (mAxisSelectionBox, mTickLabelsSelectionBox, mLabelSelectionBox) are set
   here, too.
 */
-void QCPAxisPainterPrivate::draw(QCPPainter *painter)
-{
-  QByteArray newHash = generateLabelParameterHash();
-  if (newHash != mLabelParameterHash)
-  {
-    mLabelCache.clear();
-    mLabelParameterHash = newHash;
-  }
-  
-  QPoint origin;
-  switch (type)
-  {
-    case QCPAxis::atLeft:   origin = axisRect.bottomLeft() +QPoint(-offset, 0); break;
-    case QCPAxis::atRight:  origin = axisRect.bottomRight()+QPoint(+offset, 0); break;
-    case QCPAxis::atTop:    origin = axisRect.topLeft()    +QPoint(0, -offset); break;
-    case QCPAxis::atBottom: origin = axisRect.bottomLeft() +QPoint(0, +offset); break;
-  }
+void QCPAxisPainterPrivate::draw(QCPPainter *painter) {
+    QByteArray newHash = generateLabelParameterHash();
+    if (newHash != mLabelParameterHash) {
+        mLabelCache.clear();
+        mLabelParameterHash = newHash;
+    }
 
-  double xCor = 0, yCor = 0; // paint system correction, for pixel exact matches (affects baselines and ticks of top/right axes)
-  switch (type)
-  {
-    case QCPAxis::atTop: yCor = -1; break;
-    case QCPAxis::atRight: xCor = 1; break;
-    default: break;
-  }
-  int margin = 0;
-  // draw baseline:
-  QLineF baseLine;
-  painter->setPen(basePen);
-  if (QCPAxis::orientation(type) == Qt::Horizontal)
-    baseLine.setPoints(origin+QPointF(xCor, yCor), origin+QPointF(axisRect.width()+xCor, yCor));
-  else
-    baseLine.setPoints(origin+QPointF(xCor, yCor), origin+QPointF(xCor, -axisRect.height()+yCor));
-  if (reversedEndings)
-    baseLine = QLineF(baseLine.p2(), baseLine.p1()); // won't make a difference for line itself, but for line endings later
-  painter->drawLine(baseLine);
-  
-  // draw ticks:
-  if (!tickPositions.isEmpty())
-  {
-    painter->setPen(tickPen);
-    int tickDir = (type == QCPAxis::atBottom || type == QCPAxis::atRight) ? -1 : 1; // direction of ticks ("inward" is right for left axis and left for right axis)
-    if (QCPAxis::orientation(type) == Qt::Horizontal)
-    {
-      for (int i=0; i<tickPositions.size(); ++i)
-        painter->drawLine(QLineF(tickPositions.at(i)+xCor, origin.y()-tickLengthOut*tickDir+yCor, tickPositions.at(i)+xCor, origin.y()+tickLengthIn*tickDir+yCor));
-    } else
-    {
-      for (int i=0; i<tickPositions.size(); ++i)
-        painter->drawLine(QLineF(origin.x()-tickLengthOut*tickDir+xCor, tickPositions.at(i)+yCor, origin.x()+tickLengthIn*tickDir+xCor, tickPositions.at(i)+yCor));
+    QPoint origin;
+    switch (type) {
+        case QCPAxis::atLeft:
+            origin = axisRect.bottomLeft() + QPoint(-offset, 0);
+            break;
+        case QCPAxis::atRight:
+            origin = axisRect.bottomRight() + QPoint(+offset, 0);
+            break;
+        case QCPAxis::atTop:
+            origin = axisRect.topLeft() + QPoint(0, -offset);
+            break;
+        case QCPAxis::atBottom:
+            origin = axisRect.bottomLeft() + QPoint(0, +offset);
+            break;
     }
-  }
-  
-  // draw subticks:
-  if (!subTickPositions.isEmpty())
-  {
-    painter->setPen(subTickPen);
-    // direction of ticks ("inward" is right for left axis and left for right axis)
-    int tickDir = (type == QCPAxis::atBottom || type == QCPAxis::atRight) ? -1 : 1;
-    if (QCPAxis::orientation(type) == Qt::Horizontal)
-    {
-      for (int i=0; i<subTickPositions.size(); ++i)
-        painter->drawLine(QLineF(subTickPositions.at(i)+xCor, origin.y()-subTickLengthOut*tickDir+yCor, subTickPositions.at(i)+xCor, origin.y()+subTickLengthIn*tickDir+yCor));
-    } else
-    {
-      for (int i=0; i<subTickPositions.size(); ++i)
-        painter->drawLine(QLineF(origin.x()-subTickLengthOut*tickDir+xCor, subTickPositions.at(i)+yCor, origin.x()+subTickLengthIn*tickDir+xCor, subTickPositions.at(i)+yCor));
+
+    double xCor = 0, yCor = 0; // paint system correction, for pixel exact matches (affects baselines and ticks of top/right axes)
+    switch (type) {
+        case QCPAxis::atTop:
+            yCor = -1;
+            break;
+        case QCPAxis::atRight:
+            xCor = 1;
+            break;
+        default:
+            break;
     }
-  }
-  margin += qMax(0, qMax(tickLengthOut, subTickLengthOut));
-  
-  // draw axis base endings:
-  bool antialiasingBackup = painter->antialiasing();
-  painter->setAntialiasing(true); // always want endings to be antialiased, even if base and ticks themselves aren't
-  painter->setBrush(QBrush(basePen.color()));
-  QCPVector2D baseLineVector(baseLine.dx(), baseLine.dy());
-  if (lowerEnding.style() != QCPLineEnding::esNone)
-    lowerEnding.draw(painter, QCPVector2D(baseLine.p1())-baseLineVector.normalized()*lowerEnding.realLength()*(lowerEnding.inverted()?-1:1), -baseLineVector);
-  if (upperEnding.style() != QCPLineEnding::esNone)
-    upperEnding.draw(painter, QCPVector2D(baseLine.p2())+baseLineVector.normalized()*upperEnding.realLength()*(upperEnding.inverted()?-1:1), baseLineVector);
-  painter->setAntialiasing(antialiasingBackup);
-  
-  // tick labels:
-  QRect oldClipRect;
-  if (tickLabelSide == QCPAxis::lsInside) // if using inside labels, clip them to the axis rect
-  {
-    oldClipRect = painter->clipRegion().boundingRect();
-    painter->setClipRect(axisRect);
-  }
-  QSize tickLabelsSize(0, 0); // size of largest tick label, for offset calculation of axis label
-  if (!tickLabels.isEmpty())
-  {
-    if (tickLabelSide == QCPAxis::lsOutside)
-      margin += tickLabelPadding;
-    painter->setFont(tickLabelFont);
-    painter->setPen(QPen(tickLabelColor));
-    const int maxLabelIndex = qMin(tickPositions.size(), tickLabels.size());
-    int distanceToAxis = margin;
+    int margin = 0;
+    // draw baseline:
+    QLineF baseLine;
+    painter->setPen(basePen);
+    if (QCPAxis::orientation(type) == Qt::Horizontal)
+        baseLine.setPoints(origin + QPointF(xCor, yCor), origin + QPointF(axisRect.width() + xCor, yCor));
+    else
+        baseLine.setPoints(origin + QPointF(xCor, yCor), origin + QPointF(xCor, -axisRect.height() + yCor));
+    if (reversedEndings)
+        baseLine = QLineF(baseLine.p2(), baseLine.p1()); // won't make a difference for line itself, but for line endings later
+    painter->drawLine(baseLine);
+
+    // draw ticks:
+    if (!tickPositions.isEmpty()) {
+        painter->setPen(tickPen);
+        int tickDir = (type == QCPAxis::atBottom || type == QCPAxis::atRight) ? -1
+                                                                              : 1; // direction of ticks ("inward" is right for left axis and left for right axis)
+        if (QCPAxis::orientation(type) == Qt::Horizontal) {
+            for (int i = 0; i < tickPositions.size(); ++i)
+                painter->drawLine(QLineF(tickPositions.at(i) + xCor, origin.y() - tickLengthOut * tickDir + yCor, tickPositions.at(i) + xCor,
+                                         origin.y() + tickLengthIn * tickDir + yCor));
+        } else {
+            for (int i = 0; i < tickPositions.size(); ++i)
+                painter->drawLine(
+                        QLineF(origin.x() - tickLengthOut * tickDir + xCor, tickPositions.at(i) + yCor, origin.x() + tickLengthIn * tickDir + xCor,
+                               tickPositions.at(i) + yCor));
+        }
+    }
+
+    // draw subticks:
+    if (!subTickPositions.isEmpty()) {
+        painter->setPen(subTickPen);
+        // direction of ticks ("inward" is right for left axis and left for right axis)
+        int tickDir = (type == QCPAxis::atBottom || type == QCPAxis::atRight) ? -1 : 1;
+        if (QCPAxis::orientation(type) == Qt::Horizontal) {
+            for (int i = 0; i < subTickPositions.size(); ++i)
+                painter->drawLine(QLineF(subTickPositions.at(i) + xCor, origin.y() - subTickLengthOut * tickDir + yCor, subTickPositions.at(i) + xCor,
+                                         origin.y() + subTickLengthIn * tickDir + yCor));
+        } else {
+            for (int i = 0; i < subTickPositions.size(); ++i)
+                painter->drawLine(QLineF(origin.x() - subTickLengthOut * tickDir + xCor, subTickPositions.at(i) + yCor,
+                                         origin.x() + subTickLengthIn * tickDir + xCor, subTickPositions.at(i) + yCor));
+        }
+    }
+    margin += qMax(0, qMax(tickLengthOut, subTickLengthOut));
+
+    // draw axis base endings:
+    bool antialiasingBackup = painter->antialiasing();
+    painter->setAntialiasing(true); // always want endings to be antialiased, even if base and ticks themselves aren't
+    painter->setBrush(QBrush(basePen.color()));
+    QCPVector2D baseLineVector(baseLine.dx(), baseLine.dy());
+    if (lowerEnding.style() != QCPLineEnding::esNone)
+        lowerEnding.draw(painter,
+                         QCPVector2D(baseLine.p1()) - baseLineVector.normalized() * lowerEnding.realLength() * (lowerEnding.inverted() ? -1 : 1),
+                         -baseLineVector);
+    if (upperEnding.style() != QCPLineEnding::esNone)
+        upperEnding.draw(painter,
+                         QCPVector2D(baseLine.p2()) + baseLineVector.normalized() * upperEnding.realLength() * (upperEnding.inverted() ? -1 : 1),
+                         baseLineVector);
+    painter->setAntialiasing(antialiasingBackup);
+
+    // tick labels:
+    QRect oldClipRect;
+    if (tickLabelSide == QCPAxis::lsInside) // if using inside labels, clip them to the axis rect
+    {
+        oldClipRect = painter->clipRegion().boundingRect();
+        painter->setClipRect(axisRect);
+    }
+    QSize tickLabelsSize(0, 0); // size of largest tick label, for offset calculation of axis label
+    if (!tickLabels.isEmpty()) {
+        if (tickLabelSide == QCPAxis::lsOutside)
+            margin += tickLabelPadding;
+        painter->setFont(tickLabelFont);
+        painter->setPen(QPen(tickLabelColor));
+        const int maxLabelIndex = qMin(tickPositions.size(), tickLabels.size());
+        int distanceToAxis = margin;
+        if (tickLabelSide == QCPAxis::lsInside)
+            distanceToAxis = -(qMax(tickLengthIn, subTickLengthIn) + tickLabelPadding);
+        for (int i = 0; i < maxLabelIndex; ++i)
+            placeTickLabel(painter, tickPositions.at(i), distanceToAxis, tickLabels.at(i), &tickLabelsSize);
+        if (tickLabelSide == QCPAxis::lsOutside)
+            margin += (QCPAxis::orientation(type) == Qt::Horizontal) ? tickLabelsSize.height() : tickLabelsSize.width();
+    }
     if (tickLabelSide == QCPAxis::lsInside)
-      distanceToAxis = -(qMax(tickLengthIn, subTickLengthIn)+tickLabelPadding);
-    for (int i=0; i<maxLabelIndex; ++i)
-      placeTickLabel(painter, tickPositions.at(i), distanceToAxis, tickLabels.at(i), &tickLabelsSize);
-    if (tickLabelSide == QCPAxis::lsOutside)
-      margin += (QCPAxis::orientation(type) == Qt::Horizontal) ? tickLabelsSize.height() : tickLabelsSize.width();
-  }
-  if (tickLabelSide == QCPAxis::lsInside)
-    painter->setClipRect(oldClipRect);
-  
-  // axis label:
-  QRect labelBounds;
-  if (!label.isEmpty())
-  {
-    margin += labelPadding;
-    painter->setFont(labelFont);
-    painter->setPen(QPen(labelColor));
-    labelBounds = painter->fontMetrics().boundingRect(0, 0, 0, 0, Qt::TextDontClip, label);
-    if (type == QCPAxis::atLeft)
-    {
-      QTransform oldTransform = painter->transform();
-      painter->translate((origin.x()-margin-labelBounds.height()), origin.y());
-      painter->rotate(-90);
-      painter->drawText(0, 0, axisRect.height(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
-      painter->setTransform(oldTransform);
+        painter->setClipRect(oldClipRect);
+
+    // axis label:
+    QRect labelBounds;
+    if (!label.isEmpty()) {
+        margin += labelPadding;
+        painter->setFont(labelFont);
+        painter->setPen(QPen(labelColor));
+        labelBounds = painter->fontMetrics().boundingRect(0, 0, 0, 0, Qt::TextDontClip, label);
+        if (type == QCPAxis::atLeft) {
+            QTransform oldTransform = painter->transform();
+            painter->translate((origin.x() - margin - labelBounds.height()), origin.y());
+            painter->rotate(-90);
+            painter->drawText(0, 0, axisRect.height(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
+            painter->setTransform(oldTransform);
+        } else if (type == QCPAxis::atRight) {
+            QTransform oldTransform = painter->transform();
+            painter->translate((origin.x() + margin + labelBounds.height()), origin.y() - axisRect.height());
+            painter->rotate(90);
+            painter->drawText(0, 0, axisRect.height(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
+            painter->setTransform(oldTransform);
+        } else if (type == QCPAxis::atTop)
+            painter->drawText(origin.x(), origin.y() - margin - labelBounds.height(), axisRect.width(), labelBounds.height(),
+                              Qt::TextDontClip | Qt::AlignCenter, label);
+        else if (type == QCPAxis::atBottom)
+            painter->drawText(origin.x(), origin.y() + margin, axisRect.width(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
     }
-    else if (type == QCPAxis::atRight)
-    {
-      QTransform oldTransform = painter->transform();
-      painter->translate((origin.x()+margin+labelBounds.height()), origin.y()-axisRect.height());
-      painter->rotate(90);
-      painter->drawText(0, 0, axisRect.height(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
-      painter->setTransform(oldTransform);
+
+    // set selection boxes:
+    int selectionTolerance = 0;
+    if (mParentPlot)
+        selectionTolerance = mParentPlot->selectionTolerance();
+    else
+        qDebug() << Q_FUNC_INFO << "mParentPlot is null";
+    int selAxisOutSize = qMax(qMax(tickLengthOut, subTickLengthOut), selectionTolerance);
+    int selAxisInSize = selectionTolerance;
+    int selTickLabelSize;
+    int selTickLabelOffset;
+    if (tickLabelSide == QCPAxis::lsOutside) {
+        selTickLabelSize = (QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width());
+        selTickLabelOffset = qMax(tickLengthOut, subTickLengthOut) + tickLabelPadding;
+    } else {
+        selTickLabelSize = -(QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width());
+        selTickLabelOffset = -(qMax(tickLengthIn, subTickLengthIn) + tickLabelPadding);
     }
-    else if (type == QCPAxis::atTop)
-      painter->drawText(origin.x(), origin.y()-margin-labelBounds.height(), axisRect.width(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
-    else if (type == QCPAxis::atBottom)
-      painter->drawText(origin.x(), origin.y()+margin, axisRect.width(), labelBounds.height(), Qt::TextDontClip | Qt::AlignCenter, label);
-  }
-  
-  // set selection boxes:
-  int selectionTolerance = 0;
-  if (mParentPlot)
-    selectionTolerance = mParentPlot->selectionTolerance();
-  else
-    qDebug() << Q_FUNC_INFO << "mParentPlot is null";
-  int selAxisOutSize = qMax(qMax(tickLengthOut, subTickLengthOut), selectionTolerance);
-  int selAxisInSize = selectionTolerance;
-  int selTickLabelSize;
-  int selTickLabelOffset;
-  if (tickLabelSide == QCPAxis::lsOutside)
-  {
-    selTickLabelSize = (QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width());
-    selTickLabelOffset = qMax(tickLengthOut, subTickLengthOut)+tickLabelPadding;
-  } else
-  {
-    selTickLabelSize = -(QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width());
-    selTickLabelOffset = -(qMax(tickLengthIn, subTickLengthIn)+tickLabelPadding);
-  }
-  int selLabelSize = labelBounds.height();
-  int selLabelOffset = qMax(tickLengthOut, subTickLengthOut)+(!tickLabels.isEmpty() && tickLabelSide == QCPAxis::lsOutside ? tickLabelPadding+selTickLabelSize : 0)+labelPadding;
-  if (type == QCPAxis::atLeft)
-  {
-    mAxisSelectionBox.setCoords(origin.x()-selAxisOutSize, axisRect.top(), origin.x()+selAxisInSize, axisRect.bottom());
-    mTickLabelsSelectionBox.setCoords(origin.x()-selTickLabelOffset-selTickLabelSize, axisRect.top(), origin.x()-selTickLabelOffset, axisRect.bottom());
-    mLabelSelectionBox.setCoords(origin.x()-selLabelOffset-selLabelSize, axisRect.top(), origin.x()-selLabelOffset, axisRect.bottom());
-  } else if (type == QCPAxis::atRight)
-  {
-    mAxisSelectionBox.setCoords(origin.x()-selAxisInSize, axisRect.top(), origin.x()+selAxisOutSize, axisRect.bottom());
-    mTickLabelsSelectionBox.setCoords(origin.x()+selTickLabelOffset+selTickLabelSize, axisRect.top(), origin.x()+selTickLabelOffset, axisRect.bottom());
-    mLabelSelectionBox.setCoords(origin.x()+selLabelOffset+selLabelSize, axisRect.top(), origin.x()+selLabelOffset, axisRect.bottom());
-  } else if (type == QCPAxis::atTop)
-  {
-    mAxisSelectionBox.setCoords(axisRect.left(), origin.y()-selAxisOutSize, axisRect.right(), origin.y()+selAxisInSize);
-    mTickLabelsSelectionBox.setCoords(axisRect.left(), origin.y()-selTickLabelOffset-selTickLabelSize, axisRect.right(), origin.y()-selTickLabelOffset);
-    mLabelSelectionBox.setCoords(axisRect.left(), origin.y()-selLabelOffset-selLabelSize, axisRect.right(), origin.y()-selLabelOffset);
-  } else if (type == QCPAxis::atBottom)
-  {
-    mAxisSelectionBox.setCoords(axisRect.left(), origin.y()-selAxisInSize, axisRect.right(), origin.y()+selAxisOutSize);
-    mTickLabelsSelectionBox.setCoords(axisRect.left(), origin.y()+selTickLabelOffset+selTickLabelSize, axisRect.right(), origin.y()+selTickLabelOffset);
-    mLabelSelectionBox.setCoords(axisRect.left(), origin.y()+selLabelOffset+selLabelSize, axisRect.right(), origin.y()+selLabelOffset);
-  }
-  mAxisSelectionBox = mAxisSelectionBox.normalized();
-  mTickLabelsSelectionBox = mTickLabelsSelectionBox.normalized();
-  mLabelSelectionBox = mLabelSelectionBox.normalized();
-  // draw hitboxes for debug purposes:
-  //painter->setBrush(Qt::NoBrush);
-  //painter->drawRects(QVector<QRect>() << mAxisSelectionBox << mTickLabelsSelectionBox << mLabelSelectionBox);
+    int selLabelSize = labelBounds.height();
+    int selLabelOffset = qMax(tickLengthOut, subTickLengthOut) +
+                         (!tickLabels.isEmpty() && tickLabelSide == QCPAxis::lsOutside ? tickLabelPadding + selTickLabelSize : 0) + labelPadding;
+    if (type == QCPAxis::atLeft) {
+        mAxisSelectionBox.setCoords(origin.x() - selAxisOutSize, axisRect.top(), origin.x() + selAxisInSize, axisRect.bottom());
+        mTickLabelsSelectionBox.setCoords(origin.x() - selTickLabelOffset - selTickLabelSize, axisRect.top(), origin.x() - selTickLabelOffset,
+                                          axisRect.bottom());
+        mLabelSelectionBox.setCoords(origin.x() - selLabelOffset - selLabelSize, axisRect.top(), origin.x() - selLabelOffset, axisRect.bottom());
+    } else if (type == QCPAxis::atRight) {
+        mAxisSelectionBox.setCoords(origin.x() - selAxisInSize, axisRect.top(), origin.x() + selAxisOutSize, axisRect.bottom());
+        mTickLabelsSelectionBox.setCoords(origin.x() + selTickLabelOffset + selTickLabelSize, axisRect.top(), origin.x() + selTickLabelOffset,
+                                          axisRect.bottom());
+        mLabelSelectionBox.setCoords(origin.x() + selLabelOffset + selLabelSize, axisRect.top(), origin.x() + selLabelOffset, axisRect.bottom());
+    } else if (type == QCPAxis::atTop) {
+        mAxisSelectionBox.setCoords(axisRect.left(), origin.y() - selAxisOutSize, axisRect.right(), origin.y() + selAxisInSize);
+        mTickLabelsSelectionBox.setCoords(axisRect.left(), origin.y() - selTickLabelOffset - selTickLabelSize, axisRect.right(),
+                                          origin.y() - selTickLabelOffset);
+        mLabelSelectionBox.setCoords(axisRect.left(), origin.y() - selLabelOffset - selLabelSize, axisRect.right(), origin.y() - selLabelOffset);
+    } else if (type == QCPAxis::atBottom) {
+        mAxisSelectionBox.setCoords(axisRect.left(), origin.y() - selAxisInSize, axisRect.right(), origin.y() + selAxisOutSize);
+        mTickLabelsSelectionBox.setCoords(axisRect.left(), origin.y() + selTickLabelOffset + selTickLabelSize, axisRect.right(),
+                                          origin.y() + selTickLabelOffset);
+        mLabelSelectionBox.setCoords(axisRect.left(), origin.y() + selLabelOffset + selLabelSize, axisRect.right(), origin.y() + selLabelOffset);
+    }
+    mAxisSelectionBox = mAxisSelectionBox.normalized();
+    mTickLabelsSelectionBox = mTickLabelsSelectionBox.normalized();
+    mLabelSelectionBox = mLabelSelectionBox.normalized();
+    // draw hitboxes for debug purposes:
+    //painter->setBrush(Qt::NoBrush);
+    //painter->drawRects(QVector<QRect>() << mAxisSelectionBox << mTickLabelsSelectionBox << mLabelSelectionBox);
 }
 
 /*! \internal
@@ -2303,37 +2144,33 @@ void QCPAxisPainterPrivate::draw(QCPPainter *painter)
   Returns the size ("margin" in QCPAxisRect context, so measured perpendicular to the axis backbone
   direction) needed to fit the axis.
 */
-int QCPAxisPainterPrivate::size() const
-{
-  int result = 0;
-  
-  // get length of tick marks pointing outwards:
-  if (!tickPositions.isEmpty())
-    result += qMax(0, qMax(tickLengthOut, subTickLengthOut));
-  
-  // calculate size of tick labels:
-  if (tickLabelSide == QCPAxis::lsOutside)
-  {
-    QSize tickLabelsSize(0, 0);
-    if (!tickLabels.isEmpty())
-    {
-      for (int i=0; i<tickLabels.size(); ++i)
-        getMaxTickLabelSize(tickLabelFont, tickLabels.at(i), &tickLabelsSize);
-      result += QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width();
-    result += tickLabelPadding;
+int QCPAxisPainterPrivate::size() const {
+    int result = 0;
+
+    // get length of tick marks pointing outwards:
+    if (!tickPositions.isEmpty())
+        result += qMax(0, qMax(tickLengthOut, subTickLengthOut));
+
+    // calculate size of tick labels:
+    if (tickLabelSide == QCPAxis::lsOutside) {
+        QSize tickLabelsSize(0, 0);
+        if (!tickLabels.isEmpty()) {
+            for (int i = 0; i < tickLabels.size(); ++i)
+                getMaxTickLabelSize(tickLabelFont, tickLabels.at(i), &tickLabelsSize);
+            result += QCPAxis::orientation(type) == Qt::Horizontal ? tickLabelsSize.height() : tickLabelsSize.width();
+            result += tickLabelPadding;
+        }
     }
-  }
-  
-  // calculate size of axis label (only height needed, because left/right labels are rotated by 90 degrees):
-  if (!label.isEmpty())
-  {
-    QFontMetrics fontMetrics(labelFont);
-    QRect bounds;
-    bounds = fontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter | Qt::AlignVCenter, label);
-    result += bounds.height() + labelPadding;
-  }
-  
-  return result;
+
+    // calculate size of axis label (only height needed, because left/right labels are rotated by 90 degrees):
+    if (!label.isEmpty()) {
+        QFontMetrics fontMetrics(labelFont);
+        QRect bounds;
+        bounds = fontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter | Qt::AlignVCenter, label);
+        result += bounds.height() + labelPadding;
+    }
+
+    return result;
 }
 
 /*! \internal
@@ -2342,9 +2179,8 @@ int QCPAxisPainterPrivate::size() const
   method is called automatically in \ref draw, if any parameters have changed that invalidate the
   cached labels, such as font, color, etc.
 */
-void QCPAxisPainterPrivate::clearCache()
-{
-  mLabelCache.clear();
+void QCPAxisPainterPrivate::clearCache() {
+    mLabelCache.clear();
 }
 
 /*! \internal
@@ -2354,17 +2190,16 @@ void QCPAxisPainterPrivate::clearCache()
   return value of this method hasn't changed since the last redraw, the respective label parameters
   haven't changed and cached labels may be used.
 */
-QByteArray QCPAxisPainterPrivate::generateLabelParameterHash() const
-{
-  QByteArray result;
-  result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
-  result.append(QByteArray::number(tickLabelRotation));
-  result.append(QByteArray::number((int)tickLabelSide));
-  result.append(QByteArray::number((int)substituteExponent));
-  result.append(QByteArray::number((int)numberMultiplyCross));
-  result.append(tickLabelColor.name().toLatin1()+QByteArray::number(tickLabelColor.alpha(), 16));
-  result.append(tickLabelFont.toString().toLatin1());
-  return result;
+QByteArray QCPAxisPainterPrivate::generateLabelParameterHash() const {
+    QByteArray result;
+    result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
+    result.append(QByteArray::number(tickLabelRotation));
+    result.append(QByteArray::number((int) tickLabelSide));
+    result.append(QByteArray::number((int) substituteExponent));
+    result.append(QByteArray::number((int) numberMultiplyCross));
+    result.append(tickLabelColor.name().toLatin1() + QByteArray::number(tickLabelColor.alpha(), 16));
+    result.append(tickLabelFont.toString().toLatin1());
+    return result;
 }
 
 /*! \internal
@@ -2386,84 +2221,93 @@ QByteArray QCPAxisPainterPrivate::generateLabelParameterHash() const
   superscripted powers, the font is temporarily made smaller by a fixed factor (see \ref
   getTickLabelData).
 */
-void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position, int distanceToAxis, const QString &text, QSize *tickLabelsSize)
-{
-  // warning: if you change anything here, also adapt getMaxTickLabelSize() accordingly!
-  if (text.isEmpty()) return;
-  QSize finalSize;
-  QPointF labelAnchor;
-  switch (type)
-  {
-    case QCPAxis::atLeft:   labelAnchor = QPointF(axisRect.left()-distanceToAxis-offset, position); break;
-    case QCPAxis::atRight:  labelAnchor = QPointF(axisRect.right()+distanceToAxis+offset, position); break;
-    case QCPAxis::atTop:    labelAnchor = QPointF(position, axisRect.top()-distanceToAxis-offset); break;
-    case QCPAxis::atBottom: labelAnchor = QPointF(position, axisRect.bottom()+distanceToAxis+offset); break;
-  }
-  if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) && !painter->modes().testFlag(QCPPainter::pmNoCaching)) // label caching enabled
-  {
-    CachedLabel *cachedLabel = mLabelCache.take(text); // attempt to get label from cache
-    if (!cachedLabel)  // no cached label existed, create it
+void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position, int distanceToAxis, const QString &text, QSize *tickLabelsSize) {
+    // warning: if you change anything here, also adapt getMaxTickLabelSize() accordingly!
+    if (text.isEmpty()) return;
+    QSize finalSize;
+    QPointF labelAnchor;
+    switch (type) {
+        case QCPAxis::atLeft:
+            labelAnchor = QPointF(axisRect.left() - distanceToAxis - offset, position);
+            break;
+        case QCPAxis::atRight:
+            labelAnchor = QPointF(axisRect.right() + distanceToAxis + offset, position);
+            break;
+        case QCPAxis::atTop:
+            labelAnchor = QPointF(position, axisRect.top() - distanceToAxis - offset);
+            break;
+        case QCPAxis::atBottom:
+            labelAnchor = QPointF(position, axisRect.bottom() + distanceToAxis + offset);
+            break;
+    }
+    if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) && !painter->modes().testFlag(QCPPainter::pmNoCaching)) // label caching enabled
     {
-      cachedLabel = new CachedLabel;
-      TickLabelData labelData = getTickLabelData(painter->font(), text);
-      cachedLabel->offset = getTickLabelDrawOffset(labelData)+labelData.rotatedTotalBounds.topLeft();
-      if (!qFuzzyCompare(1.0, mParentPlot->bufferDevicePixelRatio()))
-      {
-        cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
+        CachedLabel *cachedLabel = mLabelCache.take(text); // attempt to get label from cache
+        if (!cachedLabel)  // no cached label existed, create it
+        {
+            cachedLabel = new CachedLabel;
+            TickLabelData labelData = getTickLabelData(painter->font(), text);
+            cachedLabel->offset = getTickLabelDrawOffset(labelData) + labelData.rotatedTotalBounds.topLeft();
+            if (!qFuzzyCompare(1.0, mParentPlot->bufferDevicePixelRatio())) {
+                cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size() * mParentPlot->bufferDevicePixelRatio());
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
 #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
+                cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
 #  else
-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
+                cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
 #  endif
 #endif
-      } else
-        cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
-      cachedLabel->pixmap.fill(Qt::transparent);
-      QCPPainter cachePainter(&cachedLabel->pixmap);
-      cachePainter.setPen(painter->pen());
-      drawTickLabel(&cachePainter, -labelData.rotatedTotalBounds.topLeft().x(), -labelData.rotatedTotalBounds.topLeft().y(), labelData);
-    }
-    // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
-    bool labelClippedByBorder = false;
-    if (tickLabelSide == QCPAxis::lsOutside)
+            } else
+                cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
+            cachedLabel->pixmap.fill(Qt::transparent);
+            QCPPainter cachePainter(&cachedLabel->pixmap);
+            cachePainter.setPen(painter->pen());
+            drawTickLabel(&cachePainter, -labelData.rotatedTotalBounds.topLeft().x(), -labelData.rotatedTotalBounds.topLeft().y(), labelData);
+        }
+        // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
+        bool labelClippedByBorder = false;
+        if (tickLabelSide == QCPAxis::lsOutside) {
+            if (QCPAxis::orientation(type) == Qt::Horizontal)
+                labelClippedByBorder =
+                        labelAnchor.x() + cachedLabel->offset.x() + cachedLabel->pixmap.width() / mParentPlot->bufferDevicePixelRatio() >
+                        viewportRect.right() || labelAnchor.x() + cachedLabel->offset.x() < viewportRect.left();
+            else
+                labelClippedByBorder =
+                        labelAnchor.y() + cachedLabel->offset.y() + cachedLabel->pixmap.height() / mParentPlot->bufferDevicePixelRatio() >
+                        viewportRect.bottom() || labelAnchor.y() + cachedLabel->offset.y() < viewportRect.top();
+        }
+        if (!labelClippedByBorder) {
+            painter->drawPixmap(labelAnchor + cachedLabel->offset, cachedLabel->pixmap);
+            finalSize = cachedLabel->pixmap.size() / mParentPlot->bufferDevicePixelRatio();
+        }
+        mLabelCache.insert(text, cachedLabel); // return label to cache or insert for the first time if newly created
+    } else // label caching disabled, draw text directly on surface:
     {
-      if (QCPAxis::orientation(type) == Qt::Horizontal)
-        labelClippedByBorder = labelAnchor.x()+cachedLabel->offset.x()+cachedLabel->pixmap.width()/mParentPlot->bufferDevicePixelRatio() > viewportRect.right() || labelAnchor.x()+cachedLabel->offset.x() < viewportRect.left();
-      else
-        labelClippedByBorder = labelAnchor.y()+cachedLabel->offset.y()+cachedLabel->pixmap.height()/mParentPlot->bufferDevicePixelRatio() > viewportRect.bottom() || labelAnchor.y()+cachedLabel->offset.y() < viewportRect.top();
+        TickLabelData labelData = getTickLabelData(painter->font(), text);
+        QPointF finalPosition = labelAnchor + getTickLabelDrawOffset(labelData);
+        // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
+        bool labelClippedByBorder = false;
+        if (tickLabelSide == QCPAxis::lsOutside) {
+            if (QCPAxis::orientation(type) == Qt::Horizontal)
+                labelClippedByBorder =
+                        finalPosition.x() + (labelData.rotatedTotalBounds.width() + labelData.rotatedTotalBounds.left()) > viewportRect.right() ||
+                        finalPosition.x() + labelData.rotatedTotalBounds.left() < viewportRect.left();
+            else
+                labelClippedByBorder =
+                        finalPosition.y() + (labelData.rotatedTotalBounds.height() + labelData.rotatedTotalBounds.top()) > viewportRect.bottom() ||
+                        finalPosition.y() + labelData.rotatedTotalBounds.top() < viewportRect.top();
+        }
+        if (!labelClippedByBorder) {
+            drawTickLabel(painter, finalPosition.x(), finalPosition.y(), labelData);
+            finalSize = labelData.rotatedTotalBounds.size();
+        }
     }
-    if (!labelClippedByBorder)
-    {
-      painter->drawPixmap(labelAnchor+cachedLabel->offset, cachedLabel->pixmap);
-      finalSize = cachedLabel->pixmap.size()/mParentPlot->bufferDevicePixelRatio();
-    }
-    mLabelCache.insert(text, cachedLabel); // return label to cache or insert for the first time if newly created
-  } else // label caching disabled, draw text directly on surface:
-  {
-    TickLabelData labelData = getTickLabelData(painter->font(), text);
-    QPointF finalPosition = labelAnchor + getTickLabelDrawOffset(labelData);
-    // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
-     bool labelClippedByBorder = false;
-    if (tickLabelSide == QCPAxis::lsOutside)
-    {
-      if (QCPAxis::orientation(type) == Qt::Horizontal)
-        labelClippedByBorder = finalPosition.x()+(labelData.rotatedTotalBounds.width()+labelData.rotatedTotalBounds.left()) > viewportRect.right() || finalPosition.x()+labelData.rotatedTotalBounds.left() < viewportRect.left();
-      else
-        labelClippedByBorder = finalPosition.y()+(labelData.rotatedTotalBounds.height()+labelData.rotatedTotalBounds.top()) > viewportRect.bottom() || finalPosition.y()+labelData.rotatedTotalBounds.top() < viewportRect.top();
-    }
-    if (!labelClippedByBorder)
-    {
-      drawTickLabel(painter, finalPosition.x(), finalPosition.y(), labelData);
-      finalSize = labelData.rotatedTotalBounds.size();
-    }
-  }
-  
-  // expand passed tickLabelsSize if current tick label is larger:
-  if (finalSize.width() > tickLabelsSize->width())
-    tickLabelsSize->setWidth(finalSize.width());
-  if (finalSize.height() > tickLabelsSize->height())
-    tickLabelsSize->setHeight(finalSize.height());
+
+    // expand passed tickLabelsSize if current tick label is larger:
+    if (finalSize.width() > tickLabelsSize->width())
+        tickLabelsSize->setWidth(finalSize.width());
+    if (finalSize.height() > tickLabelsSize->height())
+        tickLabelsSize->setHeight(finalSize.height());
 }
 
 /*! \internal
@@ -2475,35 +2319,35 @@ void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position,
   directly draw the labels on the QCustomPlot surface when label caching is disabled, i.e. when
   QCP::phCacheLabels plotting hint is not set.
 */
-void QCPAxisPainterPrivate::drawTickLabel(QCPPainter *painter, double x, double y, const TickLabelData &labelData) const
-{
-  // backup painter settings that we're about to change:
-  QTransform oldTransform = painter->transform();
-  QFont oldFont = painter->font();
-  
-  // transform painter to position/rotation:
-  painter->translate(x, y);
-  if (!qFuzzyIsNull(tickLabelRotation))
-    painter->rotate(tickLabelRotation);
-  
-  // draw text:
-  if (!labelData.expPart.isEmpty()) // indicator that beautiful powers must be used
-  {
-    painter->setFont(labelData.baseFont);
-    painter->drawText(0, 0, 0, 0, Qt::TextDontClip, labelData.basePart);
-    if (!labelData.suffixPart.isEmpty())
-      painter->drawText(labelData.baseBounds.width()+1+labelData.expBounds.width(), 0, 0, 0, Qt::TextDontClip, labelData.suffixPart);
-    painter->setFont(labelData.expFont);
-    painter->drawText(labelData.baseBounds.width()+1, 0, labelData.expBounds.width(), labelData.expBounds.height(), Qt::TextDontClip,  labelData.expPart);
-  } else
-  {
-    painter->setFont(labelData.baseFont);
-    painter->drawText(0, 0, labelData.totalBounds.width(), labelData.totalBounds.height(), Qt::TextDontClip | Qt::AlignHCenter, labelData.basePart);
-  }
-  
-  // reset painter settings to what it was before:
-  painter->setTransform(oldTransform);
-  painter->setFont(oldFont);
+void QCPAxisPainterPrivate::drawTickLabel(QCPPainter *painter, double x, double y, const TickLabelData &labelData) const {
+    // backup painter settings that we're about to change:
+    QTransform oldTransform = painter->transform();
+    QFont oldFont = painter->font();
+
+    // transform painter to position/rotation:
+    painter->translate(x, y);
+    if (!qFuzzyIsNull(tickLabelRotation))
+        painter->rotate(tickLabelRotation);
+
+    // draw text:
+    if (!labelData.expPart.isEmpty()) // indicator that beautiful powers must be used
+    {
+        painter->setFont(labelData.baseFont);
+        painter->drawText(0, 0, 0, 0, Qt::TextDontClip, labelData.basePart);
+        if (!labelData.suffixPart.isEmpty())
+            painter->drawText(labelData.baseBounds.width() + 1 + labelData.expBounds.width(), 0, 0, 0, Qt::TextDontClip, labelData.suffixPart);
+        painter->setFont(labelData.expFont);
+        painter->drawText(labelData.baseBounds.width() + 1, 0, labelData.expBounds.width(), labelData.expBounds.height(), Qt::TextDontClip,
+                          labelData.expPart);
+    } else {
+        painter->setFont(labelData.baseFont);
+        painter->drawText(0, 0, labelData.totalBounds.width(), labelData.totalBounds.height(), Qt::TextDontClip | Qt::AlignHCenter,
+                          labelData.basePart);
+    }
+
+    // reset painter settings to what it was before:
+    painter->setTransform(oldTransform);
+    painter->setFont(oldFont);
 }
 
 /*! \internal
@@ -2514,76 +2358,76 @@ void QCPAxisPainterPrivate::drawTickLabel(QCPPainter *painter, double x, double 
   processed by \ref getTickLabelDrawOffset and \ref drawTickLabel. It splits the text into base and
   exponent if necessary (member substituteExponent) and calculates appropriate bounding boxes.
 */
-QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(const QFont &font, const QString &text) const
-{
-  TickLabelData result;
-  
-  // determine whether beautiful decimal powers should be used
-  bool useBeautifulPowers = false;
-  int ePos = -1; // first index of exponent part, text before that will be basePart, text until eLast will be expPart
-  int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
-  if (substituteExponent)
-  {
-    ePos = text.indexOf(QLatin1Char('e'));
-    if (ePos > 0 && text.at(ePos-1).isDigit())
-    {
-      eLast = ePos;
-      while (eLast+1 < text.size() && (text.at(eLast+1) == QLatin1Char('+') || text.at(eLast+1) == QLatin1Char('-') || text.at(eLast+1).isDigit()))
-        ++eLast;
-      if (eLast > ePos) // only if also to right of 'e' is a digit/+/- interpret it as beautifiable power
-        useBeautifulPowers = true;
+QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(const QFont &font, const QString &text) const {
+    TickLabelData result;
+
+    // determine whether beautiful decimal powers should be used
+    bool useBeautifulPowers = false;
+    int ePos = -1; // first index of exponent part, text before that will be basePart, text until eLast will be expPart
+    int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
+    if (substituteExponent) {
+        ePos = text.indexOf(QLatin1Char('e'));
+        if (ePos > 0 && text.at(ePos - 1).isDigit()) {
+            eLast = ePos;
+            while (eLast + 1 < text.size() &&
+                   (text.at(eLast + 1) == QLatin1Char('+') || text.at(eLast + 1) == QLatin1Char('-') || text.at(eLast + 1).isDigit()))
+                ++eLast;
+            if (eLast > ePos) // only if also to right of 'e' is a digit/+/- interpret it as beautifiable power
+                useBeautifulPowers = true;
+        }
     }
-  }
-  
-  // calculate text bounding rects and do string preparation for beautiful decimal powers:
-  result.baseFont = font;
-  if (result.baseFont.pointSizeF() > 0) // might return -1 if specified with setPixelSize, in that case we can't do correction in next line
-    result.baseFont.setPointSizeF(result.baseFont.pointSizeF()+0.05); // QFontMetrics.boundingRect has a bug for exact point sizes that make the results oscillate due to internal rounding
-  if (useBeautifulPowers)
-  {
-    // split text into parts of number/symbol that will be drawn normally and part that will be drawn as exponent:
-    result.basePart = text.left(ePos);
-    result.suffixPart = text.mid(eLast+1); // also drawn normally but after exponent
-    // in log scaling, we want to turn "1*10^n" into "10^n", else add multiplication sign and decimal base:
-    if (abbreviateDecimalPowers && result.basePart == QLatin1String("1"))
-      result.basePart = QLatin1String("10");
-    else
-      result.basePart += (numberMultiplyCross ? QString(QChar(215)) : QString(QChar(183))) + QLatin1String("10");
-    result.expPart = text.mid(ePos+1, eLast-ePos);
-    // clip "+" and leading zeros off expPart:
-    while (result.expPart.length() > 2 && result.expPart.at(1) == QLatin1Char('0')) // length > 2 so we leave one zero when numberFormatChar is 'e'
-      result.expPart.remove(1, 1);
-    if (!result.expPart.isEmpty() && result.expPart.at(0) == QLatin1Char('+'))
-      result.expPart.remove(0, 1);
-    // prepare smaller font for exponent:
-    result.expFont = font;
-    if (result.expFont.pointSize() > 0)
-      result.expFont.setPointSize(result.expFont.pointSize()*0.75);
-    else
-      result.expFont.setPixelSize(result.expFont.pixelSize()*0.75);
-    // calculate bounding rects of base part(s), exponent part and total one:
-    result.baseBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.basePart);
-    result.expBounds = QFontMetrics(result.expFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.expPart);
-    if (!result.suffixPart.isEmpty())
-      result.suffixBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.suffixPart);
-    result.totalBounds = result.baseBounds.adjusted(0, 0, result.expBounds.width()+result.suffixBounds.width()+2, 0); // +2 consists of the 1 pixel spacing between base and exponent (see drawTickLabel) and an extra pixel to include AA
-  } else // useBeautifulPowers == false
-  {
-    result.basePart = text;
-    result.totalBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter, result.basePart);
-  }
-  result.totalBounds.moveTopLeft(QPoint(0, 0)); // want bounding box aligned top left at origin, independent of how it was created, to make further processing simpler
-  
-  // calculate possibly different bounding rect after rotation:
-  result.rotatedTotalBounds = result.totalBounds;
-  if (!qFuzzyIsNull(tickLabelRotation))
-  {
-    QTransform transform;
-    transform.rotate(tickLabelRotation);
-    result.rotatedTotalBounds = transform.mapRect(result.rotatedTotalBounds);
-  }
-  
-  return result;
+
+    // calculate text bounding rects and do string preparation for beautiful decimal powers:
+    result.baseFont = font;
+    if (result.baseFont.pointSizeF() > 0) // might return -1 if specified with setPixelSize, in that case we can't do correction in next line
+        result.baseFont.setPointSizeF(result.baseFont.pointSizeF() +
+                                      0.05); // QFontMetrics.boundingRect has a bug for exact point sizes that make the results oscillate due to internal rounding
+    if (useBeautifulPowers) {
+        // split text into parts of number/symbol that will be drawn normally and part that will be drawn as exponent:
+        result.basePart = text.left(ePos);
+        result.suffixPart = text.mid(eLast + 1); // also drawn normally but after exponent
+        // in log scaling, we want to turn "1*10^n" into "10^n", else add multiplication sign and decimal base:
+        if (abbreviateDecimalPowers && result.basePart == QLatin1String("1"))
+            result.basePart = QLatin1String("10");
+        else
+            result.basePart += (numberMultiplyCross ? QString(QChar(215)) : QString(QChar(183))) + QLatin1String("10");
+        result.expPart = text.mid(ePos + 1, eLast - ePos);
+        // clip "+" and leading zeros off expPart:
+        while (result.expPart.length() > 2 &&
+               result.expPart.at(1) == QLatin1Char('0')) // length > 2 so we leave one zero when numberFormatChar is 'e'
+            result.expPart.remove(1, 1);
+        if (!result.expPart.isEmpty() && result.expPart.at(0) == QLatin1Char('+'))
+            result.expPart.remove(0, 1);
+        // prepare smaller font for exponent:
+        result.expFont = font;
+        if (result.expFont.pointSize() > 0)
+            result.expFont.setPointSize(result.expFont.pointSize() * 0.75);
+        else
+            result.expFont.setPixelSize(result.expFont.pixelSize() * 0.75);
+        // calculate bounding rects of base part(s), exponent part and total one:
+        result.baseBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.basePart);
+        result.expBounds = QFontMetrics(result.expFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.expPart);
+        if (!result.suffixPart.isEmpty())
+            result.suffixBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.suffixPart);
+        result.totalBounds = result.baseBounds.adjusted(0, 0, result.expBounds.width() + result.suffixBounds.width() + 2,
+                                                        0); // +2 consists of the 1 pixel spacing between base and exponent (see drawTickLabel) and an extra pixel to include AA
+    } else // useBeautifulPowers == false
+    {
+        result.basePart = text;
+        result.totalBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter, result.basePart);
+    }
+    result.totalBounds.moveTopLeft(
+            QPoint(0, 0)); // want bounding box aligned top left at origin, independent of how it was created, to make further processing simpler
+
+    // calculate possibly different bounding rect after rotation:
+    result.rotatedTotalBounds = result.totalBounds;
+    if (!qFuzzyIsNull(tickLabelRotation)) {
+        QTransform transform;
+        transform.rotate(tickLabelRotation);
+        result.rotatedTotalBounds = transform.mapRect(result.rotatedTotalBounds);
+    }
+
+    return result;
 }
 
 /*! \internal
@@ -2596,97 +2440,86 @@ QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(con
   This function is thus responsible for e.g. centering tick labels under ticks and positioning them
   appropriately when they are rotated.
 */
-QPointF QCPAxisPainterPrivate::getTickLabelDrawOffset(const TickLabelData &labelData) const
-{
-  /*
-    calculate label offset from base point at tick (non-trivial, for best visual appearance): short
-    explanation for bottom axis: The anchor, i.e. the point in the label that is placed
-    horizontally under the corresponding tick is always on the label side that is closer to the
-    axis (e.g. the left side of the text when we're rotating clockwise). On that side, the height
-    is halved and the resulting point is defined the anchor. This way, a 90 degree rotated text
-    will be centered under the tick (i.e. displaced horizontally by half its height). At the same
-    time, a 45 degree rotated text will "point toward" its tick, as is typical for rotated tick
-    labels.
-  */
-  bool doRotation = !qFuzzyIsNull(tickLabelRotation);
-  bool flip = qFuzzyCompare(qAbs(tickLabelRotation), 90.0); // perfect +/-90 degree flip. Indicates vertical label centering on vertical axes.
-  double radians = tickLabelRotation/180.0*M_PI;
-  int x=0, y=0;
-  if ((type == QCPAxis::atLeft && tickLabelSide == QCPAxis::lsOutside) || (type == QCPAxis::atRight && tickLabelSide == QCPAxis::lsInside)) // Anchor at right side of tick label
-  {
-    if (doRotation)
+QPointF QCPAxisPainterPrivate::getTickLabelDrawOffset(const TickLabelData &labelData) const {
+    /*
+      calculate label offset from base point at tick (non-trivial, for best visual appearance): short
+      explanation for bottom axis: The anchor, i.e. the point in the label that is placed
+      horizontally under the corresponding tick is always on the label side that is closer to the
+      axis (e.g. the left side of the text when we're rotating clockwise). On that side, the height
+      is halved and the resulting point is defined the anchor. This way, a 90 degree rotated text
+      will be centered under the tick (i.e. displaced horizontally by half its height). At the same
+      time, a 45 degree rotated text will "point toward" its tick, as is typical for rotated tick
+      labels.
+    */
+    bool doRotation = !qFuzzyIsNull(tickLabelRotation);
+    bool flip = qFuzzyCompare(qAbs(tickLabelRotation), 90.0); // perfect +/-90 degree flip. Indicates vertical label centering on vertical axes.
+    double radians = tickLabelRotation / 180.0 * M_PI;
+    int x = 0, y = 0;
+    if ((type == QCPAxis::atLeft && tickLabelSide == QCPAxis::lsOutside) ||
+        (type == QCPAxis::atRight && tickLabelSide == QCPAxis::lsInside)) // Anchor at right side of tick label
     {
-      if (tickLabelRotation > 0)
-      {
-        x = -qCos(radians)*labelData.totalBounds.width();
-        y = flip ? -labelData.totalBounds.width()/2.0 : -qSin(radians)*labelData.totalBounds.width()-qCos(radians)*labelData.totalBounds.height()/2.0;
-      } else
-      {
-        x = -qCos(-radians)*labelData.totalBounds.width()-qSin(-radians)*labelData.totalBounds.height();
-        y = flip ? +labelData.totalBounds.width()/2.0 : +qSin(-radians)*labelData.totalBounds.width()-qCos(-radians)*labelData.totalBounds.height()/2.0;
-      }
-    } else
+        if (doRotation) {
+            if (tickLabelRotation > 0) {
+                x = -qCos(radians) * labelData.totalBounds.width();
+                y = flip ? -labelData.totalBounds.width() / 2.0 : -qSin(radians) * labelData.totalBounds.width() -
+                                                                  qCos(radians) * labelData.totalBounds.height() / 2.0;
+            } else {
+                x = -qCos(-radians) * labelData.totalBounds.width() - qSin(-radians) * labelData.totalBounds.height();
+                y = flip ? +labelData.totalBounds.width() / 2.0 : +qSin(-radians) * labelData.totalBounds.width() -
+                                                                  qCos(-radians) * labelData.totalBounds.height() / 2.0;
+            }
+        } else {
+            x = -labelData.totalBounds.width();
+            y = -labelData.totalBounds.height() / 2.0;
+        }
+    } else if ((type == QCPAxis::atRight && tickLabelSide == QCPAxis::lsOutside) ||
+               (type == QCPAxis::atLeft && tickLabelSide == QCPAxis::lsInside)) // Anchor at left side of tick label
     {
-      x = -labelData.totalBounds.width();
-      y = -labelData.totalBounds.height()/2.0;
+        if (doRotation) {
+            if (tickLabelRotation > 0) {
+                x = +qSin(radians) * labelData.totalBounds.height();
+                y = flip ? -labelData.totalBounds.width() / 2.0 : -qCos(radians) * labelData.totalBounds.height() / 2.0;
+            } else {
+                x = 0;
+                y = flip ? +labelData.totalBounds.width() / 2.0 : -qCos(-radians) * labelData.totalBounds.height() / 2.0;
+            }
+        } else {
+            x = 0;
+            y = -labelData.totalBounds.height() / 2.0;
+        }
+    } else if ((type == QCPAxis::atTop && tickLabelSide == QCPAxis::lsOutside) ||
+               (type == QCPAxis::atBottom && tickLabelSide == QCPAxis::lsInside)) // Anchor at bottom side of tick label
+    {
+        if (doRotation) {
+            if (tickLabelRotation > 0) {
+                x = -qCos(radians) * labelData.totalBounds.width() + qSin(radians) * labelData.totalBounds.height() / 2.0;
+                y = -qSin(radians) * labelData.totalBounds.width() - qCos(radians) * labelData.totalBounds.height();
+            } else {
+                x = -qSin(-radians) * labelData.totalBounds.height() / 2.0;
+                y = -qCos(-radians) * labelData.totalBounds.height();
+            }
+        } else {
+            x = -labelData.totalBounds.width() / 2.0;
+            y = -labelData.totalBounds.height();
+        }
+    } else if ((type == QCPAxis::atBottom && tickLabelSide == QCPAxis::lsOutside) ||
+               (type == QCPAxis::atTop && tickLabelSide == QCPAxis::lsInside)) // Anchor at top side of tick label
+    {
+        if (doRotation) {
+            if (tickLabelRotation > 0) {
+                x = +qSin(radians) * labelData.totalBounds.height() / 2.0;
+                y = 0;
+            } else {
+                x = -qCos(-radians) * labelData.totalBounds.width() - qSin(-radians) * labelData.totalBounds.height() / 2.0;
+                y = +qSin(-radians) * labelData.totalBounds.width();
+            }
+        } else {
+            x = -labelData.totalBounds.width() / 2.0;
+            y = 0;
+        }
     }
-  } else if ((type == QCPAxis::atRight && tickLabelSide == QCPAxis::lsOutside) || (type == QCPAxis::atLeft && tickLabelSide == QCPAxis::lsInside)) // Anchor at left side of tick label
-  {
-    if (doRotation)
-    {
-      if (tickLabelRotation > 0)
-      {
-        x = +qSin(radians)*labelData.totalBounds.height();
-        y = flip ? -labelData.totalBounds.width()/2.0 : -qCos(radians)*labelData.totalBounds.height()/2.0;
-      } else
-      {
-        x = 0;
-        y = flip ? +labelData.totalBounds.width()/2.0 : -qCos(-radians)*labelData.totalBounds.height()/2.0;
-      }
-    } else
-    {
-      x = 0;
-      y = -labelData.totalBounds.height()/2.0;
-    }
-  } else if ((type == QCPAxis::atTop && tickLabelSide == QCPAxis::lsOutside) || (type == QCPAxis::atBottom && tickLabelSide == QCPAxis::lsInside)) // Anchor at bottom side of tick label
-  {
-    if (doRotation)
-    {
-      if (tickLabelRotation > 0)
-      {
-        x = -qCos(radians)*labelData.totalBounds.width()+qSin(radians)*labelData.totalBounds.height()/2.0;
-        y = -qSin(radians)*labelData.totalBounds.width()-qCos(radians)*labelData.totalBounds.height();
-      } else
-      {
-        x = -qSin(-radians)*labelData.totalBounds.height()/2.0;
-        y = -qCos(-radians)*labelData.totalBounds.height();
-      }
-    } else
-    {
-      x = -labelData.totalBounds.width()/2.0;
-      y = -labelData.totalBounds.height();
-    }
-  } else if ((type == QCPAxis::atBottom && tickLabelSide == QCPAxis::lsOutside) || (type == QCPAxis::atTop && tickLabelSide == QCPAxis::lsInside)) // Anchor at top side of tick label
-  {
-    if (doRotation)
-    {
-      if (tickLabelRotation > 0)
-      {
-        x = +qSin(radians)*labelData.totalBounds.height()/2.0;
-        y = 0;
-      } else
-      {
-        x = -qCos(-radians)*labelData.totalBounds.width()-qSin(-radians)*labelData.totalBounds.height()/2.0;
-        y = +qSin(-radians)*labelData.totalBounds.width();
-      }
-    } else
-    {
-      x = -labelData.totalBounds.width()/2.0;
-      y = 0;
-    }
-  }
-  
-  return QPointF(x, y);
+
+    return QPointF(x, y);
 }
 
 /*! \internal
@@ -2696,23 +2529,22 @@ QPointF QCPAxisPainterPrivate::getTickLabelDrawOffset(const TickLabelData &label
   margin calculation, the passed \a tickLabelsSize is only expanded, if it's currently set to a
   smaller width/height.
 */
-void QCPAxisPainterPrivate::getMaxTickLabelSize(const QFont &font, const QString &text,  QSize *tickLabelsSize) const
-{
-  // note: this function must return the same tick label sizes as the placeTickLabel function.
-  QSize finalSize;
-  if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) && mLabelCache.contains(text)) // label caching enabled and have cached label
-  {
-    const CachedLabel *cachedLabel = mLabelCache.object(text);
-    finalSize = cachedLabel->pixmap.size()/mParentPlot->bufferDevicePixelRatio();
-  } else // label caching disabled or no label with this text cached:
-  {
-    TickLabelData labelData = getTickLabelData(font, text);
-    finalSize = labelData.rotatedTotalBounds.size();
-  }
-  
-  // expand passed tickLabelsSize if current tick label is larger:
-  if (finalSize.width() > tickLabelsSize->width())
-    tickLabelsSize->setWidth(finalSize.width());
-  if (finalSize.height() > tickLabelsSize->height())
-    tickLabelsSize->setHeight(finalSize.height());
+void QCPAxisPainterPrivate::getMaxTickLabelSize(const QFont &font, const QString &text, QSize *tickLabelsSize) const {
+    // note: this function must return the same tick label sizes as the placeTickLabel function.
+    QSize finalSize;
+    if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) && mLabelCache.contains(text)) // label caching enabled and have cached label
+    {
+        const CachedLabel *cachedLabel = mLabelCache.object(text);
+        finalSize = cachedLabel->pixmap.size() / mParentPlot->bufferDevicePixelRatio();
+    } else // label caching disabled or no label with this text cached:
+    {
+        TickLabelData labelData = getTickLabelData(font, text);
+        finalSize = labelData.rotatedTotalBounds.size();
+    }
+
+    // expand passed tickLabelsSize if current tick label is larger:
+    if (finalSize.width() > tickLabelsSize->width())
+        tickLabelsSize->setWidth(finalSize.width());
+    if (finalSize.height() > tickLabelsSize->height())
+        tickLabelsSize->setHeight(finalSize.height());
 }

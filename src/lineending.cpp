@@ -55,30 +55,27 @@
   Creates a QCPLineEnding instance with default values (style \ref esNone).
 */
 QCPLineEnding::QCPLineEnding() :
-  mStyle(esNone),
-  mWidth(8),
-  mLength(10),
-  mInverted(false)
-{
+        mStyle(esNone),
+        mWidth(8),
+        mLength(10),
+        mInverted(false) {
 }
 
 /*!
   Creates a QCPLineEnding instance with the specified values.
 */
 QCPLineEnding::QCPLineEnding(QCPLineEnding::EndingStyle style, double width, double length, bool inverted) :
-  mStyle(style),
-  mWidth(width),
-  mLength(length),
-  mInverted(inverted)
-{
+        mStyle(style),
+        mWidth(width),
+        mLength(length),
+        mInverted(inverted) {
 }
 
 /*!
   Sets the style of the ending decoration.
 */
-void QCPLineEnding::setStyle(QCPLineEnding::EndingStyle style)
-{
-  mStyle = style;
+void QCPLineEnding::setStyle(QCPLineEnding::EndingStyle style) {
+    mStyle = style;
 }
 
 /*!
@@ -87,9 +84,8 @@ void QCPLineEnding::setStyle(QCPLineEnding::EndingStyle style)
   
   \see setLength
 */
-void QCPLineEnding::setWidth(double width)
-{
-  mWidth = width;
+void QCPLineEnding::setWidth(double width) {
+    mWidth = width;
 }
 
 /*!
@@ -98,9 +94,8 @@ void QCPLineEnding::setWidth(double width)
   
   \see setWidth
 */
-void QCPLineEnding::setLength(double length)
-{
-  mLength = length;
+void QCPLineEnding::setLength(double length) {
+    mLength = length;
 }
 
 /*!
@@ -111,9 +106,8 @@ void QCPLineEnding::setLength(double length)
   discs, this doesn't make a difference. However, asymmetric styles like \ref esHalfBar are
   affected by it, which can be used to control to which side the half bar points to.
 */
-void QCPLineEnding::setInverted(bool inverted)
-{
-  mInverted = inverted;
+void QCPLineEnding::setInverted(bool inverted) {
+    mInverted = inverted;
 }
 
 /*! \internal
@@ -125,28 +119,26 @@ void QCPLineEnding::setInverted(bool inverted)
   decoration is supposed to be drawn is farther away from the clipping rect than the returned
   distance.
 */
-double QCPLineEnding::boundingDistance() const
-{
-  switch (mStyle)
-  {
-    case esNone:
-      return 0;
-      
-    case esFlatArrow:
-    case esSpikeArrow:
-    case esLineArrow:
-    case esSkewedBar:
-      return qSqrt(mWidth*mWidth+mLength*mLength); // items that have width and length
-      
-    case esDisc:
-    case esSquare:
-    case esDiamond:
-    case esBar:
-    case esHalfBar:
-      return mWidth*1.42; // items that only have a width -> width*sqrt(2)
+double QCPLineEnding::boundingDistance() const {
+    switch (mStyle) {
+        case esNone:
+            return 0;
 
-  }
-  return 0;
+        case esFlatArrow:
+        case esSpikeArrow:
+        case esLineArrow:
+        case esSkewedBar:
+            return qSqrt(mWidth * mWidth + mLength * mLength); // items that have width and length
+
+        case esDisc:
+        case esSquare:
+        case esDiamond:
+        case esBar:
+        case esHalfBar:
+            return mWidth * 1.42; // items that only have a width -> width*sqrt(2)
+
+    }
+    return 0;
 }
 
 /*!
@@ -160,29 +152,27 @@ double QCPLineEnding::boundingDistance() const
   This function is used for precise, style specific placement of line endings, for example in
   QCPAxes.
 */
-double QCPLineEnding::realLength() const
-{
-  switch (mStyle)
-  {
-    case esNone:
-    case esLineArrow:
-    case esSkewedBar:
-    case esBar:
-    case esHalfBar:
-      return 0;
-      
-    case esFlatArrow:
-      return mLength;
-      
-    case esDisc:
-    case esSquare:
-    case esDiamond:
-      return mWidth*0.5;
-      
-    case esSpikeArrow:
-      return mLength*0.8;
-  }
-  return 0;
+double QCPLineEnding::realLength() const {
+    switch (mStyle) {
+        case esNone:
+        case esLineArrow:
+        case esSkewedBar:
+        case esBar:
+        case esHalfBar:
+            return 0;
+
+        case esFlatArrow:
+            return mLength;
+
+        case esDisc:
+        case esSquare:
+        case esDiamond:
+            return mWidth * 0.5;
+
+        case esSpikeArrow:
+            return mLength * 0.8;
+    }
+    return 0;
 }
 
 /*! \internal
@@ -190,125 +180,115 @@ double QCPLineEnding::realLength() const
   Draws the line ending with the specified \a painter at the position \a pos. The direction of the
   line ending is controlled with \a dir.
 */
-void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, const QCPVector2D &dir) const
-{
-  if (mStyle == esNone)
-    return;
-  
-  QCPVector2D lengthVec = dir.normalized() * mLength*(mInverted ? -1 : 1);
-  if (lengthVec.isNull())
-    lengthVec = QCPVector2D(1, 0);
-  QCPVector2D widthVec = dir.normalized().perpendicular() * mWidth*0.5*(mInverted ? -1 : 1);
-  
-  QPen penBackup = painter->pen();
-  QBrush brushBackup = painter->brush();
-  QPen miterPen = penBackup;
-  miterPen.setJoinStyle(Qt::MiterJoin); // to make arrow heads spikey
-  QBrush brush(painter->pen().color(), Qt::SolidPattern);
-  switch (mStyle)
-  {
-    case esNone: break;
-    case esFlatArrow:
-    {
-      QPointF points[3] = {pos.toPointF(),
-                           (pos-lengthVec+widthVec).toPointF(),
-                           (pos-lengthVec-widthVec).toPointF()
-                          };
-      painter->setPen(miterPen);
-      painter->setBrush(brush);
-      painter->drawConvexPolygon(points, 3);
-      painter->setBrush(brushBackup);
-      painter->setPen(penBackup);
-      break;
+void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, const QCPVector2D &dir) const {
+    if (mStyle == esNone)
+        return;
+
+    QCPVector2D lengthVec = dir.normalized() * mLength * (mInverted ? -1 : 1);
+    if (lengthVec.isNull())
+        lengthVec = QCPVector2D(1, 0);
+    QCPVector2D widthVec = dir.normalized().perpendicular() * mWidth * 0.5 * (mInverted ? -1 : 1);
+
+    QPen penBackup = painter->pen();
+    QBrush brushBackup = painter->brush();
+    QPen miterPen = penBackup;
+    miterPen.setJoinStyle(Qt::MiterJoin); // to make arrow heads spikey
+    QBrush brush(painter->pen().color(), Qt::SolidPattern);
+    switch (mStyle) {
+        case esNone:
+            break;
+        case esFlatArrow: {
+            QPointF points[3] = {pos.toPointF(),
+                                 (pos - lengthVec + widthVec).toPointF(),
+                                 (pos - lengthVec - widthVec).toPointF()
+            };
+            painter->setPen(miterPen);
+            painter->setBrush(brush);
+            painter->drawConvexPolygon(points, 3);
+            painter->setBrush(brushBackup);
+            painter->setPen(penBackup);
+            break;
+        }
+        case esSpikeArrow: {
+            QPointF points[4] = {pos.toPointF(),
+                                 (pos - lengthVec + widthVec).toPointF(),
+                                 (pos - lengthVec * 0.8).toPointF(),
+                                 (pos - lengthVec - widthVec).toPointF()
+            };
+            painter->setPen(miterPen);
+            painter->setBrush(brush);
+            painter->drawConvexPolygon(points, 4);
+            painter->setBrush(brushBackup);
+            painter->setPen(penBackup);
+            break;
+        }
+        case esLineArrow: {
+            QPointF points[3] = {(pos - lengthVec + widthVec).toPointF(),
+                                 pos.toPointF(),
+                                 (pos - lengthVec - widthVec).toPointF()
+            };
+            painter->setPen(miterPen);
+            painter->drawPolyline(points, 3);
+            painter->setPen(penBackup);
+            break;
+        }
+        case esDisc: {
+            painter->setBrush(brush);
+            painter->drawEllipse(pos.toPointF(), mWidth * 0.5, mWidth * 0.5);
+            painter->setBrush(brushBackup);
+            break;
+        }
+        case esSquare: {
+            QCPVector2D widthVecPerp = widthVec.perpendicular();
+            QPointF points[4] = {(pos - widthVecPerp + widthVec).toPointF(),
+                                 (pos - widthVecPerp - widthVec).toPointF(),
+                                 (pos + widthVecPerp - widthVec).toPointF(),
+                                 (pos + widthVecPerp + widthVec).toPointF()
+            };
+            painter->setPen(miterPen);
+            painter->setBrush(brush);
+            painter->drawConvexPolygon(points, 4);
+            painter->setBrush(brushBackup);
+            painter->setPen(penBackup);
+            break;
+        }
+        case esDiamond: {
+            QCPVector2D widthVecPerp = widthVec.perpendicular();
+            QPointF points[4] = {(pos - widthVecPerp).toPointF(),
+                                 (pos - widthVec).toPointF(),
+                                 (pos + widthVecPerp).toPointF(),
+                                 (pos + widthVec).toPointF()
+            };
+            painter->setPen(miterPen);
+            painter->setBrush(brush);
+            painter->drawConvexPolygon(points, 4);
+            painter->setBrush(brushBackup);
+            painter->setPen(penBackup);
+            break;
+        }
+        case esBar: {
+            painter->drawLine((pos + widthVec).toPointF(), (pos - widthVec).toPointF());
+            break;
+        }
+        case esHalfBar: {
+            painter->drawLine((pos + widthVec).toPointF(), pos.toPointF());
+            break;
+        }
+        case esSkewedBar: {
+            if (qFuzzyIsNull(painter->pen().widthF()) && !painter->modes().testFlag(QCPPainter::pmNonCosmetic)) {
+                // if drawing with cosmetic pen (perfectly thin stroke, happens only in vector exports), draw bar exactly on tip of line
+                painter->drawLine((pos + widthVec + lengthVec * 0.2 * (mInverted ? -1 : 1)).toPointF(),
+                                  (pos - widthVec - lengthVec * 0.2 * (mInverted ? -1 : 1)).toPointF());
+            } else {
+                // if drawing with thick (non-cosmetic) pen, shift bar a little in line direction to prevent line from sticking through bar slightly
+                painter->drawLine((pos + widthVec + lengthVec * 0.2 * (mInverted ? -1 : 1) +
+                                   dir.normalized() * qMax(1.0f, (float) painter->pen().widthF()) * 0.5f).toPointF(),
+                                  (pos - widthVec - lengthVec * 0.2 * (mInverted ? -1 : 1) +
+                                   dir.normalized() * qMax(1.0f, (float) painter->pen().widthF()) * 0.5f).toPointF());
+            }
+            break;
+        }
     }
-    case esSpikeArrow:
-    {
-      QPointF points[4] = {pos.toPointF(),
-                           (pos-lengthVec+widthVec).toPointF(),
-                           (pos-lengthVec*0.8).toPointF(),
-                           (pos-lengthVec-widthVec).toPointF()
-                          };
-      painter->setPen(miterPen);
-      painter->setBrush(brush);
-      painter->drawConvexPolygon(points, 4);
-      painter->setBrush(brushBackup);
-      painter->setPen(penBackup);
-      break;
-    }
-    case esLineArrow:
-    {
-      QPointF points[3] = {(pos-lengthVec+widthVec).toPointF(),
-                           pos.toPointF(),
-                           (pos-lengthVec-widthVec).toPointF()
-                          };
-      painter->setPen(miterPen);
-      painter->drawPolyline(points, 3);
-      painter->setPen(penBackup);
-      break;
-    }
-    case esDisc:
-    {
-      painter->setBrush(brush);
-      painter->drawEllipse(pos.toPointF(),  mWidth*0.5, mWidth*0.5);
-      painter->setBrush(brushBackup);
-      break;
-    }
-    case esSquare:
-    {
-      QCPVector2D widthVecPerp = widthVec.perpendicular();
-      QPointF points[4] = {(pos-widthVecPerp+widthVec).toPointF(),
-                           (pos-widthVecPerp-widthVec).toPointF(),
-                           (pos+widthVecPerp-widthVec).toPointF(),
-                           (pos+widthVecPerp+widthVec).toPointF()
-                          };
-      painter->setPen(miterPen);
-      painter->setBrush(brush);
-      painter->drawConvexPolygon(points, 4);
-      painter->setBrush(brushBackup);
-      painter->setPen(penBackup);
-      break;
-    }
-    case esDiamond:
-    {
-      QCPVector2D widthVecPerp = widthVec.perpendicular();
-      QPointF points[4] = {(pos-widthVecPerp).toPointF(),
-                           (pos-widthVec).toPointF(),
-                           (pos+widthVecPerp).toPointF(),
-                           (pos+widthVec).toPointF()
-                          };
-      painter->setPen(miterPen);
-      painter->setBrush(brush);
-      painter->drawConvexPolygon(points, 4);
-      painter->setBrush(brushBackup);
-      painter->setPen(penBackup);
-      break;
-    }
-    case esBar:
-    {
-      painter->drawLine((pos+widthVec).toPointF(), (pos-widthVec).toPointF());
-      break;
-    }
-    case esHalfBar:
-    {
-      painter->drawLine((pos+widthVec).toPointF(), pos.toPointF());
-      break;
-    }
-    case esSkewedBar:
-    {
-      if (qFuzzyIsNull(painter->pen().widthF()) && !painter->modes().testFlag(QCPPainter::pmNonCosmetic))
-      {
-        // if drawing with cosmetic pen (perfectly thin stroke, happens only in vector exports), draw bar exactly on tip of line
-        painter->drawLine((pos+widthVec+lengthVec*0.2*(mInverted?-1:1)).toPointF(),
-                          (pos-widthVec-lengthVec*0.2*(mInverted?-1:1)).toPointF());
-      } else
-      {
-        // if drawing with thick (non-cosmetic) pen, shift bar a little in line direction to prevent line from sticking through bar slightly
-        painter->drawLine((pos+widthVec+lengthVec*0.2*(mInverted?-1:1)+dir.normalized()*qMax(1.0f, (float)painter->pen().widthF())*0.5f).toPointF(),
-                          (pos-widthVec-lengthVec*0.2*(mInverted?-1:1)+dir.normalized()*qMax(1.0f, (float)painter->pen().widthF())*0.5f).toPointF());
-      }
-      break;
-    }
-  }
 }
 
 /*! \internal
@@ -316,7 +296,6 @@ void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, const QCPV
   
   Draws the line ending. The direction is controlled with the \a angle parameter in radians.
 */
-void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, double angle) const
-{
-  draw(painter, pos, QCPVector2D(qCos(angle), qSin(angle)));
+void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, double angle) const {
+    draw(painter, pos, QCPVector2D(qCos(angle), qSin(angle)));
 }

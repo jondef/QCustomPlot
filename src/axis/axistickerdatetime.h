@@ -28,39 +28,48 @@
 
 #include "axisticker.h"
 
-class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker
-{
+class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker {
 public:
-  QCPAxisTickerDateTime();
-  
-  // getters:
-  QString dateTimeFormat() const { return mDateTimeFormat; }
-  Qt::TimeSpec dateTimeSpec() const { return mDateTimeSpec; }
-  
-  // setters:
-  void setDateTimeFormat(const QString &format);
-  void setDateTimeSpec(Qt::TimeSpec spec);
-  void setTickOrigin(double origin); // hides base class method but calls baseclass implementation ("using" throws off IDEs and doxygen)
-  void setTickOrigin(const QDateTime &origin);
-  
-  // static methods:
-  static QDateTime keyToDateTime(double key);
-  static double dateTimeToKey(const QDateTime dateTime);
-  static double dateTimeToKey(const QDate date);
-  
+    QCPAxisTickerDateTime();
+
+    // getters:
+    QString dateTimeFormat() const { return mDateTimeFormat; }
+
+    Qt::TimeSpec dateTimeSpec() const { return mDateTimeSpec; }
+
+    // setters:
+    void setDateTimeFormat(const QString &format);
+
+    void setDateTimeSpec(Qt::TimeSpec spec);
+
+    void setTickOrigin(double origin); // hides base class method but calls baseclass implementation ("using" throws off IDEs and doxygen)
+    void setTickOrigin(const QDateTime &origin);
+
+    // static methods:
+    static QDateTime keyToDateTime(double key);
+
+    static double dateTimeToKey(const QDateTime dateTime);
+
+    static double dateTimeToKey(const QDate date);
+
 protected:
-  // property members:
-  QString mDateTimeFormat;
-  Qt::TimeSpec mDateTimeSpec;
-  
-  // non-property members:
-  enum DateStrategy {dsNone, dsUniformTimeInDay, dsUniformDayInMonth} mDateStrategy;
-  
-  // reimplemented virtual methods:
-  virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
-  virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
-  virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
-  virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
+    // property members:
+    QString mDateTimeFormat;
+    Qt::TimeSpec mDateTimeSpec;
+
+    // non-property members:
+    enum DateStrategy {
+        dsNone, dsUniformTimeInDay, dsUniformDayInMonth
+    } mDateStrategy;
+
+    // reimplemented virtual methods:
+    virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
+
+    virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
+
+    virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
+
+    virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
 };
 
 #endif // QCP_AXISTICKERDATETIME_H

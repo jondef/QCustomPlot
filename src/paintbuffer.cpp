@@ -115,14 +115,12 @@
   Subclasses must call their \ref reallocateBuffer implementation in their respective constructors.
 */
 QCPAbstractPaintBuffer::QCPAbstractPaintBuffer(const QSize &size, double devicePixelRatio) :
-  mSize(size),
-  mDevicePixelRatio(devicePixelRatio),
-  mInvalidated(true)
-{
+        mSize(size),
+        mDevicePixelRatio(devicePixelRatio),
+        mInvalidated(true) {
 }
 
-QCPAbstractPaintBuffer::~QCPAbstractPaintBuffer()
-{
+QCPAbstractPaintBuffer::~QCPAbstractPaintBuffer() {
 }
 
 /*!
@@ -133,13 +131,11 @@ QCPAbstractPaintBuffer::~QCPAbstractPaintBuffer()
 
   If \a size is already the current buffer size, this method does nothing.
 */
-void QCPAbstractPaintBuffer::setSize(const QSize &size)
-{
-  if (mSize != size)
-  {
-    mSize = size;
-    reallocateBuffer();
-  }
+void QCPAbstractPaintBuffer::setSize(const QSize &size) {
+    if (mSize != size) {
+        mSize = size;
+        reallocateBuffer();
+    }
 }
 
 /*!
@@ -157,9 +153,8 @@ void QCPAbstractPaintBuffer::setSize(const QSize &size)
 
   Under normal circumstances, it is not necessary to manually call this method.
 */
-void QCPAbstractPaintBuffer::setInvalidated(bool invalidated)
-{
-  mInvalidated = invalidated;
+void QCPAbstractPaintBuffer::setInvalidated(bool invalidated) {
+    mInvalidated = invalidated;
 }
 
 /*!
@@ -171,18 +166,16 @@ void QCPAbstractPaintBuffer::setInvalidated(bool invalidated)
 
   \note This method is only available for Qt versions 5.4 and higher.
 */
-void QCPAbstractPaintBuffer::setDevicePixelRatio(double ratio)
-{
-  if (!qFuzzyCompare(ratio, mDevicePixelRatio))
-  {
+void QCPAbstractPaintBuffer::setDevicePixelRatio(double ratio) {
+    if (!qFuzzyCompare(ratio, mDevicePixelRatio)) {
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    mDevicePixelRatio = ratio;
-    reallocateBuffer();
+        mDevicePixelRatio = ratio;
+        reallocateBuffer();
 #else
-    qDebug() << Q_FUNC_INFO << "Device pixel ratios not supported for Qt versions before 5.4";
-    mDevicePixelRatio = 1.0;
+        qDebug() << Q_FUNC_INFO << "Device pixel ratios not supported for Qt versions before 5.4";
+        mDevicePixelRatio = 1.0;
 #endif
-  }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,56 +194,48 @@ void QCPAbstractPaintBuffer::setDevicePixelRatio(double ratio)
   applicable.
 */
 QCPPaintBufferPixmap::QCPPaintBufferPixmap(const QSize &size, double devicePixelRatio) :
-  QCPAbstractPaintBuffer(size, devicePixelRatio)
-{
-  QCPPaintBufferPixmap::reallocateBuffer();
+        QCPAbstractPaintBuffer(size, devicePixelRatio) {
+    QCPPaintBufferPixmap::reallocateBuffer();
 }
 
-QCPPaintBufferPixmap::~QCPPaintBufferPixmap()
-{
-}
-
-/* inherits documentation from base class */
-QCPPainter *QCPPaintBufferPixmap::startPainting()
-{
-  QCPPainter *result = new QCPPainter(&mBuffer);
-  result->setRenderHint(QPainter::HighQualityAntialiasing);
-  return result;
+QCPPaintBufferPixmap::~QCPPaintBufferPixmap() {
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferPixmap::draw(QCPPainter *painter) const
-{
-  if (painter && painter->isActive())
-    painter->drawPixmap(0, 0, mBuffer);
-  else
-    qDebug() << Q_FUNC_INFO << "invalid or inactive painter passed";
+QCPPainter *QCPPaintBufferPixmap::startPainting() {
+    QCPPainter *result = new QCPPainter(&mBuffer);
+    result->setRenderHint(QPainter::HighQualityAntialiasing);
+    return result;
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferPixmap::clear(const QColor &color)
-{
-  mBuffer.fill(color);
+void QCPPaintBufferPixmap::draw(QCPPainter *painter) const {
+    if (painter && painter->isActive())
+        painter->drawPixmap(0, 0, mBuffer);
+    else
+        qDebug() << Q_FUNC_INFO << "invalid or inactive painter passed";
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferPixmap::reallocateBuffer()
-{
-  setInvalidated();
-  if (!qFuzzyCompare(1.0, mDevicePixelRatio))
-  {
+void QCPPaintBufferPixmap::clear(const QColor &color) {
+    mBuffer.fill(color);
+}
+
+/* inherits documentation from base class */
+void QCPPaintBufferPixmap::reallocateBuffer() {
+    setInvalidated();
+    if (!qFuzzyCompare(1.0, mDevicePixelRatio)) {
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    mBuffer = QPixmap(mSize*mDevicePixelRatio);
-    mBuffer.setDevicePixelRatio(mDevicePixelRatio);
+        mBuffer = QPixmap(mSize * mDevicePixelRatio);
+        mBuffer.setDevicePixelRatio(mDevicePixelRatio);
 #else
-    qDebug() << Q_FUNC_INFO << "Device pixel ratios not supported for Qt versions before 5.4";
-    mDevicePixelRatio = 1.0;
-    mBuffer = QPixmap(mSize);
+        qDebug() << Q_FUNC_INFO << "Device pixel ratios not supported for Qt versions before 5.4";
+        mDevicePixelRatio = 1.0;
+        mBuffer = QPixmap(mSize);
 #endif
-  } else
-  {
-    mBuffer = QPixmap(mSize);
-  }
+    } else {
+        mBuffer = QPixmap(mSize);
+    }
 }
 
 

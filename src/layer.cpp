@@ -115,29 +115,28 @@
   This check is only performed by \ref QCustomPlot::addLayer.
 */
 QCPLayer::QCPLayer(QCustomPlot *parentPlot, const QString &layerName) :
-  QObject(parentPlot),
-  mParentPlot(parentPlot),
-  mName(layerName),
-  mIndex(-1), // will be set to a proper value by the QCustomPlot layer creation function
-  mVisible(true),
-  mMode(lmLogical)
-{
-  // Note: no need to make sure layerName is unique, because layer
-  // management is done with QCustomPlot functions.
+        QObject(parentPlot),
+        mParentPlot(parentPlot),
+        mName(layerName),
+        mIndex(-1), // will be set to a proper value by the QCustomPlot layer creation function
+        mVisible(true),
+        mMode(lmLogical) {
+    // Note: no need to make sure layerName is unique, because layer
+    // management is done with QCustomPlot functions.
 }
 
-QCPLayer::~QCPLayer()
-{
-  // If child layerables are still on this layer, detach them, so they don't try to reach back to this
-  // then invalid layer once they get deleted/moved themselves. This only happens when layers are deleted
-  // directly, like in the QCustomPlot destructor. (The regular layer removal procedure for the user is to
-  // call QCustomPlot::removeLayer, which moves all layerables off this layer before deleting it.)
-  
-  while (!mChildren.isEmpty())
-    mChildren.last()->setLayer(0); // removes itself from mChildren via removeChild()
-  
-  if (mParentPlot->currentLayer() == this)
-    qDebug() << Q_FUNC_INFO << "The parent plot's mCurrentLayer will be a dangling pointer. Should have been set to a valid layer or 0 beforehand.";
+QCPLayer::~QCPLayer() {
+    // If child layerables are still on this layer, detach them, so they don't try to reach back to this
+    // then invalid layer once they get deleted/moved themselves. This only happens when layers are deleted
+    // directly, like in the QCustomPlot destructor. (The regular layer removal procedure for the user is to
+    // call QCustomPlot::removeLayer, which moves all layerables off this layer before deleting it.)
+
+    while (!mChildren.isEmpty())
+        mChildren.last()->setLayer(0); // removes itself from mChildren via removeChild()
+
+    if (mParentPlot->currentLayer() == this)
+        qDebug() << Q_FUNC_INFO
+                 << "The parent plot's mCurrentLayer will be a dangling pointer. Should have been set to a valid layer or 0 beforehand.";
 }
 
 /*!
@@ -148,9 +147,8 @@ QCPLayer::~QCPLayer()
   QCPLayerable::setVisible), but the \ref QCPLayerable::realVisibility of each layerable takes the
   visibility of the parent layer into account.
 */
-void QCPLayer::setVisible(bool visible)
-{
-  mVisible = visible;
+void QCPLayer::setVisible(bool visible) {
+    mVisible = visible;
 }
 
 /*!
@@ -174,14 +172,12 @@ void QCPLayer::setVisible(bool visible)
 
   \see replot
 */
-void QCPLayer::setMode(QCPLayer::LayerMode mode)
-{
-  if (mMode != mode)
-  {
-    mMode = mode;
-    if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
-  }
+void QCPLayer::setMode(QCPLayer::LayerMode mode) {
+    if (mMode != mode) {
+        mMode = mode;
+        if (!mPaintBuffer.isNull())
+            mPaintBuffer.data()->setInvalidated();
+    }
 }
 
 /*! \internal
@@ -190,19 +186,16 @@ void QCPLayer::setMode(QCPLayer::LayerMode mode)
 
   \see replot, drawToPaintBuffer
 */
-void QCPLayer::draw(QCPPainter *painter)
-{
-  foreach (QCPLayerable *child, mChildren)
-  {
-    if (child->realVisibility())
-    {
-      painter->save();
-      painter->setClipRect(child->clipRect().translated(0, -1));
-      child->applyDefaultAntialiasingHint(painter);
-      child->draw(painter);
-      painter->restore();
-    }
-  }
+void QCPLayer::draw(QCPPainter *painter) {
+            foreach (QCPLayerable *child, mChildren) {
+            if (child->realVisibility()) {
+                painter->save();
+                painter->setClipRect(child->clipRect().translated(0, -1));
+                child->applyDefaultAntialiasingHint(painter);
+                child->draw(painter);
+                painter->restore();
+            }
+        }
 }
 
 /*! \internal
@@ -213,22 +206,19 @@ void QCPLayer::draw(QCPPainter *painter)
 
   \see draw
 */
-void QCPLayer::drawToPaintBuffer()
-{
-  if (!mPaintBuffer.isNull())
-  {
-    if (QCPPainter *painter = mPaintBuffer.data()->startPainting())
-    {
-      if (painter->isActive())
-        draw(painter);
-      else
-        qDebug() << Q_FUNC_INFO << "paint buffer returned inactive painter";
-      delete painter;
-      mPaintBuffer.data()->donePainting();
+void QCPLayer::drawToPaintBuffer() {
+    if (!mPaintBuffer.isNull()) {
+        if (QCPPainter *painter = mPaintBuffer.data()->startPainting()) {
+            if (painter->isActive())
+                draw(painter);
+            else
+                qDebug() << Q_FUNC_INFO << "paint buffer returned inactive painter";
+            delete painter;
+            mPaintBuffer.data()->donePainting();
+        } else
+            qDebug() << Q_FUNC_INFO << "paint buffer returned zero painter";
     } else
-      qDebug() << Q_FUNC_INFO << "paint buffer returned zero painter";
-  } else
-    qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
+        qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
 }
 
 /*!
@@ -244,20 +234,17 @@ void QCPLayer::drawToPaintBuffer()
 
   \see draw
 */
-void QCPLayer::replot()
-{
-  if (mMode == lmBuffered && !mParentPlot->hasInvalidatedPaintBuffers())
-  {
-    if (!mPaintBuffer.isNull())
-    {
-      mPaintBuffer.data()->clear(Qt::transparent);
-      drawToPaintBuffer();
-      mPaintBuffer.data()->setInvalidated(false);
-      mParentPlot->update();
-    } else
-      qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
-  } else if (mMode == lmLogical)
-    mParentPlot->replot();
+void QCPLayer::replot() {
+    if (mMode == lmBuffered && !mParentPlot->hasInvalidatedPaintBuffers()) {
+        if (!mPaintBuffer.isNull()) {
+            mPaintBuffer.data()->clear(Qt::transparent);
+            drawToPaintBuffer();
+            mPaintBuffer.data()->setInvalidated(false);
+            mParentPlot->update();
+        } else
+            qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
+    } else if (mMode == lmLogical)
+        mParentPlot->replot();
 }
 
 /*! \internal
@@ -270,18 +257,16 @@ void QCPLayer::replot()
   
   \see removeChild
 */
-void QCPLayer::addChild(QCPLayerable *layerable, bool prepend)
-{
-  if (!mChildren.contains(layerable))
-  {
-    if (prepend)
-      mChildren.prepend(layerable);
-    else
-      mChildren.append(layerable);
-    if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
-  } else
-    qDebug() << Q_FUNC_INFO << "layerable is already child of this layer" << reinterpret_cast<quintptr>(layerable);
+void QCPLayer::addChild(QCPLayerable *layerable, bool prepend) {
+    if (!mChildren.contains(layerable)) {
+        if (prepend)
+            mChildren.prepend(layerable);
+        else
+            mChildren.append(layerable);
+        if (!mPaintBuffer.isNull())
+            mPaintBuffer.data()->setInvalidated();
+    } else
+        qDebug() << Q_FUNC_INFO << "layerable is already child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
 
 /*! \internal
@@ -293,14 +278,12 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend)
   
   \see addChild
 */
-void QCPLayer::removeChild(QCPLayerable *layerable)
-{
-  if (mChildren.removeOne(layerable))
-  {
-    if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
-  } else
-    qDebug() << Q_FUNC_INFO << "layerable is not child of this layer" << reinterpret_cast<quintptr>(layerable);
+void QCPLayer::removeChild(QCPLayerable *layerable) {
+    if (mChildren.removeOne(layerable)) {
+        if (!mPaintBuffer.isNull())
+            mPaintBuffer.data()->setInvalidated();
+    } else
+        qDebug() << Q_FUNC_INFO << "layerable is not child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
 
 
@@ -412,29 +395,25 @@ void QCPLayer::removeChild(QCPLayerable *layerable)
   QCPLayerable subclasses, to guarantee a working destruction hierarchy.
 */
 QCPLayerable::QCPLayerable(QCustomPlot *plot, QString targetLayer, QCPLayerable *parentLayerable) :
-  QObject(plot),
-  mVisible(true),
-  mParentPlot(plot),
-  mParentLayerable(parentLayerable),
-  mLayer(0),
-  mAntialiased(true)
-{
-  if (mParentPlot)
-  {
-    if (targetLayer.isEmpty())
-      setLayer(mParentPlot->currentLayer());
-    else if (!setLayer(targetLayer))
-      qDebug() << Q_FUNC_INFO << "setting QCPlayerable initial layer to" << targetLayer << "failed.";
-  }
+        QObject(plot),
+        mVisible(true),
+        mParentPlot(plot),
+        mParentLayerable(parentLayerable),
+        mLayer(0),
+        mAntialiased(true) {
+    if (mParentPlot) {
+        if (targetLayer.isEmpty())
+            setLayer(mParentPlot->currentLayer());
+        else if (!setLayer(targetLayer))
+            qDebug() << Q_FUNC_INFO << "setting QCPlayerable initial layer to" << targetLayer << "failed.";
+    }
 }
 
-QCPLayerable::~QCPLayerable()
-{
-  if (mLayer)
-  {
-    mLayer->removeChild(this);
-    mLayer = 0;
-  }
+QCPLayerable::~QCPLayerable() {
+    if (mLayer) {
+        mLayer->removeChild(this);
+        mLayer = 0;
+    }
 }
 
 /*!
@@ -442,9 +421,8 @@ QCPLayerable::~QCPLayerable()
   on the QCustomPlot surface, and user interaction with it (e.g. click and selection) is not
   possible.
 */
-void QCPLayerable::setVisible(bool on)
-{
-  mVisible = on;
+void QCPLayerable::setVisible(bool on) {
+    mVisible = on;
 }
 
 /*!
@@ -456,9 +434,8 @@ void QCPLayerable::setVisible(bool on)
   
   Returns true if the layer of this layerable was successfully changed to \a layer.
 */
-bool QCPLayerable::setLayer(QCPLayer *layer)
-{
-  return moveToLayer(layer, false);
+bool QCPLayerable::setLayer(QCPLayer *layer) {
+    return moveToLayer(layer, false);
 }
 
 /*! \overload
@@ -466,21 +443,17 @@ bool QCPLayerable::setLayer(QCPLayer *layer)
   
   Returns true on success, i.e. if \a layerName is a valid layer name.
 */
-bool QCPLayerable::setLayer(const QString &layerName)
-{
-  if (!mParentPlot)
-  {
-    qDebug() << Q_FUNC_INFO << "no parent QCustomPlot set";
-    return false;
-  }
-  if (QCPLayer *layer = mParentPlot->layer(layerName))
-  {
-    return setLayer(layer);
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "there is no layer with name" << layerName;
-    return false;
-  }
+bool QCPLayerable::setLayer(const QString &layerName) {
+    if (!mParentPlot) {
+        qDebug() << Q_FUNC_INFO << "no parent QCustomPlot set";
+        return false;
+    }
+    if (QCPLayer *layer = mParentPlot->layer(layerName)) {
+        return setLayer(layer);
+    } else {
+        qDebug() << Q_FUNC_INFO << "there is no layer with name" << layerName;
+        return false;
+    }
 }
 
 /*!
@@ -489,9 +462,8 @@ bool QCPLayerable::setLayer(const QString &layerName)
   Note that antialiasing settings may be overridden by QCustomPlot::setAntialiasedElements and
   QCustomPlot::setNotAntialiasedElements.
 */
-void QCPLayerable::setAntialiased(bool enabled)
-{
-  mAntialiased = enabled;
+void QCPLayerable::setAntialiased(bool enabled) {
+    mAntialiased = enabled;
 }
 
 /*!
@@ -504,9 +476,8 @@ void QCPLayerable::setAntialiased(bool enabled)
   layerable has its visibility set to true and the parent layerable's \ref realVisibility returns
   true.
 */
-bool QCPLayerable::realVisibility() const
-{
-  return mVisible && (!mLayer || mLayer->visible()) && (!mParentLayerable || mParentLayerable.data()->realVisibility());
+bool QCPLayerable::realVisibility() const {
+    return mVisible && (!mLayer || mLayer->visible()) && (!mParentLayerable || mParentLayerable.data()->realVisibility());
 }
 
 /*!
@@ -547,12 +518,11 @@ bool QCPLayerable::realVisibility() const
   \see selectEvent, deselectEvent, mousePressEvent, wheelEvent, QCustomPlot::setInteractions,
   QCPAbstractPlottable1D::selectTestRect
 */
-double QCPLayerable::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(pos)
-  Q_UNUSED(onlySelectable)
-  Q_UNUSED(details)
-  return -1.0;
+double QCPLayerable::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(pos)
+    Q_UNUSED(onlySelectable)
+    Q_UNUSED(details)
+    return -1.0;
 }
 
 /*! \internal
@@ -572,19 +542,17 @@ double QCPLayerable::selectTest(const QPointF &pos, bool onlySelectable, QVarian
   so they can react accordingly (e.g. also initialize the parent plot of child layerables, like
   QCPLayout does).
 */
-void QCPLayerable::initializeParentPlot(QCustomPlot *parentPlot)
-{
-  if (mParentPlot)
-  {
-    qDebug() << Q_FUNC_INFO << "called with mParentPlot already initialized";
-    return;
-  }
-  
-  if (!parentPlot)
-    qDebug() << Q_FUNC_INFO << "called with parentPlot zero";
-  
-  mParentPlot = parentPlot;
-  parentPlotInitialized(mParentPlot);
+void QCPLayerable::initializeParentPlot(QCustomPlot *parentPlot) {
+    if (mParentPlot) {
+        qDebug() << Q_FUNC_INFO << "called with mParentPlot already initialized";
+        return;
+    }
+
+    if (!parentPlot)
+        qDebug() << Q_FUNC_INFO << "called with parentPlot zero";
+
+    mParentPlot = parentPlot;
+    parentPlotInitialized(mParentPlot);
 }
 
 /*! \internal
@@ -598,9 +566,8 @@ void QCPLayerable::initializeParentPlot(QCustomPlot *parentPlot)
   
   \see realVisibility
 */
-void QCPLayerable::setParentLayerable(QCPLayerable *parentLayerable)
-{
-  mParentLayerable = parentLayerable;
+void QCPLayerable::setParentLayerable(QCPLayerable *parentLayerable) {
+    mParentLayerable = parentLayerable;
 }
 
 /*! \internal
@@ -611,28 +578,25 @@ void QCPLayerable::setParentLayerable(QCPLayerable *parentLayerable)
   
   Returns true on success, i.e. if \a layer is a valid layer.
 */
-bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend)
-{
-  if (layer && !mParentPlot)
-  {
-    qDebug() << Q_FUNC_INFO << "no parent QCustomPlot set";
-    return false;
-  }
-  if (layer && layer->parentPlot() != mParentPlot)
-  {
-    qDebug() << Q_FUNC_INFO << "layer" << layer->name() << "is not in same QCustomPlot as this layerable";
-    return false;
-  }
-  
-  QCPLayer *oldLayer = mLayer;
-  if (mLayer)
-    mLayer->removeChild(this);
-  mLayer = layer;
-  if (mLayer)
-    mLayer->addChild(this, prepend);
-  if (mLayer != oldLayer)
-    emit layerChanged(mLayer);
-  return true;
+bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend) {
+    if (layer && !mParentPlot) {
+        qDebug() << Q_FUNC_INFO << "no parent QCustomPlot set";
+        return false;
+    }
+    if (layer && layer->parentPlot() != mParentPlot) {
+        qDebug() << Q_FUNC_INFO << "layer" << layer->name() << "is not in same QCustomPlot as this layerable";
+        return false;
+    }
+
+    QCPLayer *oldLayer = mLayer;
+    if (mLayer)
+        mLayer->removeChild(this);
+    mLayer = layer;
+    if (mLayer)
+        mLayer->addChild(this, prepend);
+    if (mLayer != oldLayer)
+            emit layerChanged(mLayer);
+    return true;
 }
 
 /*! \internal
@@ -642,14 +606,13 @@ bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend)
   QCustomPlot::setNotAntialiasedElements. Which override enum this function takes into account is
   controlled via \a overrideElement.
 */
-void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialiased, QCP::AntialiasedElement overrideElement) const
-{
-  if (mParentPlot && mParentPlot->notAntialiasedElements().testFlag(overrideElement))
-    painter->setAntialiasing(false);
-  else if (mParentPlot && mParentPlot->antialiasedElements().testFlag(overrideElement))
-    painter->setAntialiasing(true);
-  else
-    painter->setAntialiasing(localAntialiased);
+void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialiased, QCP::AntialiasedElement overrideElement) const {
+    if (mParentPlot && mParentPlot->notAntialiasedElements().testFlag(overrideElement))
+        painter->setAntialiasing(false);
+    else if (mParentPlot && mParentPlot->antialiasedElements().testFlag(overrideElement))
+        painter->setAntialiasing(true);
+    else
+        painter->setAntialiasing(localAntialiased);
 }
 
 /*! \internal
@@ -668,9 +631,8 @@ void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialia
   
   \see initializeParentPlot
 */
-void QCPLayerable::parentPlotInitialized(QCustomPlot *parentPlot)
-{
-   Q_UNUSED(parentPlot)
+void QCPLayerable::parentPlotInitialized(QCustomPlot *parentPlot) {
+    Q_UNUSED(parentPlot)
 }
 
 /*! \internal
@@ -684,9 +646,8 @@ void QCPLayerable::parentPlotInitialized(QCustomPlot *parentPlot)
   
   \see QCustomPlot::setInteractions
 */
-QCP::Interaction QCPLayerable::selectionCategory() const
-{
-  return QCP::iSelectOther;
+QCP::Interaction QCPLayerable::selectionCategory() const {
+    return QCP::iSelectOther;
 }
 
 /*! \internal
@@ -698,12 +659,11 @@ QCP::Interaction QCPLayerable::selectionCategory() const
   The returned clipping rect is set on the painter before the draw function of the respective
   object is called.
 */
-QRect QCPLayerable::clipRect() const
-{
-  if (mParentPlot)
-    return mParentPlot->viewport();
-  else
-    return QRect();
+QRect QCPLayerable::clipRect() const {
+    if (mParentPlot)
+        return mParentPlot->viewport();
+    else
+        return QRect();
 }
 
 /*! \internal
@@ -734,12 +694,11 @@ QRect QCPLayerable::clipRect() const
   
   \see selectTest, deselectEvent
 */
-void QCPLayerable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  Q_UNUSED(additive)
-  Q_UNUSED(details)
-  Q_UNUSED(selectionStateChanged)
+void QCPLayerable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    Q_UNUSED(additive)
+    Q_UNUSED(details)
+    Q_UNUSED(selectionStateChanged)
 }
 
 /*! \internal
@@ -754,9 +713,8 @@ void QCPLayerable::selectEvent(QMouseEvent *event, bool additive, const QVariant
   
   \see selectTest, selectEvent
 */
-void QCPLayerable::deselectEvent(bool *selectionStateChanged)
-{
-  Q_UNUSED(selectionStateChanged)
+void QCPLayerable::deselectEvent(bool *selectionStateChanged) {
+    Q_UNUSED(selectionStateChanged)
 }
 
 /*!
@@ -784,10 +742,9 @@ void QCPLayerable::deselectEvent(bool *selectionStateChanged)
 
   \see mouseMoveEvent, mouseReleaseEvent, mouseDoubleClickEvent, wheelEvent
 */
-void QCPLayerable::mousePressEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  event->ignore();
+void QCPLayerable::mousePressEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    event->ignore();
 }
 
 /*!
@@ -802,10 +759,9 @@ void QCPLayerable::mousePressEvent(QMouseEvent *event, const QVariant &details)
 
   \see mousePressEvent, mouseReleaseEvent, mouseDoubleClickEvent, wheelEvent
 */
-void QCPLayerable::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  Q_UNUSED(startPos)
-  event->ignore();
+void QCPLayerable::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos) {
+    Q_UNUSED(startPos)
+    event->ignore();
 }
 
 /*!
@@ -820,10 +776,9 @@ void QCPLayerable::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
 
   \see mousePressEvent, mouseMoveEvent, mouseDoubleClickEvent, wheelEvent
 */
-void QCPLayerable::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  Q_UNUSED(startPos)
-  event->ignore();
+void QCPLayerable::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos) {
+    Q_UNUSED(startPos)
+    event->ignore();
 }
 
 /*!
@@ -852,10 +807,9 @@ void QCPLayerable::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos
 
   \see mousePressEvent, mouseMoveEvent, mouseReleaseEvent, wheelEvent
 */
-void QCPLayerable::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  event->ignore();
+void QCPLayerable::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    event->ignore();
 }
 
 /*!
@@ -875,7 +829,6 @@ void QCPLayerable::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &det
 
   \see mousePressEvent, mouseMoveEvent, mouseReleaseEvent, mouseDoubleClickEvent
 */
-void QCPLayerable::wheelEvent(QWheelEvent *event)
-{
-  event->ignore();
+void QCPLayerable::wheelEvent(QWheelEvent *event) {
+    event->ignore();
 }

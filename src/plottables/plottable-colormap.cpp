@@ -84,87 +84,79 @@
   \see setSize, setKeySize, setValueSize, setRange, setKeyRange, setValueRange
 */
 QCPColorMapData::QCPColorMapData(int keySize, int valueSize, const QCPRange &keyRange, const QCPRange &valueRange) :
-  mKeySize(0),
-  mValueSize(0),
-  mKeyRange(keyRange),
-  mValueRange(valueRange),
-  mIsEmpty(true),
-  mData(0),
-  mAlpha(0),
-  mDataModified(true)
-{
-  setSize(keySize, valueSize);
-  fill(0);
+        mKeySize(0),
+        mValueSize(0),
+        mKeyRange(keyRange),
+        mValueRange(valueRange),
+        mIsEmpty(true),
+        mData(0),
+        mAlpha(0),
+        mDataModified(true) {
+    setSize(keySize, valueSize);
+    fill(0);
 }
 
-QCPColorMapData::~QCPColorMapData()
-{
-  if (mData)
-    delete[] mData;
-  if (mAlpha)
-    delete[] mAlpha;
+QCPColorMapData::~QCPColorMapData() {
+    if (mData)
+        delete[] mData;
+    if (mAlpha)
+        delete[] mAlpha;
 }
 
 /*!
   Constructs a new QCPColorMapData instance copying the data and range of \a other.
 */
 QCPColorMapData::QCPColorMapData(const QCPColorMapData &other) :
-  mKeySize(0),
-  mValueSize(0),
-  mIsEmpty(true),
-  mData(0),
-  mAlpha(0),
-  mDataModified(true)
-{
-  *this = other;
+        mKeySize(0),
+        mValueSize(0),
+        mIsEmpty(true),
+        mData(0),
+        mAlpha(0),
+        mDataModified(true) {
+    *this = other;
 }
 
 /*!
   Overwrites this color map data instance with the data stored in \a other. The alpha map state is
   transferred, too.
 */
-QCPColorMapData &QCPColorMapData::operator=(const QCPColorMapData &other)
-{
-  if (&other != this)
-  {
-    const int keySize = other.keySize();
-    const int valueSize = other.valueSize();
-    if (!other.mAlpha && mAlpha)
-      clearAlpha();
-    setSize(keySize, valueSize);
-    if (other.mAlpha && !mAlpha)
-      createAlpha(false);
-    setRange(other.keyRange(), other.valueRange());
-    if (!isEmpty())
-    {
-      memcpy(mData, other.mData, sizeof(mData[0])*keySize*valueSize);
-      if (mAlpha)
-        memcpy(mAlpha, other.mAlpha, sizeof(mAlpha[0])*keySize*valueSize);
+QCPColorMapData &QCPColorMapData::operator=(const QCPColorMapData &other) {
+    if (&other != this) {
+        const int keySize = other.keySize();
+        const int valueSize = other.valueSize();
+        if (!other.mAlpha && mAlpha)
+            clearAlpha();
+        setSize(keySize, valueSize);
+        if (other.mAlpha && !mAlpha)
+            createAlpha(false);
+        setRange(other.keyRange(), other.valueRange());
+        if (!isEmpty()) {
+            memcpy(mData, other.mData, sizeof(mData[0]) * keySize * valueSize);
+            if (mAlpha)
+                memcpy(mAlpha, other.mAlpha, sizeof(mAlpha[0]) * keySize * valueSize);
+        }
+        mDataBounds = other.mDataBounds;
+        mDataModified = true;
     }
-    mDataBounds = other.mDataBounds;
-    mDataModified = true;
-  }
-  return *this;
+    return *this;
 }
 
 /* undocumented getter */
-double QCPColorMapData::data(double key, double value)
-{
-  int keyCell = (key-mKeyRange.lower)/(mKeyRange.upper-mKeyRange.lower)*(mKeySize-1)+0.5;
-  int valueCell = (value-mValueRange.lower)/(mValueRange.upper-mValueRange.lower)*(mValueSize-1)+0.5;
-  if (keyCell >= 0 && keyCell < mKeySize && valueCell >= 0 && valueCell < mValueSize)
-    return mData[valueCell*mKeySize + keyCell];
-  else
-    return 0;
+double QCPColorMapData::data(double key, double value) {
+    int keyCell = (key - mKeyRange.lower) / (mKeyRange.upper - mKeyRange.lower) * (mKeySize - 1) + 0.5;
+    int valueCell = (value - mValueRange.lower) / (mValueRange.upper - mValueRange.lower) * (mValueSize - 1) + 0.5;
+    if (keyCell >= 0 && keyCell < mKeySize && valueCell >= 0 && valueCell < mValueSize)
+        return mData[valueCell * mKeySize + keyCell];
+    else
+        return 0;
 }
 
 /* undocumented getter */
-double QCPColorMapData::cell(int keyIndex, int valueIndex)
-{
-  if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
-    return mData[valueIndex*mKeySize + keyIndex];
-  else
-    return 0;
+double QCPColorMapData::cell(int keyIndex, int valueIndex) {
+    if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
+        return mData[valueIndex * mKeySize + keyIndex];
+    else
+        return 0;
 }
 
 /*!
@@ -175,12 +167,11 @@ double QCPColorMapData::cell(int keyIndex, int valueIndex)
 
   \see setAlpha
 */
-unsigned char QCPColorMapData::alpha(int keyIndex, int valueIndex)
-{
-  if (mAlpha && keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
-    return mAlpha[valueIndex*mKeySize + keyIndex];
-  else
-    return 255;
+unsigned char QCPColorMapData::alpha(int keyIndex, int valueIndex) {
+    if (mAlpha && keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
+        return mAlpha[valueIndex * mKeySize + keyIndex];
+    else
+        return 255;
 }
 
 /*!
@@ -195,36 +186,33 @@ unsigned char QCPColorMapData::alpha(int keyIndex, int valueIndex)
 
   \see setRange, setKeySize, setValueSize
 */
-void QCPColorMapData::setSize(int keySize, int valueSize)
-{
-  if (keySize != mKeySize || valueSize != mValueSize)
-  {
-    mKeySize = keySize;
-    mValueSize = valueSize;
-    if (mData)
-      delete[] mData;
-    mIsEmpty = mKeySize == 0 || mValueSize == 0;
-    if (!mIsEmpty)
-    {
+void QCPColorMapData::setSize(int keySize, int valueSize) {
+    if (keySize != mKeySize || valueSize != mValueSize) {
+        mKeySize = keySize;
+        mValueSize = valueSize;
+        if (mData)
+            delete[] mData;
+        mIsEmpty = mKeySize == 0 || mValueSize == 0;
+        if (!mIsEmpty) {
 #ifdef __EXCEPTIONS
-      try { // 2D arrays get memory intensive fast. So if the allocation fails, at least output debug message
+            try { // 2D arrays get memory intensive fast. So if the allocation fails, at least output debug message
 #endif
-      mData = new double[mKeySize*mValueSize];
+                mData = new double[mKeySize * mValueSize];
 #ifdef __EXCEPTIONS
-      } catch (...) { mData = 0; }
+            } catch (...) { mData = 0; }
 #endif
-      if (mData)
-        fill(0);
-      else
-        qDebug() << Q_FUNC_INFO << "out of memory for data dimensions "<< mKeySize << "*" << mValueSize;
-    } else
-      mData = 0;
-    
-    if (mAlpha) // if we had an alpha map, recreate it with new size
-      createAlpha();
-    
-    mDataModified = true;
-  }
+            if (mData)
+                fill(0);
+            else
+                qDebug() << Q_FUNC_INFO << "out of memory for data dimensions " << mKeySize << "*" << mValueSize;
+        } else
+            mData = 0;
+
+        if (mAlpha) // if we had an alpha map, recreate it with new size
+            createAlpha();
+
+        mDataModified = true;
+    }
 }
 
 /*!
@@ -237,9 +225,8 @@ void QCPColorMapData::setSize(int keySize, int valueSize)
 
   \see setKeyRange, setSize, setValueSize
 */
-void QCPColorMapData::setKeySize(int keySize)
-{
-  setSize(keySize, mValueSize);
+void QCPColorMapData::setKeySize(int keySize) {
+    setSize(keySize, mValueSize);
 }
 
 /*!
@@ -252,9 +239,8 @@ void QCPColorMapData::setKeySize(int keySize)
 
   \see setValueRange, setSize, setKeySize
 */
-void QCPColorMapData::setValueSize(int valueSize)
-{
-  setSize(mKeySize, valueSize);
+void QCPColorMapData::setValueSize(int valueSize) {
+    setSize(mKeySize, valueSize);
 }
 
 /*!
@@ -267,10 +253,9 @@ void QCPColorMapData::setValueSize(int valueSize)
  
   \see setSize
 */
-void QCPColorMapData::setRange(const QCPRange &keyRange, const QCPRange &valueRange)
-{
-  setKeyRange(keyRange);
-  setValueRange(valueRange);
+void QCPColorMapData::setRange(const QCPRange &keyRange, const QCPRange &valueRange) {
+    setKeyRange(keyRange);
+    setValueRange(valueRange);
 }
 
 /*!
@@ -283,9 +268,8 @@ void QCPColorMapData::setRange(const QCPRange &keyRange, const QCPRange &valueRa
  
   \see setRange, setValueRange, setSize
 */
-void QCPColorMapData::setKeyRange(const QCPRange &keyRange)
-{
-  mKeyRange = keyRange;
+void QCPColorMapData::setKeyRange(const QCPRange &keyRange) {
+    mKeyRange = keyRange;
 }
 
 /*!
@@ -298,9 +282,8 @@ void QCPColorMapData::setKeyRange(const QCPRange &keyRange)
  
   \see setRange, setKeyRange, setSize
 */
-void QCPColorMapData::setValueRange(const QCPRange &valueRange)
-{
-  mValueRange = valueRange;
+void QCPColorMapData::setValueRange(const QCPRange &valueRange) {
+    mValueRange = valueRange;
 }
 
 /*!
@@ -315,19 +298,17 @@ void QCPColorMapData::setValueRange(const QCPRange &valueRange)
  
   \see setCell, setRange
 */
-void QCPColorMapData::setData(double key, double value, double z)
-{
-  int keyCell = (key-mKeyRange.lower)/(mKeyRange.upper-mKeyRange.lower)*(mKeySize-1)+0.5;
-  int valueCell = (value-mValueRange.lower)/(mValueRange.upper-mValueRange.lower)*(mValueSize-1)+0.5;
-  if (keyCell >= 0 && keyCell < mKeySize && valueCell >= 0 && valueCell < mValueSize)
-  {
-    mData[valueCell*mKeySize + keyCell] = z;
-    if (z < mDataBounds.lower)
-      mDataBounds.lower = z;
-    if (z > mDataBounds.upper)
-      mDataBounds.upper = z;
-     mDataModified = true;
-  }
+void QCPColorMapData::setData(double key, double value, double z) {
+    int keyCell = (key - mKeyRange.lower) / (mKeyRange.upper - mKeyRange.lower) * (mKeySize - 1) + 0.5;
+    int valueCell = (value - mValueRange.lower) / (mValueRange.upper - mValueRange.lower) * (mValueSize - 1) + 0.5;
+    if (keyCell >= 0 && keyCell < mKeySize && valueCell >= 0 && valueCell < mValueSize) {
+        mData[valueCell * mKeySize + keyCell] = z;
+        if (z < mDataBounds.lower)
+            mDataBounds.lower = z;
+        if (z > mDataBounds.upper)
+            mDataBounds.upper = z;
+        mDataModified = true;
+    }
 }
 
 /*!
@@ -341,18 +322,16 @@ void QCPColorMapData::setData(double key, double value, double z)
   
   \see setData, setSize
 */
-void QCPColorMapData::setCell(int keyIndex, int valueIndex, double z)
-{
-  if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
-  {
-    mData[valueIndex*mKeySize + keyIndex] = z;
-    if (z < mDataBounds.lower)
-      mDataBounds.lower = z;
-    if (z > mDataBounds.upper)
-      mDataBounds.upper = z;
-     mDataModified = true;
-  } else
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << keyIndex << valueIndex;
+void QCPColorMapData::setCell(int keyIndex, int valueIndex, double z) {
+    if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize) {
+        mData[valueIndex * mKeySize + keyIndex] = z;
+        if (z < mDataBounds.lower)
+            mDataBounds.lower = z;
+        if (z > mDataBounds.upper)
+            mDataBounds.upper = z;
+        mDataModified = true;
+    } else
+        qDebug() << Q_FUNC_INFO << "index out of bounds:" << keyIndex << valueIndex;
 }
 
 /*!
@@ -370,17 +349,14 @@ void QCPColorMapData::setCell(int keyIndex, int valueIndex, double z)
 
   \see fillAlpha, clearAlpha
 */
-void QCPColorMapData::setAlpha(int keyIndex, int valueIndex, unsigned char alpha)
-{
-  if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize)
-  {
-    if (mAlpha || createAlpha())
-    {
-      mAlpha[valueIndex*mKeySize + keyIndex] = alpha;
-      mDataModified = true;
-    }
-  } else
-    qDebug() << Q_FUNC_INFO << "index out of bounds:" << keyIndex << valueIndex;
+void QCPColorMapData::setAlpha(int keyIndex, int valueIndex, unsigned char alpha) {
+    if (keyIndex >= 0 && keyIndex < mKeySize && valueIndex >= 0 && valueIndex < mValueSize) {
+        if (mAlpha || createAlpha()) {
+            mAlpha[valueIndex * mKeySize + keyIndex] = alpha;
+            mDataModified = true;
+        }
+    } else
+        qDebug() << Q_FUNC_INFO << "index out of bounds:" << keyIndex << valueIndex;
 }
 
 /*!
@@ -396,23 +372,20 @@ void QCPColorMapData::setAlpha(int keyIndex, int valueIndex, unsigned char alpha
   recalculateDataBounds for convenience. Setting this to true will call this method for you, before
   doing the rescale.
 */
-void QCPColorMapData::recalculateDataBounds()
-{
-  if (mKeySize > 0 && mValueSize > 0)
-  {
-    double minHeight = mData[0];
-    double maxHeight = mData[0];
-    const int dataCount = mValueSize*mKeySize;
-    for (int i=0; i<dataCount; ++i)
-    {
-      if (mData[i] > maxHeight)
-        maxHeight = mData[i];
-      if (mData[i] < minHeight)
-        minHeight = mData[i];
+void QCPColorMapData::recalculateDataBounds() {
+    if (mKeySize > 0 && mValueSize > 0) {
+        double minHeight = mData[0];
+        double maxHeight = mData[0];
+        const int dataCount = mValueSize * mKeySize;
+        for (int i = 0; i < dataCount; ++i) {
+            if (mData[i] > maxHeight)
+                maxHeight = mData[i];
+            if (mData[i] < minHeight)
+                minHeight = mData[i];
+        }
+        mDataBounds.lower = minHeight;
+        mDataBounds.upper = maxHeight;
     }
-    mDataBounds.lower = minHeight;
-    mDataBounds.upper = maxHeight;
-  }
 }
 
 /*!
@@ -420,34 +393,30 @@ void QCPColorMapData::recalculateDataBounds()
   
   This is equivalent to calling \ref setSize "setSize(0, 0)".
 */
-void QCPColorMapData::clear()
-{
-  setSize(0, 0);
+void QCPColorMapData::clear() {
+    setSize(0, 0);
 }
 
 /*!
   Frees the internal alpha map. The color map will have full opacity again.
 */
-void QCPColorMapData::clearAlpha()
-{
-  if (mAlpha)
-  {
-    delete[] mAlpha;
-    mAlpha = 0;
-    mDataModified = true;
-  }
+void QCPColorMapData::clearAlpha() {
+    if (mAlpha) {
+        delete[] mAlpha;
+        mAlpha = 0;
+        mDataModified = true;
+    }
 }
 
 /*!
   Sets all cells to the value \a z.
 */
-void QCPColorMapData::fill(double z)
-{
-  const int dataCount = mValueSize*mKeySize;
-  for (int i=0; i<dataCount; ++i)
-    mData[i] = z;
-  mDataBounds = QCPRange(z, z);
-  mDataModified = true;
+void QCPColorMapData::fill(double z) {
+    const int dataCount = mValueSize * mKeySize;
+    for (int i = 0; i < dataCount; ++i)
+        mData[i] = z;
+    mDataBounds = QCPRange(z, z);
+    mDataModified = true;
 }
 
 /*!
@@ -459,15 +428,13 @@ void QCPColorMapData::fill(double z)
 
   \see setAlpha
 */
-void QCPColorMapData::fillAlpha(unsigned char alpha)
-{
-  if (mAlpha || createAlpha(false))
-  {
-    const int dataCount = mValueSize*mKeySize;
-    for (int i=0; i<dataCount; ++i)
-      mAlpha[i] = alpha;
-    mDataModified = true;
-  }
+void QCPColorMapData::fillAlpha(unsigned char alpha) {
+    if (mAlpha || createAlpha(false)) {
+        const int dataCount = mValueSize * mKeySize;
+        for (int i = 0; i < dataCount; ++i)
+            mAlpha[i] = alpha;
+        mDataModified = true;
+    }
 }
 
 /*!
@@ -487,12 +454,11 @@ void QCPColorMapData::fillAlpha(unsigned char alpha)
   
   \see cellToCoord, QCPAxis::coordToPixel
 */
-void QCPColorMapData::coordToCell(double key, double value, int *keyIndex, int *valueIndex) const
-{
-  if (keyIndex)
-    *keyIndex = (key-mKeyRange.lower)/(mKeyRange.upper-mKeyRange.lower)*(mKeySize-1)+0.5;
-  if (valueIndex)
-    *valueIndex = (value-mValueRange.lower)/(mValueRange.upper-mValueRange.lower)*(mValueSize-1)+0.5;
+void QCPColorMapData::coordToCell(double key, double value, int *keyIndex, int *valueIndex) const {
+    if (keyIndex)
+        *keyIndex = (key - mKeyRange.lower) / (mKeyRange.upper - mKeyRange.lower) * (mKeySize - 1) + 0.5;
+    if (valueIndex)
+        *valueIndex = (value - mValueRange.lower) / (mValueRange.upper - mValueRange.lower) * (mValueSize - 1) + 0.5;
 }
 
 /*!
@@ -510,12 +476,11 @@ void QCPColorMapData::coordToCell(double key, double value, int *keyIndex, int *
   
   \see coordToCell, QCPAxis::pixelToCoord
 */
-void QCPColorMapData::cellToCoord(int keyIndex, int valueIndex, double *key, double *value) const
-{
-  if (key)
-    *key = keyIndex/(double)(mKeySize-1)*(mKeyRange.upper-mKeyRange.lower)+mKeyRange.lower;
-  if (value)
-    *value = valueIndex/(double)(mValueSize-1)*(mValueRange.upper-mValueRange.lower)+mValueRange.lower;
+void QCPColorMapData::cellToCoord(int keyIndex, int valueIndex, double *key, double *value) const {
+    if (key)
+        *key = keyIndex / (double) (mKeySize - 1) * (mKeyRange.upper - mKeyRange.lower) + mKeyRange.lower;
+    if (value)
+        *value = valueIndex / (double) (mValueSize - 1) * (mValueRange.upper - mValueRange.lower) + mValueRange.lower;
 }
 
 /*! \internal
@@ -531,29 +496,26 @@ void QCPColorMapData::cellToCoord(int keyIndex, int valueIndex, double *key, dou
   The return value indicates the existence of the alpha map after the call. So this method returns
   true if the data map isn't empty and an alpha map was successfully allocated.
 */
-bool QCPColorMapData::createAlpha(bool initializeOpaque)
-{
-  clearAlpha();
-  if (isEmpty())
-    return false;
-  
+bool QCPColorMapData::createAlpha(bool initializeOpaque) {
+    clearAlpha();
+    if (isEmpty())
+        return false;
+
 #ifdef __EXCEPTIONS
-  try { // 2D arrays get memory intensive fast. So if the allocation fails, at least output debug message
+    try { // 2D arrays get memory intensive fast. So if the allocation fails, at least output debug message
 #endif
-    mAlpha = new unsigned char[mKeySize*mValueSize];
+        mAlpha = new unsigned char[mKeySize * mValueSize];
 #ifdef __EXCEPTIONS
-  } catch (...) { mAlpha = 0; }
+    } catch (...) { mAlpha = 0; }
 #endif
-  if (mAlpha)
-  {
-    if (initializeOpaque)
-      fillAlpha(255);
-    return true;
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "out of memory for data dimensions "<< mKeySize << "*" << mValueSize;
-    return false;
-  }
+    if (mAlpha) {
+        if (initializeOpaque)
+            fillAlpha(255);
+        return true;
+    } else {
+        qDebug() << Q_FUNC_INFO << "out of memory for data dimensions " << mKeySize << "*" << mValueSize;
+        return false;
+    }
 }
 
 
@@ -681,19 +643,17 @@ bool QCPColorMapData::createAlpha(bool initializeOpaque)
   manually but use QCustomPlot::removePlottable() instead.
 */
 QCPColorMap::QCPColorMap(QCPAxis *keyAxis, QCPAxis *valueAxis) :
-  QCPAbstractPlottable(keyAxis, valueAxis),
-  mDataScaleType(QCPAxis::stLinear),
-  mMapData(new QCPColorMapData(10, 10, QCPRange(0, 5), QCPRange(0, 5))),
-  mGradient(QCPColorGradient::gpCold),
-  mInterpolate(true),
-  mTightBoundary(false),
-  mMapImageInvalidated(true)
-{
+        QCPAbstractPlottable(keyAxis, valueAxis),
+        mDataScaleType(QCPAxis::stLinear),
+        mMapData(new QCPColorMapData(10, 10, QCPRange(0, 5), QCPRange(0, 5))),
+        mGradient(QCPColorGradient::gpCold),
+        mInterpolate(true),
+        mTightBoundary(false),
+        mMapImageInvalidated(true) {
 }
 
-QCPColorMap::~QCPColorMap()
-{
-  delete mMapData;
+QCPColorMap::~QCPColorMap() {
+    delete mMapData;
 }
 
 /*!
@@ -703,22 +663,18 @@ QCPColorMap::~QCPColorMap()
   takes ownership of the passed data and replaces the internal data pointer with it. This is
   significantly faster than copying for large datasets.
 */
-void QCPColorMap::setData(QCPColorMapData *data, bool copy)
-{
-  if (mMapData == data)
-  {
-    qDebug() << Q_FUNC_INFO << "The data pointer is already in (and owned by) this plottable" << reinterpret_cast<quintptr>(data);
-    return;
-  }
-  if (copy)
-  {
-    *mMapData = *data;
-  } else
-  {
-    delete mMapData;
-    mMapData = data;
-  }
-  mMapImageInvalidated = true;
+void QCPColorMap::setData(QCPColorMapData *data, bool copy) {
+    if (mMapData == data) {
+        qDebug() << Q_FUNC_INFO << "The data pointer is already in (and owned by) this plottable" << reinterpret_cast<quintptr>(data);
+        return;
+    }
+    if (copy) {
+        *mMapData = *data;
+    } else {
+        delete mMapData;
+        mMapData = data;
+    }
+    mMapImageInvalidated = true;
 }
 
 /*!
@@ -729,18 +685,16 @@ void QCPColorMap::setData(QCPColorMapData *data, bool copy)
   
   \see QCPColorScale::setDataRange
 */
-void QCPColorMap::setDataRange(const QCPRange &dataRange)
-{
-  if (!QCPRange::validRange(dataRange)) return;
-  if (mDataRange.lower != dataRange.lower || mDataRange.upper != dataRange.upper)
-  {
-    if (mDataScaleType == QCPAxis::stLogarithmic)
-      mDataRange = dataRange.sanitizedForLogScale();
-    else
-      mDataRange = dataRange.sanitizedForLinScale();
-    mMapImageInvalidated = true;
-    emit dataRangeChanged(mDataRange);
-  }
+void QCPColorMap::setDataRange(const QCPRange &dataRange) {
+    if (!QCPRange::validRange(dataRange)) return;
+    if (mDataRange.lower != dataRange.lower || mDataRange.upper != dataRange.upper) {
+        if (mDataScaleType == QCPAxis::stLogarithmic)
+            mDataRange = dataRange.sanitizedForLogScale();
+        else
+            mDataRange = dataRange.sanitizedForLinScale();
+        mMapImageInvalidated = true;
+        emit dataRangeChanged(mDataRange);
+    }
 }
 
 /*!
@@ -748,16 +702,14 @@ void QCPColorMap::setDataRange(const QCPRange &dataRange)
   
   \see QCPColorScale::setDataScaleType
 */
-void QCPColorMap::setDataScaleType(QCPAxis::ScaleType scaleType)
-{
-  if (mDataScaleType != scaleType)
-  {
-    mDataScaleType = scaleType;
-    mMapImageInvalidated = true;
-    emit dataScaleTypeChanged(mDataScaleType);
-    if (mDataScaleType == QCPAxis::stLogarithmic)
-      setDataRange(mDataRange.sanitizedForLogScale());
-  }
+void QCPColorMap::setDataScaleType(QCPAxis::ScaleType scaleType) {
+    if (mDataScaleType != scaleType) {
+        mDataScaleType = scaleType;
+        mMapImageInvalidated = true;
+        emit dataScaleTypeChanged(mDataScaleType);
+        if (mDataScaleType == QCPAxis::stLogarithmic)
+            setDataRange(mDataRange.sanitizedForLogScale());
+    }
 }
 
 /*!
@@ -771,14 +723,12 @@ void QCPColorMap::setDataScaleType(QCPAxis::ScaleType scaleType)
   
   \see QCPColorScale::setGradient
 */
-void QCPColorMap::setGradient(const QCPColorGradient &gradient)
-{
-  if (mGradient != gradient)
-  {
-    mGradient = gradient;
-    mMapImageInvalidated = true;
-    emit gradientChanged(mGradient);
-  }
+void QCPColorMap::setGradient(const QCPColorGradient &gradient) {
+    if (mGradient != gradient) {
+        mGradient = gradient;
+        mMapImageInvalidated = true;
+        emit gradientChanged(mGradient);
+    }
 }
 
 /*!
@@ -787,10 +737,9 @@ void QCPColorMap::setGradient(const QCPColorGradient &gradient)
   
   \image html QCPColorMap-interpolate.png "A 10*10 color map, with interpolation and without interpolation enabled"
 */
-void QCPColorMap::setInterpolate(bool enabled)
-{
-  mInterpolate = enabled;
-  mMapImageInvalidated = true; // because oversampling factors might need to change
+void QCPColorMap::setInterpolate(bool enabled) {
+    mInterpolate = enabled;
+    mMapImageInvalidated = true; // because oversampling factors might need to change
 }
 
 /*!
@@ -804,9 +753,8 @@ void QCPColorMap::setInterpolate(bool enabled)
   
   \image html QCPColorMap-tightboundary.png "A color map, with tight boundary enabled and disabled"
 */
-void QCPColorMap::setTightBoundary(bool enabled)
-{
-  mTightBoundary = enabled;
+void QCPColorMap::setTightBoundary(bool enabled) {
+    mTightBoundary = enabled;
 }
 
 /*!
@@ -823,30 +771,29 @@ void QCPColorMap::setTightBoundary(bool enabled)
   
   Pass 0 as \a colorScale to disconnect the color scale from this color map again.
 */
-void QCPColorMap::setColorScale(QCPColorScale *colorScale)
-{
-  if (mColorScale) // unconnect signals from old color scale
-  {
-    disconnect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
-    disconnect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
-    disconnect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
-    disconnect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-    disconnect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
-    disconnect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
-  }
-  mColorScale = colorScale;
-  if (mColorScale) // connect signals to new color scale
-  {
-    setGradient(mColorScale.data()->gradient());
-    setDataRange(mColorScale.data()->dataRange());
-    setDataScaleType(mColorScale.data()->dataScaleType());
-    connect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
-    connect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
-    connect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
-    connect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-    connect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
-    connect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
-  }
+void QCPColorMap::setColorScale(QCPColorScale *colorScale) {
+    if (mColorScale) // unconnect signals from old color scale
+    {
+        disconnect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
+        disconnect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
+        disconnect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
+        disconnect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
+        disconnect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
+        disconnect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+    }
+    mColorScale = colorScale;
+    if (mColorScale) // connect signals to new color scale
+    {
+        setGradient(mColorScale.data()->gradient());
+        setDataRange(mColorScale.data()->dataRange());
+        setDataScaleType(mColorScale.data()->dataScaleType());
+        connect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
+        connect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
+        connect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
+        connect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
+        connect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
+        connect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+    }
 }
 
 /*!
@@ -869,11 +816,10 @@ void QCPColorMap::setColorScale(QCPColorScale *colorScale)
   
   \see setDataRange
 */
-void QCPColorMap::rescaleDataRange(bool recalculateDataBounds)
-{
-  if (recalculateDataBounds)
-    mMapData->recalculateDataBounds();
-  setDataRange(mMapData->dataBounds());
+void QCPColorMap::rescaleDataRange(bool recalculateDataBounds) {
+    if (recalculateDataBounds)
+        mMapData->recalculateDataBounds();
+    setDataRange(mMapData->dataBounds());
 }
 
 /*!
@@ -890,93 +836,82 @@ void QCPColorMap::rescaleDataRange(bool recalculateDataBounds)
   
   \see setDataRange
 */
-void QCPColorMap::updateLegendIcon(Qt::TransformationMode transformMode, const QSize &thumbSize)
-{
-  if (mMapImage.isNull() && !data()->isEmpty())
-    updateMapImage(); // try to update map image if it's null (happens if no draw has happened yet)
-  
-  if (!mMapImage.isNull()) // might still be null, e.g. if data is empty, so check here again
-  {
-    bool mirrorX = (keyAxis()->orientation() == Qt::Horizontal ? keyAxis() : valueAxis())->rangeReversed();
-    bool mirrorY = (valueAxis()->orientation() == Qt::Vertical ? valueAxis() : keyAxis())->rangeReversed();
-    mLegendIcon = QPixmap::fromImage(mMapImage.mirrored(mirrorX, mirrorY)).scaled(thumbSize, Qt::KeepAspectRatio, transformMode);
-  }
-}
+void QCPColorMap::updateLegendIcon(Qt::TransformationMode transformMode, const QSize &thumbSize) {
+    if (mMapImage.isNull() && !data()->isEmpty())
+        updateMapImage(); // try to update map image if it's null (happens if no draw has happened yet)
 
-/* inherits documentation from base class */
-double QCPColorMap::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if ((onlySelectable && mSelectable == QCP::stNone) || mMapData->isEmpty())
-    return -1;
-  if (!mKeyAxis || !mValueAxis)
-    return -1;
-  
-  if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()))
-  {
-    double posKey, posValue;
-    pixelsToCoords(pos, posKey, posValue);
-    if (mMapData->keyRange().contains(posKey) && mMapData->valueRange().contains(posValue))
+    if (!mMapImage.isNull()) // might still be null, e.g. if data is empty, so check here again
     {
-      if (details)
-        details->setValue(QCPDataSelection(QCPDataRange(0, 1))); // temporary solution, to facilitate whole-plottable selection. Replace in future version with segmented 2D selection.
-      return mParentPlot->selectionTolerance()*0.99;
+        bool mirrorX = (keyAxis()->orientation() == Qt::Horizontal ? keyAxis() : valueAxis())->rangeReversed();
+        bool mirrorY = (valueAxis()->orientation() == Qt::Vertical ? valueAxis() : keyAxis())->rangeReversed();
+        mLegendIcon = QPixmap::fromImage(mMapImage.mirrored(mirrorX, mirrorY)).scaled(thumbSize, Qt::KeepAspectRatio, transformMode);
     }
-  }
-  return -1;
 }
 
 /* inherits documentation from base class */
-QCPRange QCPColorMap::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const
-{
-  foundRange = true;
-  QCPRange result = mMapData->keyRange();
-  result.normalize();
-  if (inSignDomain == QCP::sdPositive)
-  {
-    if (result.lower <= 0 && result.upper > 0)
-      result.lower = result.upper*1e-3;
-    else if (result.lower <= 0 && result.upper <= 0)
-      foundRange = false;
-  } else if (inSignDomain == QCP::sdNegative)
-  {
-    if (result.upper >= 0 && result.lower < 0)
-      result.upper = result.lower*1e-3;
-    else if (result.upper >= 0 && result.lower >= 0)
-      foundRange = false;
-  }
-  return result;
+double QCPColorMap::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if ((onlySelectable && mSelectable == QCP::stNone) || mMapData->isEmpty())
+        return -1;
+    if (!mKeyAxis || !mValueAxis)
+        return -1;
+
+    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint())) {
+        double posKey, posValue;
+        pixelsToCoords(pos, posKey, posValue);
+        if (mMapData->keyRange().contains(posKey) && mMapData->valueRange().contains(posValue)) {
+            if (details)
+                details->setValue(QCPDataSelection(QCPDataRange(0,
+                                                                1))); // temporary solution, to facilitate whole-plottable selection. Replace in future version with segmented 2D selection.
+            return mParentPlot->selectionTolerance() * 0.99;
+        }
+    }
+    return -1;
 }
 
 /* inherits documentation from base class */
-QCPRange QCPColorMap::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const
-{
-  if (inKeyRange != QCPRange())
-  {
-    if (mMapData->keyRange().upper < inKeyRange.lower || mMapData->keyRange().lower > inKeyRange.upper)
-    {
-      foundRange = false;
-      return QCPRange();
+QCPRange QCPColorMap::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const {
+    foundRange = true;
+    QCPRange result = mMapData->keyRange();
+    result.normalize();
+    if (inSignDomain == QCP::sdPositive) {
+        if (result.lower <= 0 && result.upper > 0)
+            result.lower = result.upper * 1e-3;
+        else if (result.lower <= 0 && result.upper <= 0)
+            foundRange = false;
+    } else if (inSignDomain == QCP::sdNegative) {
+        if (result.upper >= 0 && result.lower < 0)
+            result.upper = result.lower * 1e-3;
+        else if (result.upper >= 0 && result.lower >= 0)
+            foundRange = false;
     }
-  }
-  
-  foundRange = true;
-  QCPRange result = mMapData->valueRange();
-  result.normalize();
-  if (inSignDomain == QCP::sdPositive)
-  {
-    if (result.lower <= 0 && result.upper > 0)
-      result.lower = result.upper*1e-3;
-    else if (result.lower <= 0 && result.upper <= 0)
-      foundRange = false;
-  } else if (inSignDomain == QCP::sdNegative)
-  {
-    if (result.upper >= 0 && result.lower < 0)
-      result.upper = result.lower*1e-3;
-    else if (result.upper >= 0 && result.lower >= 0)
-      foundRange = false;
-  }
-  return result;
+    return result;
+}
+
+/* inherits documentation from base class */
+QCPRange QCPColorMap::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
+    if (inKeyRange != QCPRange()) {
+        if (mMapData->keyRange().upper < inKeyRange.lower || mMapData->keyRange().lower > inKeyRange.upper) {
+            foundRange = false;
+            return QCPRange();
+        }
+    }
+
+    foundRange = true;
+    QCPRange result = mMapData->valueRange();
+    result.normalize();
+    if (inSignDomain == QCP::sdPositive) {
+        if (result.lower <= 0 && result.upper > 0)
+            result.lower = result.upper * 1e-3;
+        else if (result.lower <= 0 && result.upper <= 0)
+            foundRange = false;
+    } else if (inSignDomain == QCP::sdNegative) {
+        if (result.upper >= 0 && result.lower < 0)
+            result.upper = result.lower * 1e-3;
+        else if (result.upper >= 0 && result.lower >= 0)
+            foundRange = false;
+    }
+    return result;
 }
 
 /*! \internal
@@ -993,169 +928,166 @@ QCPRange QCPColorMap::getValueRange(bool &foundRange, QCP::SignDomain inSignDoma
   without smooth transform enabled. Accordingly, oversampling isn't performed if \ref
   setInterpolate is true.
 */
-void QCPColorMap::updateMapImage()
-{
-  QCPAxis *keyAxis = mKeyAxis.data();
-  if (!keyAxis) return;
-  if (mMapData->isEmpty()) return;
-  
-  const QImage::Format format = QImage::Format_ARGB32_Premultiplied;
-  const int keySize = mMapData->keySize();
-  const int valueSize = mMapData->valueSize();
-  int keyOversamplingFactor = mInterpolate ? 1 : (int)(1.0+100.0/(double)keySize); // make mMapImage have at least size 100, factor becomes 1 if size > 200 or interpolation is on
-  int valueOversamplingFactor = mInterpolate ? 1 : (int)(1.0+100.0/(double)valueSize); // make mMapImage have at least size 100, factor becomes 1 if size > 200 or interpolation is on
-  
-  // resize mMapImage to correct dimensions including possible oversampling factors, according to key/value axes orientation:
-  if (keyAxis->orientation() == Qt::Horizontal && (mMapImage.width() != keySize*keyOversamplingFactor || mMapImage.height() != valueSize*valueOversamplingFactor))
-    mMapImage = QImage(QSize(keySize*keyOversamplingFactor, valueSize*valueOversamplingFactor), format);
-  else if (keyAxis->orientation() == Qt::Vertical && (mMapImage.width() != valueSize*valueOversamplingFactor || mMapImage.height() != keySize*keyOversamplingFactor))
-    mMapImage = QImage(QSize(valueSize*valueOversamplingFactor, keySize*keyOversamplingFactor), format);
-  
-  if (mMapImage.isNull())
-  {
-    qDebug() << Q_FUNC_INFO << "Couldn't create map image (possibly too large for memory)";
-    mMapImage = QImage(QSize(10, 10), format);
-    mMapImage.fill(Qt::black);
-  } else
-  {
-    QImage *localMapImage = &mMapImage; // this is the image on which the colorization operates. Either the final mMapImage, or if we need oversampling, mUndersampledMapImage
-    if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
-    {
-      // resize undersampled map image to actual key/value cell sizes:
-      if (keyAxis->orientation() == Qt::Horizontal && (mUndersampledMapImage.width() != keySize || mUndersampledMapImage.height() != valueSize))
-        mUndersampledMapImage = QImage(QSize(keySize, valueSize), format);
-      else if (keyAxis->orientation() == Qt::Vertical && (mUndersampledMapImage.width() != valueSize || mUndersampledMapImage.height() != keySize))
-        mUndersampledMapImage = QImage(QSize(valueSize, keySize), format);
-      localMapImage = &mUndersampledMapImage; // make the colorization run on the undersampled image
-    } else if (!mUndersampledMapImage.isNull())
-      mUndersampledMapImage = QImage(); // don't need oversampling mechanism anymore (map size has changed) but mUndersampledMapImage still has nonzero size, free it
-    
-    const double *rawData = mMapData->mData;
-    const unsigned char *rawAlpha = mMapData->mAlpha;
-    if (keyAxis->orientation() == Qt::Horizontal)
-    {
-      const int lineCount = valueSize;
-      const int rowCount = keySize;
-      for (int line=0; line<lineCount; ++line)
-      {
-        QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
-        if (rawAlpha)
-          mGradient.colorize(rawData+line*rowCount, rawAlpha+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
-        else
-          mGradient.colorize(rawData+line*rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType==QCPAxis::stLogarithmic);
-      }
-    } else // keyAxis->orientation() == Qt::Vertical
-    {
-      const int lineCount = keySize;
-      const int rowCount = valueSize;
-      for (int line=0; line<lineCount; ++line)
-      {
-        QRgb* pixels = reinterpret_cast<QRgb*>(localMapImage->scanLine(lineCount-1-line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
-        if (rawAlpha)
-          mGradient.colorize(rawData+line, rawAlpha+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
-        else
-          mGradient.colorize(rawData+line, mDataRange, pixels, rowCount, lineCount, mDataScaleType==QCPAxis::stLogarithmic);
-      }
+void QCPColorMap::updateMapImage() {
+    QCPAxis *keyAxis = mKeyAxis.data();
+    if (!keyAxis) return;
+    if (mMapData->isEmpty()) return;
+
+    const QImage::Format format = QImage::Format_ARGB32_Premultiplied;
+    const int keySize = mMapData->keySize();
+    const int valueSize = mMapData->valueSize();
+    int keyOversamplingFactor = mInterpolate ? 1 : (int) (1.0 + 100.0 /
+                                                                (double) keySize); // make mMapImage have at least size 100, factor becomes 1 if size > 200 or interpolation is on
+    int valueOversamplingFactor = mInterpolate ? 1 : (int) (1.0 + 100.0 /
+                                                                  (double) valueSize); // make mMapImage have at least size 100, factor becomes 1 if size > 200 or interpolation is on
+
+    // resize mMapImage to correct dimensions including possible oversampling factors, according to key/value axes orientation:
+    if (keyAxis->orientation() == Qt::Horizontal &&
+        (mMapImage.width() != keySize * keyOversamplingFactor || mMapImage.height() != valueSize * valueOversamplingFactor))
+        mMapImage = QImage(QSize(keySize * keyOversamplingFactor, valueSize * valueOversamplingFactor), format);
+    else if (keyAxis->orientation() == Qt::Vertical &&
+             (mMapImage.width() != valueSize * valueOversamplingFactor || mMapImage.height() != keySize * keyOversamplingFactor))
+        mMapImage = QImage(QSize(valueSize * valueOversamplingFactor, keySize * keyOversamplingFactor), format);
+
+    if (mMapImage.isNull()) {
+        qDebug() << Q_FUNC_INFO << "Couldn't create map image (possibly too large for memory)";
+        mMapImage = QImage(QSize(10, 10), format);
+        mMapImage.fill(Qt::black);
+    } else {
+        QImage *localMapImage = &mMapImage; // this is the image on which the colorization operates. Either the final mMapImage, or if we need oversampling, mUndersampledMapImage
+        if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1) {
+            // resize undersampled map image to actual key/value cell sizes:
+            if (keyAxis->orientation() == Qt::Horizontal && (mUndersampledMapImage.width() != keySize || mUndersampledMapImage.height() != valueSize))
+                mUndersampledMapImage = QImage(QSize(keySize, valueSize), format);
+            else if (keyAxis->orientation() == Qt::Vertical &&
+                     (mUndersampledMapImage.width() != valueSize || mUndersampledMapImage.height() != keySize))
+                mUndersampledMapImage = QImage(QSize(valueSize, keySize), format);
+            localMapImage = &mUndersampledMapImage; // make the colorization run on the undersampled image
+        } else if (!mUndersampledMapImage.isNull())
+            mUndersampledMapImage = QImage(); // don't need oversampling mechanism anymore (map size has changed) but mUndersampledMapImage still has nonzero size, free it
+
+        const double *rawData = mMapData->mData;
+        const unsigned char *rawAlpha = mMapData->mAlpha;
+        if (keyAxis->orientation() == Qt::Horizontal) {
+            const int lineCount = valueSize;
+            const int rowCount = keySize;
+            for (int line = 0; line < lineCount; ++line) {
+                QRgb *pixels = reinterpret_cast<QRgb *>(localMapImage->scanLine(lineCount - 1 -
+                                                                                line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
+                if (rawAlpha)
+                    mGradient.colorize(rawData + line * rowCount, rawAlpha + line * rowCount, mDataRange, pixels, rowCount, 1,
+                                       mDataScaleType == QCPAxis::stLogarithmic);
+                else
+                    mGradient.colorize(rawData + line * rowCount, mDataRange, pixels, rowCount, 1, mDataScaleType == QCPAxis::stLogarithmic);
+            }
+        } else // keyAxis->orientation() == Qt::Vertical
+        {
+            const int lineCount = keySize;
+            const int rowCount = valueSize;
+            for (int line = 0; line < lineCount; ++line) {
+                QRgb *pixels = reinterpret_cast<QRgb *>(localMapImage->scanLine(lineCount - 1 -
+                                                                                line)); // invert scanline index because QImage counts scanlines from top, but our vertical index counts from bottom (mathematical coordinate system)
+                if (rawAlpha)
+                    mGradient.colorize(rawData + line, rawAlpha + line, mDataRange, pixels, rowCount, lineCount,
+                                       mDataScaleType == QCPAxis::stLogarithmic);
+                else
+                    mGradient.colorize(rawData + line, mDataRange, pixels, rowCount, lineCount, mDataScaleType == QCPAxis::stLogarithmic);
+            }
+        }
+
+        if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1) {
+            if (keyAxis->orientation() == Qt::Horizontal)
+                mMapImage = mUndersampledMapImage.scaled(keySize * keyOversamplingFactor, valueSize * valueOversamplingFactor, Qt::IgnoreAspectRatio,
+                                                         Qt::FastTransformation);
+            else
+                mMapImage = mUndersampledMapImage.scaled(valueSize * valueOversamplingFactor, keySize * keyOversamplingFactor, Qt::IgnoreAspectRatio,
+                                                         Qt::FastTransformation);
+        }
     }
-    
-    if (keyOversamplingFactor > 1 || valueOversamplingFactor > 1)
-    {
-      if (keyAxis->orientation() == Qt::Horizontal)
-        mMapImage = mUndersampledMapImage.scaled(keySize*keyOversamplingFactor, valueSize*valueOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
-      else
-        mMapImage = mUndersampledMapImage.scaled(valueSize*valueOversamplingFactor, keySize*keyOversamplingFactor, Qt::IgnoreAspectRatio, Qt::FastTransformation);
-    }
-  }
-  mMapData->mDataModified = false;
-  mMapImageInvalidated = false;
+    mMapData->mDataModified = false;
+    mMapImageInvalidated = false;
 }
 
 /* inherits documentation from base class */
-void QCPColorMap::draw(QCPPainter *painter)
-{
-  if (mMapData->isEmpty()) return;
-  if (!mKeyAxis || !mValueAxis) return;
-  applyDefaultAntialiasingHint(painter);
-  
-  if (mMapData->mDataModified || mMapImageInvalidated)
-    updateMapImage();
-  
-  // use buffer if painting vectorized (PDF):
-  const bool useBuffer = painter->modes().testFlag(QCPPainter::pmVectorized);
-  QCPPainter *localPainter = painter; // will be redirected to paint on mapBuffer if painting vectorized
-  QRectF mapBufferTarget; // the rect in absolute widget coordinates where the visible map portion/buffer will end up in
-  QPixmap mapBuffer;
-  if (useBuffer)
-  {
-    const double mapBufferPixelRatio = 3; // factor by which DPI is increased in embedded bitmaps
-    mapBufferTarget = painter->clipRegion().boundingRect();
-    mapBuffer = QPixmap((mapBufferTarget.size()*mapBufferPixelRatio).toSize());
-    mapBuffer.fill(Qt::transparent);
-    localPainter = new QCPPainter(&mapBuffer);
-    localPainter->scale(mapBufferPixelRatio, mapBufferPixelRatio);
-    localPainter->translate(-mapBufferTarget.topLeft());
-  }
-  
-  QRectF imageRect = QRectF(coordsToPixels(mMapData->keyRange().lower, mMapData->valueRange().lower),
-                            coordsToPixels(mMapData->keyRange().upper, mMapData->valueRange().upper)).normalized();
-  // extend imageRect to contain outer halves/quarters of bordering/cornering pixels (cells are centered on map range boundary):
-  double halfCellWidth = 0; // in pixels
-  double halfCellHeight = 0; // in pixels
-  if (keyAxis()->orientation() == Qt::Horizontal)
-  {
-    if (mMapData->keySize() > 1)
-      halfCellWidth = 0.5*imageRect.width()/(double)(mMapData->keySize()-1);
-    if (mMapData->valueSize() > 1)
-      halfCellHeight = 0.5*imageRect.height()/(double)(mMapData->valueSize()-1);
-  } else // keyAxis orientation is Qt::Vertical
-  {
-    if (mMapData->keySize() > 1)
-      halfCellHeight = 0.5*imageRect.height()/(double)(mMapData->keySize()-1);
-    if (mMapData->valueSize() > 1)
-      halfCellWidth = 0.5*imageRect.width()/(double)(mMapData->valueSize()-1);
-  }
-  imageRect.adjust(-halfCellWidth, -halfCellHeight, halfCellWidth, halfCellHeight);
-  const bool mirrorX = (keyAxis()->orientation() == Qt::Horizontal ? keyAxis() : valueAxis())->rangeReversed();
-  const bool mirrorY = (valueAxis()->orientation() == Qt::Vertical ? valueAxis() : keyAxis())->rangeReversed();
-  const bool smoothBackup = localPainter->renderHints().testFlag(QPainter::SmoothPixmapTransform);
-  localPainter->setRenderHint(QPainter::SmoothPixmapTransform, mInterpolate);
-  QRegion clipBackup;
-  if (mTightBoundary)
-  {
-    clipBackup = localPainter->clipRegion();
-    QRectF tightClipRect = QRectF(coordsToPixels(mMapData->keyRange().lower, mMapData->valueRange().lower),
-                                  coordsToPixels(mMapData->keyRange().upper, mMapData->valueRange().upper)).normalized();
-    localPainter->setClipRect(tightClipRect, Qt::IntersectClip);
-  }
-  localPainter->drawImage(imageRect, mMapImage.mirrored(mirrorX, mirrorY));
-  if (mTightBoundary)
-    localPainter->setClipRegion(clipBackup);
-  localPainter->setRenderHint(QPainter::SmoothPixmapTransform, smoothBackup);
-  
-  if (useBuffer) // localPainter painted to mapBuffer, so now draw buffer with original painter
-  {
-    delete localPainter;
-    painter->drawPixmap(mapBufferTarget.toRect(), mapBuffer);
-  }
+void QCPColorMap::draw(QCPPainter *painter) {
+    if (mMapData->isEmpty()) return;
+    if (!mKeyAxis || !mValueAxis) return;
+    applyDefaultAntialiasingHint(painter);
+
+    if (mMapData->mDataModified || mMapImageInvalidated)
+        updateMapImage();
+
+    // use buffer if painting vectorized (PDF):
+    const bool useBuffer = painter->modes().testFlag(QCPPainter::pmVectorized);
+    QCPPainter *localPainter = painter; // will be redirected to paint on mapBuffer if painting vectorized
+    QRectF mapBufferTarget; // the rect in absolute widget coordinates where the visible map portion/buffer will end up in
+    QPixmap mapBuffer;
+    if (useBuffer) {
+        const double mapBufferPixelRatio = 3; // factor by which DPI is increased in embedded bitmaps
+        mapBufferTarget = painter->clipRegion().boundingRect();
+        mapBuffer = QPixmap((mapBufferTarget.size() * mapBufferPixelRatio).toSize());
+        mapBuffer.fill(Qt::transparent);
+        localPainter = new QCPPainter(&mapBuffer);
+        localPainter->scale(mapBufferPixelRatio, mapBufferPixelRatio);
+        localPainter->translate(-mapBufferTarget.topLeft());
+    }
+
+    QRectF imageRect = QRectF(coordsToPixels(mMapData->keyRange().lower, mMapData->valueRange().lower),
+                              coordsToPixels(mMapData->keyRange().upper, mMapData->valueRange().upper)).normalized();
+    // extend imageRect to contain outer halves/quarters of bordering/cornering pixels (cells are centered on map range boundary):
+    double halfCellWidth = 0; // in pixels
+    double halfCellHeight = 0; // in pixels
+    if (keyAxis()->orientation() == Qt::Horizontal) {
+        if (mMapData->keySize() > 1)
+            halfCellWidth = 0.5 * imageRect.width() / (double) (mMapData->keySize() - 1);
+        if (mMapData->valueSize() > 1)
+            halfCellHeight = 0.5 * imageRect.height() / (double) (mMapData->valueSize() - 1);
+    } else // keyAxis orientation is Qt::Vertical
+    {
+        if (mMapData->keySize() > 1)
+            halfCellHeight = 0.5 * imageRect.height() / (double) (mMapData->keySize() - 1);
+        if (mMapData->valueSize() > 1)
+            halfCellWidth = 0.5 * imageRect.width() / (double) (mMapData->valueSize() - 1);
+    }
+    imageRect.adjust(-halfCellWidth, -halfCellHeight, halfCellWidth, halfCellHeight);
+    const bool mirrorX = (keyAxis()->orientation() == Qt::Horizontal ? keyAxis() : valueAxis())->rangeReversed();
+    const bool mirrorY = (valueAxis()->orientation() == Qt::Vertical ? valueAxis() : keyAxis())->rangeReversed();
+    const bool smoothBackup = localPainter->renderHints().testFlag(QPainter::SmoothPixmapTransform);
+    localPainter->setRenderHint(QPainter::SmoothPixmapTransform, mInterpolate);
+    QRegion clipBackup;
+    if (mTightBoundary) {
+        clipBackup = localPainter->clipRegion();
+        QRectF tightClipRect = QRectF(coordsToPixels(mMapData->keyRange().lower, mMapData->valueRange().lower),
+                                      coordsToPixels(mMapData->keyRange().upper, mMapData->valueRange().upper)).normalized();
+        localPainter->setClipRect(tightClipRect, Qt::IntersectClip);
+    }
+    localPainter->drawImage(imageRect, mMapImage.mirrored(mirrorX, mirrorY));
+    if (mTightBoundary)
+        localPainter->setClipRegion(clipBackup);
+    localPainter->setRenderHint(QPainter::SmoothPixmapTransform, smoothBackup);
+
+    if (useBuffer) // localPainter painted to mapBuffer, so now draw buffer with original painter
+    {
+        delete localPainter;
+        painter->drawPixmap(mapBufferTarget.toRect(), mapBuffer);
+    }
 }
 
 /* inherits documentation from base class */
-void QCPColorMap::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
-{
-  applyDefaultAntialiasingHint(painter);
-  // draw map thumbnail:
-  if (!mLegendIcon.isNull())
-  {
-    QPixmap scaledIcon = mLegendIcon.scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::FastTransformation);
-    QRectF iconRect = QRectF(0, 0, scaledIcon.width(), scaledIcon.height());
-    iconRect.moveCenter(rect.center());
-    painter->drawPixmap(iconRect.topLeft(), scaledIcon);
-  }
-  /*
-  // draw frame:
-  painter->setBrush(Qt::NoBrush);
-  painter->setPen(Qt::black);
-  painter->drawRect(rect.adjusted(1, 1, 0, 0));
-  */
+void QCPColorMap::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {
+    applyDefaultAntialiasingHint(painter);
+    // draw map thumbnail:
+    if (!mLegendIcon.isNull()) {
+        QPixmap scaledIcon = mLegendIcon.scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::FastTransformation);
+        QRectF iconRect = QRectF(0, 0, scaledIcon.width(), scaledIcon.height());
+        iconRect.moveCenter(rect.center());
+        painter->drawPixmap(iconRect.topLeft(), scaledIcon);
+    }
+    /*
+    // draw frame:
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(Qt::black);
+    painter->drawRect(rect.adjusted(1, 1, 0, 0));
+    */
 }
 

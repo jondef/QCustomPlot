@@ -53,52 +53,48 @@
   ownership of the item, so do not delete it manually but use QCustomPlot::removeItem() instead.
 */
 QCPItemPixmap::QCPItemPixmap(QCustomPlot *parentPlot) :
-  QCPAbstractItem(parentPlot),
-  topLeft(createPosition(QLatin1String("topLeft"))),
-  bottomRight(createPosition(QLatin1String("bottomRight"))),
-  top(createAnchor(QLatin1String("top"), aiTop)),
-  topRight(createAnchor(QLatin1String("topRight"), aiTopRight)),
-  right(createAnchor(QLatin1String("right"), aiRight)),
-  bottom(createAnchor(QLatin1String("bottom"), aiBottom)),
-  bottomLeft(createAnchor(QLatin1String("bottomLeft"), aiBottomLeft)),
-  left(createAnchor(QLatin1String("left"), aiLeft)),
-  mScaled(false),
-  mScaledPixmapInvalidated(true),
-  mAspectRatioMode(Qt::KeepAspectRatio),
-  mTransformationMode(Qt::SmoothTransformation)
-{
-  topLeft->setCoords(0, 1);
-  bottomRight->setCoords(1, 0);
-  
-  setPen(Qt::NoPen);
-  setSelectedPen(QPen(Qt::blue));
+        QCPAbstractItem(parentPlot),
+        topLeft(createPosition(QLatin1String("topLeft"))),
+        bottomRight(createPosition(QLatin1String("bottomRight"))),
+        top(createAnchor(QLatin1String("top"), aiTop)),
+        topRight(createAnchor(QLatin1String("topRight"), aiTopRight)),
+        right(createAnchor(QLatin1String("right"), aiRight)),
+        bottom(createAnchor(QLatin1String("bottom"), aiBottom)),
+        bottomLeft(createAnchor(QLatin1String("bottomLeft"), aiBottomLeft)),
+        left(createAnchor(QLatin1String("left"), aiLeft)),
+        mScaled(false),
+        mScaledPixmapInvalidated(true),
+        mAspectRatioMode(Qt::KeepAspectRatio),
+        mTransformationMode(Qt::SmoothTransformation) {
+    topLeft->setCoords(0, 1);
+    bottomRight->setCoords(1, 0);
+
+    setPen(Qt::NoPen);
+    setSelectedPen(QPen(Qt::blue));
 }
 
-QCPItemPixmap::~QCPItemPixmap()
-{
+QCPItemPixmap::~QCPItemPixmap() {
 }
 
 /*!
   Sets the pixmap that will be displayed.
 */
-void QCPItemPixmap::setPixmap(const QPixmap &pixmap)
-{
-  mPixmap = pixmap;
-  mScaledPixmapInvalidated = true;
-  if (mPixmap.isNull())
-    qDebug() << Q_FUNC_INFO << "pixmap is null";
+void QCPItemPixmap::setPixmap(const QPixmap &pixmap) {
+    mPixmap = pixmap;
+    mScaledPixmapInvalidated = true;
+    if (mPixmap.isNull())
+        qDebug() << Q_FUNC_INFO << "pixmap is null";
 }
 
 /*!
   Sets whether the pixmap will be scaled to fit the rectangle defined by the \a topLeft and \a
   bottomRight positions.
 */
-void QCPItemPixmap::setScaled(bool scaled, Qt::AspectRatioMode aspectRatioMode, Qt::TransformationMode transformationMode)
-{
-  mScaled = scaled;
-  mAspectRatioMode = aspectRatioMode;
-  mTransformationMode = transformationMode;
-  mScaledPixmapInvalidated = true;
+void QCPItemPixmap::setScaled(bool scaled, Qt::AspectRatioMode aspectRatioMode, Qt::TransformationMode transformationMode) {
+    mScaled = scaled;
+    mAspectRatioMode = aspectRatioMode;
+    mTransformationMode = transformationMode;
+    mScaledPixmapInvalidated = true;
 }
 
 /*!
@@ -106,9 +102,8 @@ void QCPItemPixmap::setScaled(bool scaled, Qt::AspectRatioMode aspectRatioMode, 
   
   \see setSelectedPen, setBrush
 */
-void QCPItemPixmap::setPen(const QPen &pen)
-{
-  mPen = pen;
+void QCPItemPixmap::setPen(const QPen &pen) {
+    mPen = pen;
 }
 
 /*!
@@ -116,68 +111,67 @@ void QCPItemPixmap::setPen(const QPen &pen)
   
   \see setPen, setSelected
 */
-void QCPItemPixmap::setSelectedPen(const QPen &pen)
-{
-  mSelectedPen = pen;
+void QCPItemPixmap::setSelectedPen(const QPen &pen) {
+    mSelectedPen = pen;
 }
 
 /* inherits documentation from base class */
-double QCPItemPixmap::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if (onlySelectable && !mSelectable)
-    return -1;
-  
-  return rectDistance(getFinalRect(), pos, true);
+double QCPItemPixmap::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if (onlySelectable && !mSelectable)
+        return -1;
+
+    return rectDistance(getFinalRect(), pos, true);
 }
 
 /* inherits documentation from base class */
-void QCPItemPixmap::draw(QCPPainter *painter)
-{
-  bool flipHorz = false;
-  bool flipVert = false;
-  QRect rect = getFinalRect(&flipHorz, &flipVert);
-  double clipPad = mainPen().style() == Qt::NoPen ? 0 : mainPen().widthF();
-  QRect boundingRect = rect.adjusted(-clipPad, -clipPad, clipPad, clipPad);
-  if (boundingRect.intersects(clipRect()))
-  {
-    updateScaledPixmap(rect, flipHorz, flipVert);
-    painter->drawPixmap(rect.topLeft(), mScaled ? mScaledPixmap : mPixmap);
-    QPen pen = mainPen();
-    if (pen.style() != Qt::NoPen)
-    {
-      painter->setPen(pen);
-      painter->setBrush(Qt::NoBrush);
-      painter->drawRect(rect);
+void QCPItemPixmap::draw(QCPPainter *painter) {
+    bool flipHorz = false;
+    bool flipVert = false;
+    QRect rect = getFinalRect(&flipHorz, &flipVert);
+    double clipPad = mainPen().style() == Qt::NoPen ? 0 : mainPen().widthF();
+    QRect boundingRect = rect.adjusted(-clipPad, -clipPad, clipPad, clipPad);
+    if (boundingRect.intersects(clipRect())) {
+        updateScaledPixmap(rect, flipHorz, flipVert);
+        painter->drawPixmap(rect.topLeft(), mScaled ? mScaledPixmap : mPixmap);
+        QPen pen = mainPen();
+        if (pen.style() != Qt::NoPen) {
+            painter->setPen(pen);
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRect(rect);
+        }
     }
-  }
 }
 
 /* inherits documentation from base class */
-QPointF QCPItemPixmap::anchorPixelPosition(int anchorId) const
-{
-  bool flipHorz;
-  bool flipVert;
-  QRect rect = getFinalRect(&flipHorz, &flipVert);
-  // we actually want denormal rects (negative width/height) here, so restore
-  // the flipped state:
-  if (flipHorz)
-    rect.adjust(rect.width(), 0, -rect.width(), 0);
-  if (flipVert)
-    rect.adjust(0, rect.height(), 0, -rect.height());
-  
-  switch (anchorId)
-  {
-    case aiTop:         return (rect.topLeft()+rect.topRight())*0.5;
-    case aiTopRight:    return rect.topRight();
-    case aiRight:       return (rect.topRight()+rect.bottomRight())*0.5;
-    case aiBottom:      return (rect.bottomLeft()+rect.bottomRight())*0.5;
-    case aiBottomLeft:  return rect.bottomLeft();
-    case aiLeft:        return (rect.topLeft()+rect.bottomLeft())*0.5;;
-  }
-  
-  qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
-  return QPointF();
+QPointF QCPItemPixmap::anchorPixelPosition(int anchorId) const {
+    bool flipHorz;
+    bool flipVert;
+    QRect rect = getFinalRect(&flipHorz, &flipVert);
+    // we actually want denormal rects (negative width/height) here, so restore
+    // the flipped state:
+    if (flipHorz)
+        rect.adjust(rect.width(), 0, -rect.width(), 0);
+    if (flipVert)
+        rect.adjust(0, rect.height(), 0, -rect.height());
+
+    switch (anchorId) {
+        case aiTop:
+            return (rect.topLeft() + rect.topRight()) * 0.5;
+        case aiTopRight:
+            return rect.topRight();
+        case aiRight:
+            return (rect.topRight() + rect.bottomRight()) * 0.5;
+        case aiBottom:
+            return (rect.bottomLeft() + rect.bottomRight()) * 0.5;
+        case aiBottomLeft:
+            return rect.bottomLeft();
+        case aiLeft:
+            return (rect.topLeft() + rect.bottomLeft()) * 0.5;;
+    }
+
+    qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
+    return QPointF();
 }
 
 /*! \internal
@@ -193,32 +187,29 @@ QPointF QCPItemPixmap::anchorPixelPosition(int anchorId) const
   
   If scaling is disabled, sets mScaledPixmap to a null QPixmap.
 */
-void QCPItemPixmap::updateScaledPixmap(QRect finalRect, bool flipHorz, bool flipVert)
-{
-  if (mPixmap.isNull())
-    return;
-  
-  if (mScaled)
-  {
+void QCPItemPixmap::updateScaledPixmap(QRect finalRect, bool flipHorz, bool flipVert) {
+    if (mPixmap.isNull())
+        return;
+
+    if (mScaled) {
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    double devicePixelRatio = mPixmap.devicePixelRatio();
+        double devicePixelRatio = mPixmap.devicePixelRatio();
 #else
-    double devicePixelRatio = 1.0;
+        double devicePixelRatio = 1.0;
 #endif
-    if (finalRect.isNull())
-      finalRect = getFinalRect(&flipHorz, &flipVert);
-    if (mScaledPixmapInvalidated || finalRect.size() != mScaledPixmap.size()/devicePixelRatio)
-    {
-      mScaledPixmap = mPixmap.scaled(finalRect.size()*devicePixelRatio, mAspectRatioMode, mTransformationMode);
-      if (flipHorz || flipVert)
-        mScaledPixmap = QPixmap::fromImage(mScaledPixmap.toImage().mirrored(flipHorz, flipVert));
+        if (finalRect.isNull())
+            finalRect = getFinalRect(&flipHorz, &flipVert);
+        if (mScaledPixmapInvalidated || finalRect.size() != mScaledPixmap.size() / devicePixelRatio) {
+            mScaledPixmap = mPixmap.scaled(finalRect.size() * devicePixelRatio, mAspectRatioMode, mTransformationMode);
+            if (flipHorz || flipVert)
+                mScaledPixmap = QPixmap::fromImage(mScaledPixmap.toImage().mirrored(flipHorz, flipVert));
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-      mScaledPixmap.setDevicePixelRatio(devicePixelRatio);
+            mScaledPixmap.setDevicePixelRatio(devicePixelRatio);
 #endif
-    }
-  } else if (!mScaledPixmap.isNull())
-    mScaledPixmap = QPixmap();
-  mScaledPixmapInvalidated = false;
+        }
+    } else if (!mScaledPixmap.isNull())
+        mScaledPixmap = QPixmap();
+    mScaledPixmapInvalidated = false;
 }
 
 /*! \internal
@@ -235,52 +226,47 @@ void QCPItemPixmap::updateScaledPixmap(QRect finalRect, bool flipHorz, bool flip
   If scaling is disabled, returns a rect with size of the original pixmap and the top left corner
   aligned with the item position \a topLeft. The position \a bottomRight is ignored.
 */
-QRect QCPItemPixmap::getFinalRect(bool *flippedHorz, bool *flippedVert) const
-{
-  QRect result;
-  bool flipHorz = false;
-  bool flipVert = false;
-  QPoint p1 = topLeft->pixelPosition().toPoint();
-  QPoint p2 = bottomRight->pixelPosition().toPoint();
-  if (p1 == p2)
-    return QRect(p1, QSize(0, 0));
-  if (mScaled)
-  {
-    QSize newSize = QSize(p2.x()-p1.x(), p2.y()-p1.y());
-    QPoint topLeft = p1;
-    if (newSize.width() < 0)
-    {
-      flipHorz = true;
-      newSize.rwidth() *= -1;
-      topLeft.setX(p2.x());
-    }
-    if (newSize.height() < 0)
-    {
-      flipVert = true;
-      newSize.rheight() *= -1;
-      topLeft.setY(p2.y());
-    }
-    QSize scaledSize = mPixmap.size();
+QRect QCPItemPixmap::getFinalRect(bool *flippedHorz, bool *flippedVert) const {
+    QRect result;
+    bool flipHorz = false;
+    bool flipVert = false;
+    QPoint p1 = topLeft->pixelPosition().toPoint();
+    QPoint p2 = bottomRight->pixelPosition().toPoint();
+    if (p1 == p2)
+        return QRect(p1, QSize(0, 0));
+    if (mScaled) {
+        QSize newSize = QSize(p2.x() - p1.x(), p2.y() - p1.y());
+        QPoint topLeft = p1;
+        if (newSize.width() < 0) {
+            flipHorz = true;
+            newSize.rwidth() *= -1;
+            topLeft.setX(p2.x());
+        }
+        if (newSize.height() < 0) {
+            flipVert = true;
+            newSize.rheight() *= -1;
+            topLeft.setY(p2.y());
+        }
+        QSize scaledSize = mPixmap.size();
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    scaledSize /= mPixmap.devicePixelRatio();
-    scaledSize.scale(newSize*mPixmap.devicePixelRatio(), mAspectRatioMode);
+        scaledSize /= mPixmap.devicePixelRatio();
+        scaledSize.scale(newSize * mPixmap.devicePixelRatio(), mAspectRatioMode);
 #else
-    scaledSize.scale(newSize, mAspectRatioMode);
+        scaledSize.scale(newSize, mAspectRatioMode);
 #endif
-    result = QRect(topLeft, scaledSize);
-  } else
-  {
+        result = QRect(topLeft, scaledSize);
+    } else {
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    result = QRect(p1, mPixmap.size()/mPixmap.devicePixelRatio());
+        result = QRect(p1, mPixmap.size() / mPixmap.devicePixelRatio());
 #else
-    result = QRect(p1, mPixmap.size());
+        result = QRect(p1, mPixmap.size());
 #endif
-  }
-  if (flippedHorz)
-    *flippedHorz = flipHorz;
-  if (flippedVert)
-    *flippedVert = flipVert;
-  return result;
+    }
+    if (flippedHorz)
+        *flippedHorz = flipHorz;
+    if (flippedVert)
+        *flippedVert = flipVert;
+    return result;
 }
 
 /*! \internal
@@ -288,7 +274,6 @@ QRect QCPItemPixmap::getFinalRect(bool *flippedHorz, bool *flippedVert) const
   Returns the pen that should be used for drawing lines. Returns mPen when the item is not selected
   and mSelectedPen when it is.
 */
-QPen QCPItemPixmap::mainPen() const
-{
-  return mSelected ? mSelectedPen : mPen;
+QPen QCPItemPixmap::mainPen() const {
+    return mSelected ? mSelectedPen : mPen;
 }

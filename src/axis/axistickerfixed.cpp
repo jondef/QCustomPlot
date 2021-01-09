@@ -53,9 +53,8 @@
   managed by a QSharedPointer, which then can be passed to QCPAxis::setTicker.
 */
 QCPAxisTickerFixed::QCPAxisTickerFixed() :
-  mTickStep(1.0),
-  mScaleStrategy(ssNone)
-{
+        mTickStep(1.0),
+        mScaleStrategy(ssNone) {
 }
 
 /*!
@@ -67,12 +66,11 @@ QCPAxisTickerFixed::QCPAxisTickerFixed() :
   step. This will enable the ticker to reduce the number of ticks to a reasonable amount (see \ref
   setTickCount).
 */
-void QCPAxisTickerFixed::setTickStep(double step)
-{
-  if (step > 0)
-    mTickStep = step;
-  else
-    qDebug() << Q_FUNC_INFO << "tick step must be greater than zero:" << step;
+void QCPAxisTickerFixed::setTickStep(double step) {
+    if (step > 0)
+        mTickStep = step;
+    else
+        qDebug() << Q_FUNC_INFO << "tick step must be greater than zero:" << step;
 }
 
 /*!
@@ -82,9 +80,8 @@ void QCPAxisTickerFixed::setTickStep(double step)
   
   The default strategy is \ref ssNone, which means the tick step is absolutely fixed.
 */
-void QCPAxisTickerFixed::setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy strategy)
-{
-  mScaleStrategy = strategy;
+void QCPAxisTickerFixed::setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy strategy) {
+    mScaleStrategy = strategy;
 }
 
 /*! \internal
@@ -97,27 +94,24 @@ void QCPAxisTickerFixed::setScaleStrategy(QCPAxisTickerFixed::ScaleStrategy stra
   
   \seebaseclassmethod
 */
-double QCPAxisTickerFixed::getTickStep(const QCPRange &range)
-{
-  switch (mScaleStrategy)
-  {
-    case ssNone:
-    {
-      return mTickStep;
+double QCPAxisTickerFixed::getTickStep(const QCPRange &range) {
+    switch (mScaleStrategy) {
+        case ssNone: {
+            return mTickStep;
+        }
+        case ssMultiples: {
+            double exactStep = range.size() / (double) (mTickCount +
+                                                        1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
+            if (exactStep < mTickStep)
+                return mTickStep;
+            else
+                return (qint64) (cleanMantissa(exactStep / mTickStep) + 0.5) * mTickStep;
+        }
+        case ssPowers: {
+            double exactStep = range.size() / (double) (mTickCount +
+                                                        1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
+            return qPow(mTickStep, (int) (qLn(exactStep) / qLn(mTickStep) + 0.5));
+        }
     }
-    case ssMultiples:
-    {
-      double exactStep = range.size()/(double)(mTickCount+1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
-      if (exactStep < mTickStep)
-        return mTickStep;
-      else
-        return (qint64)(cleanMantissa(exactStep/mTickStep)+0.5)*mTickStep;
-    }
-    case ssPowers:
-    {
-      double exactStep = range.size()/(double)(mTickCount+1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
-      return qPow(mTickStep, (int)(qLn(exactStep)/qLn(mTickStep)+0.5));
-    }
-  }
-  return mTickStep;
+    return mTickStep;
 }
