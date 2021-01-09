@@ -2,12 +2,9 @@ cmake_minimum_required(VERSION 3.17)
 project(QCustomPlot)
 
 FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets OpenGL PrintSupport REQUIRED)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON) # Find includes in corresponding build directories
 set(CMAKE_AUTOMOC ON) # Instruct CMake to run moc automatically when needed
-set(CMAKE_AUTOUIC ON) # Create code from a list of Qt designer ui files
-set(CMAKE_AUTORCC ON) # Create Resource files
-
+add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+add_definitions(-DQCUSTOMPLOT_COMPILE_LIBRARY)
 
 file(GLOB HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/global.h
@@ -106,16 +103,11 @@ file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/selectiondecorator-bracket.cpp
 )
 
-
-#add_definitions(-DQCUSTOMPLOT_USE_OPENGL)  # fixme: doesn't work
-
 add_library(QCustomPlot SHARED ${SOURCES} ${HEADERS})
 target_link_libraries(QCustomPlot PUBLIC Qt5::Core Qt5::PrintSupport)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    # see: https://stackoverflow.com/questions/34187770/cmake-target-link-libraries-cannot-find-lfoo-but-it-is-in-the-same-directory
-    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplotd2")
-    #    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplotd2" PREFIX "")
+    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplotd2" PREFIX "")
 elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
     set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplot2")
 endif ()
