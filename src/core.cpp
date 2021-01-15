@@ -718,15 +718,15 @@ void QCustomPlot::setSelectionRectMode(QCP::SelectionRectMode mode) {
 
         // disconnect old connections:
         if (mSelectionRectMode == QCP::srmSelect)
-            disconnect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectSelection(QRect, QMouseEvent * )));
+            disconnect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectSelection);
         else if (mSelectionRectMode == QCP::srmZoom)
-            disconnect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectZoom(QRect, QMouseEvent * )));
+            disconnect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectZoom);
 
         // establish new ones:
         if (mode == QCP::srmSelect)
-            connect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectSelection(QRect, QMouseEvent * )));
+            connect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectSelection);
         else if (mode == QCP::srmZoom)
-            connect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectZoom(QRect, QMouseEvent * )));
+            connect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectZoom);
     }
 
     mSelectionRectMode = mode;
@@ -751,9 +751,9 @@ void QCustomPlot::setSelectionRect(QCPSelectionRect *selectionRect) {
     if (mSelectionRect) {
         // establish connections with new selection rect:
         if (mSelectionRectMode == QCP::srmSelect)
-            connect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectSelection(QRect, QMouseEvent * )));
+            connect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectSelection);
         else if (mSelectionRectMode == QCP::srmZoom)
-            connect(mSelectionRect, SIGNAL(accepted(QRect, QMouseEvent * )), this, SLOT(processRectZoom(QRect, QMouseEvent * )));
+            connect(mSelectionRect, &QCPSelectionRect::accepted, this, &QCustomPlot::processRectZoom);
     }
 }
 
@@ -1791,7 +1791,7 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority) {
     if (refreshPriority == QCustomPlot::rpQueuedReplot) {
         if (!mReplotQueued) {
             mReplotQueued = true;
-            QTimer::singleShot(0, this, SLOT(replot()));
+            QTimer::singleShot(0, this, [this]() { replot(); });
         }
         return;
     }
