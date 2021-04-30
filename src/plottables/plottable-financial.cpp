@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-financial.h"
@@ -247,8 +247,8 @@ void QCPFinancial::setData(QSharedPointer<QCPFinancialDataContainer> data) {
   
   \see addData, timeSeriesToOhlc
 */
-void QCPFinancial::setData(const QVector<double> &keys, const QVector<double> &open, const QVector<double> &high, const QVector<double> &low,
-                           const QVector<double> &close, bool alreadySorted) {
+void QCPFinancial::setData(const QVector<double> &keys, const QVector<double> &open, const QVector<double> &high,
+                           const QVector<double> &low, const QVector<double> &close, bool alreadySorted) {
     mDataContainer->clear();
     addData(keys, open, high, low, close, alreadySorted);
 }
@@ -360,12 +360,12 @@ void QCPFinancial::setPenNegative(const QPen &pen) {
   
   \see timeSeriesToOhlc
 */
-void QCPFinancial::addData(const QVector<double> &keys, const QVector<double> &open, const QVector<double> &high, const QVector<double> &low,
-                           const QVector<double> &close, bool alreadySorted) {
-    if (keys.size() != open.size() || open.size() != high.size() || high.size() != low.size() || low.size() != close.size() ||
-        close.size() != keys.size())
-        qDebug() << Q_FUNC_INFO << "keys, open, high, low, close have different sizes:" << keys.size() << open.size() << high.size() << low.size()
-                 << close.size();
+void QCPFinancial::addData(const QVector<double> &keys, const QVector<double> &open, const QVector<double> &high,
+                           const QVector<double> &low, const QVector<double> &close, bool alreadySorted) {
+    if (keys.size() != open.size() || open.size() != high.size() || high.size() != low.size() ||
+        low.size() != close.size() || close.size() != keys.size())
+        qDebug() << Q_FUNC_INFO << "keys, open, high, low, close have different sizes:" << keys.size() << open.size()
+                 << high.size() << low.size() << close.size();
     const int n = qMin(keys.size(), qMin(open.size(), qMin(high.size(), qMin(low.size(), close.size()))));
     QVector<QCPFinancialData> tempData(n);
     QVector<QCPFinancialData>::iterator it = tempData.begin();
@@ -412,7 +412,9 @@ QCPDataSelection QCPFinancial::selectTestRect(const QRectF &rect, bool onlySelec
 
     for (QCPFinancialDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
         if (rect.intersects(selectionHitBox(it)))
-            result.addDataRange(QCPDataRange(it - mDataContainer->constBegin(), it - mDataContainer->constBegin() + 1), false);
+            result.addDataRange(
+                    QCPDataRange(int(it - mDataContainer->constBegin()), int(it - mDataContainer->constBegin() + 1)),
+                    false);
     }
     result.simplify();
     return result;
@@ -433,7 +435,8 @@ double QCPFinancial::selectTest(const QPointF &pos, bool onlySelectable, QVarian
     if (!mKeyAxis || !mValueAxis)
         return -1;
 
-    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint())) {
+    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
         // get visible data range:
         QCPFinancialDataContainer::const_iterator visibleBegin, visibleEnd;
         QCPFinancialDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
@@ -449,7 +452,7 @@ double QCPFinancial::selectTest(const QPointF &pos, bool onlySelectable, QVarian
                 break;
         }
         if (details) {
-            int pointIndex = closestDataPoint - mDataContainer->constBegin();
+            int pointIndex = int(closestDataPoint - mDataContainer->constBegin());
             details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
         }
         return result;
@@ -491,7 +494,8 @@ QCPRange QCPFinancial::getValueRange(bool &foundRange, QCP::SignDomain inSignDom
   data.
 */
 QCPFinancialDataContainer
-QCPFinancial::timeSeriesToOhlc(const QVector<double> &time, const QVector<double> &value, double timeBinSize, double timeBinOffset) {
+QCPFinancial::timeSeriesToOhlc(const QVector<double> &time, const QVector<double> &value, double timeBinSize,
+                               double timeBinOffset) {
     QCPFinancialDataContainer data;
     int count = qMin(time.size(), value.size());
     if (count == 0)
@@ -570,46 +574,77 @@ void QCPFinancial::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
             // draw upper left half icon with positive color:
             painter->setBrush(mBrushPositive);
             painter->setPen(mPenPositive);
-            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint() << rect.topLeft().toPoint()));
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(rect.topLeft()));
+            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint()
+                                                      << rect.topLeft().toPoint()));
+            painter->drawLine(
+                    QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(
+                            rect.topLeft()));
             // draw bottom right half icon with negative color:
             painter->setBrush(mBrushNegative);
             painter->setPen(mPenNegative);
-            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint() << rect.bottomRight().toPoint()));
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(rect.topLeft()));
+            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint()
+                                                      << rect.bottomRight().toPoint()));
+            painter->drawLine(
+                    QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(
+                            rect.topLeft()));
         } else {
             painter->setBrush(mBrush);
             painter->setPen(mPen);
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(rect.topLeft()));
+            painter->drawLine(
+                    QLineF(0, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.2, rect.height() * 0.3, rect.width() * 0.2, rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.8, rect.height() * 0.5, rect.width() * 0.8, rect.height() * 0.7).translated(
+                            rect.topLeft()));
         }
     } else if (mChartStyle == csCandlestick) {
         if (mTwoColored) {
             // draw upper left half icon with positive color:
             painter->setBrush(mBrushPositive);
             painter->setPen(mPenPositive);
-            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint() << rect.topLeft().toPoint()));
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5, rect.height() * 0.5).translated(rect.topLeft()));
+            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint()
+                                                      << rect.topLeft().toPoint()));
+            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(
+                    rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5,
+                                     rect.height() * 0.5).translated(rect.topLeft()));
             // draw bottom right half icon with negative color:
             painter->setBrush(mBrushNegative);
             painter->setPen(mPenNegative);
-            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint() << rect.bottomRight().toPoint()));
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5, rect.height() * 0.5).translated(rect.topLeft()));
+            painter->setClipRegion(QRegion(QPolygon() << rect.bottomLeft().toPoint() << rect.topRight().toPoint()
+                                                      << rect.bottomRight().toPoint()));
+            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(
+                    rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5,
+                                     rect.height() * 0.5).translated(rect.topLeft()));
         } else {
             painter->setBrush(mBrush);
             painter->setPen(mPen);
-            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawLine(QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(rect.topLeft()));
-            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5, rect.height() * 0.5).translated(rect.topLeft()));
+            painter->drawLine(QLineF(0, rect.height() * 0.5, rect.width() * 0.25, rect.height() * 0.5).translated(
+                    rect.topLeft()));
+            painter->drawLine(
+                    QLineF(rect.width() * 0.75, rect.height() * 0.5, rect.width(), rect.height() * 0.5).translated(
+                            rect.topLeft()));
+            painter->drawRect(QRectF(rect.width() * 0.25, rect.height() * 0.25, rect.width() * 0.5,
+                                     rect.height() * 0.5).translated(rect.topLeft()));
         }
     }
 }
@@ -641,9 +676,11 @@ void QCPFinancial::drawOhlcPlot(QCPPainter *painter, const QCPFinancialDataConta
             double openPixel = valueAxis->coordToPixel(it->open);
             double closePixel = valueAxis->coordToPixel(it->close);
             // draw backbone:
-            painter->drawLine(QPointF(keyPixel, valueAxis->coordToPixel(it->high)), QPointF(keyPixel, valueAxis->coordToPixel(it->low)));
+            painter->drawLine(QPointF(keyPixel, valueAxis->coordToPixel(it->high)),
+                              QPointF(keyPixel, valueAxis->coordToPixel(it->low)));
             // draw open:
-            double pixelWidth = getPixelWidth(it->key, keyPixel); // sign of this makes sure open/close are on correct sides
+            double pixelWidth = getPixelWidth(it->key,
+                                              keyPixel); // sign of this makes sure open/close are on correct sides
             painter->drawLine(QPointF(keyPixel - pixelWidth, openPixel), QPointF(keyPixel, openPixel));
             // draw close:
             painter->drawLine(QPointF(keyPixel, closePixel), QPointF(keyPixel + pixelWidth, closePixel));
@@ -660,9 +697,11 @@ void QCPFinancial::drawOhlcPlot(QCPPainter *painter, const QCPFinancialDataConta
             double openPixel = valueAxis->coordToPixel(it->open);
             double closePixel = valueAxis->coordToPixel(it->close);
             // draw backbone:
-            painter->drawLine(QPointF(valueAxis->coordToPixel(it->high), keyPixel), QPointF(valueAxis->coordToPixel(it->low), keyPixel));
+            painter->drawLine(QPointF(valueAxis->coordToPixel(it->high), keyPixel),
+                              QPointF(valueAxis->coordToPixel(it->low), keyPixel));
             // draw open:
-            double pixelWidth = getPixelWidth(it->key, keyPixel); // sign of this makes sure open/close are on correct sides
+            double pixelWidth = getPixelWidth(it->key,
+                                              keyPixel); // sign of this makes sure open/close are on correct sides
             painter->drawLine(QPointF(openPixel, keyPixel - pixelWidth), QPointF(openPixel, keyPixel));
             // draw close:
             painter->drawLine(QPointF(closePixel, keyPixel), QPointF(closePixel, keyPixel + pixelWidth));
@@ -708,7 +747,8 @@ void QCPFinancial::drawCandlestickPlot(QCPPainter *painter, const QCPFinancialDa
                               QPointF(keyPixel, valueAxis->coordToPixel(qMin(it->open, it->close))));
             // draw open-close box:
             double pixelWidth = getPixelWidth(it->key, keyPixel);
-            painter->drawRect(QRectF(QPointF(keyPixel - pixelWidth, closePixel), QPointF(keyPixel + pixelWidth, openPixel)));
+            painter->drawRect(
+                    QRectF(QPointF(keyPixel - pixelWidth, closePixel), QPointF(keyPixel + pixelWidth, openPixel)));
         }
     } else // keyAxis->orientation() == Qt::Vertical
     {
@@ -734,7 +774,8 @@ void QCPFinancial::drawCandlestickPlot(QCPPainter *painter, const QCPFinancialDa
                               QPointF(valueAxis->coordToPixel(qMin(it->open, it->close)), keyPixel));
             // draw open-close box:
             double pixelWidth = getPixelWidth(it->key, keyPixel);
-            painter->drawRect(QRectF(QPointF(closePixel, keyPixel - pixelWidth), QPointF(openPixel, keyPixel + pixelWidth)));
+            painter->drawRect(
+                    QRectF(QPointF(closePixel, keyPixel - pixelWidth), QPointF(openPixel, keyPixel + pixelWidth)));
         }
     }
 }
@@ -804,8 +845,9 @@ double QCPFinancial::ohlcSelectTest(const QPointF &pos, const QCPFinancialDataCo
         for (QCPFinancialDataContainer::const_iterator it = begin; it != end; ++it) {
             double keyPixel = keyAxis->coordToPixel(it->key);
             // calculate distance to backbone:
-            double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(keyPixel, valueAxis->coordToPixel(it->high)),
-                                                                           QCPVector2D(keyPixel, valueAxis->coordToPixel(it->low)));
+            double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                    QCPVector2D(keyPixel, valueAxis->coordToPixel(it->high)),
+                    QCPVector2D(keyPixel, valueAxis->coordToPixel(it->low)));
             if (currentDistSqr < minDistSqr) {
                 minDistSqr = currentDistSqr;
                 closestDataPoint = it;
@@ -816,8 +858,9 @@ double QCPFinancial::ohlcSelectTest(const QPointF &pos, const QCPFinancialDataCo
         for (QCPFinancialDataContainer::const_iterator it = begin; it != end; ++it) {
             double keyPixel = keyAxis->coordToPixel(it->key);
             // calculate distance to backbone:
-            double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(valueAxis->coordToPixel(it->high), keyPixel),
-                                                                           QCPVector2D(valueAxis->coordToPixel(it->low), keyPixel));
+            double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                    QCPVector2D(valueAxis->coordToPixel(it->high), keyPixel),
+                    QCPVector2D(valueAxis->coordToPixel(it->low), keyPixel));
             if (currentDistSqr < minDistSqr) {
                 minDistSqr = currentDistSqr;
                 closestDataPoint = it;
@@ -862,12 +905,12 @@ double QCPFinancial::candlestickSelectTest(const QPointF &pos, const QCPFinancia
             } else {
                 // calculate distance to high/low lines:
                 double keyPixel = keyAxis->coordToPixel(it->key);
-                double highLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(keyPixel, valueAxis->coordToPixel(it->high)),
-                                                                                QCPVector2D(keyPixel,
-                                                                                            valueAxis->coordToPixel(qMax(it->open, it->close))));
-                double lowLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(keyPixel, valueAxis->coordToPixel(it->low)),
-                                                                               QCPVector2D(keyPixel,
-                                                                                           valueAxis->coordToPixel(qMin(it->open, it->close))));
+                double highLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                        QCPVector2D(keyPixel, valueAxis->coordToPixel(it->high)),
+                        QCPVector2D(keyPixel, valueAxis->coordToPixel(qMax(it->open, it->close))));
+                double lowLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                        QCPVector2D(keyPixel, valueAxis->coordToPixel(it->low)),
+                        QCPVector2D(keyPixel, valueAxis->coordToPixel(qMin(it->open, it->close))));
                 currentDistSqr = qMin(highLineDistSqr, lowLineDistSqr);
             }
             if (currentDistSqr < minDistSqr) {
@@ -890,12 +933,12 @@ double QCPFinancial::candlestickSelectTest(const QPointF &pos, const QCPFinancia
             } else {
                 // calculate distance to high/low lines:
                 double keyPixel = keyAxis->coordToPixel(it->key);
-                double highLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(valueAxis->coordToPixel(it->high), keyPixel),
-                                                                                QCPVector2D(valueAxis->coordToPixel(qMax(it->open, it->close)),
-                                                                                            keyPixel));
-                double lowLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(valueAxis->coordToPixel(it->low), keyPixel),
-                                                                               QCPVector2D(valueAxis->coordToPixel(qMin(it->open, it->close)),
-                                                                                           keyPixel));
+                double highLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                        QCPVector2D(valueAxis->coordToPixel(it->high), keyPixel),
+                        QCPVector2D(valueAxis->coordToPixel(qMax(it->open, it->close)), keyPixel));
+                double lowLineDistSqr = QCPVector2D(pos).distanceSquaredToLine(
+                        QCPVector2D(valueAxis->coordToPixel(it->low), keyPixel),
+                        QCPVector2D(valueAxis->coordToPixel(qMin(it->open, it->close)), keyPixel));
                 currentDistSqr = qMin(highLineDistSqr, lowLineDistSqr);
             }
             if (currentDistSqr < minDistSqr) {
@@ -921,17 +964,18 @@ double QCPFinancial::candlestickSelectTest(const QPointF &pos, const QCPFinancia
   
   if the plottable contains no data, both \a begin and \a end point to \c constEnd.
 */
-void QCPFinancial::getVisibleDataBounds(QCPFinancialDataContainer::const_iterator &begin, QCPFinancialDataContainer::const_iterator &end) const {
+void QCPFinancial::getVisibleDataBounds(QCPFinancialDataContainer::const_iterator &begin,
+                                        QCPFinancialDataContainer::const_iterator &end) const {
     if (!mKeyAxis) {
         qDebug() << Q_FUNC_INFO << "invalid key axis";
         begin = mDataContainer->constEnd();
         end = mDataContainer->constEnd();
         return;
     }
-    begin = mDataContainer->findBegin(
-            mKeyAxis.data()->range().lower - mWidth * 0.5); // subtract half width of ohlc/candlestick to include partially visible data points
-    end = mDataContainer->findEnd(
-            mKeyAxis.data()->range().upper + mWidth * 0.5); // add half width of ohlc/candlestick to include partially visible data points
+    begin = mDataContainer->findBegin(mKeyAxis.data()->range().lower - mWidth *
+                                                                       0.5); // subtract half width of ohlc/candlestick to include partially visible data points
+    end = mDataContainer->findEnd(mKeyAxis.data()->range().upper + mWidth *
+                                                                   0.5); // add half width of ohlc/candlestick to include partially visible data points
 }
 
 /*!  \internal
@@ -944,7 +988,7 @@ QRectF QCPFinancial::selectionHitBox(QCPFinancialDataContainer::const_iterator i
     QCPAxis *valueAxis = mValueAxis.data();
     if (!keyAxis || !valueAxis) {
         qDebug() << Q_FUNC_INFO << "invalid key or value axis";
-        return QRectF();
+        return {};
     }
 
     double keyPixel = keyAxis->coordToPixel(it->key);

@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "item-text.h"
@@ -237,7 +237,7 @@ void QCPItemText::draw(QCPPainter *painter) {
     QPointF textPos = getTextDrawPoint(QPointF(0, 0), textBoxRect, mPositionAlignment); // 0, 0 because the transform does the translation
     textRect.moveTopLeft(textPos.toPoint() + QPoint(mPadding.left(), mPadding.top()));
     textBoxRect.moveTopLeft(textPos.toPoint());
-    double clipPad = mainPen().widthF();
+    int clipPad = qCeil(mainPen().widthF());
     QRect boundingRect = textBoxRect.adjusted(-clipPad, -clipPad, clipPad, clipPad);
     if (transform.mapRect(boundingRect).intersects(painter->transform().mapRect(clipRect()))) {
         painter->setTransform(transform);
@@ -264,7 +264,8 @@ QPointF QCPItemText::anchorPixelPosition(int anchorId) const {
     QFontMetrics fontMetrics(mainFont());
     QRect textRect = fontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip | mTextAlignment, mText);
     QRectF textBoxRect = textRect.adjusted(-mPadding.left(), -mPadding.top(), mPadding.right(), mPadding.bottom());
-    QPointF textPos = getTextDrawPoint(QPointF(0, 0), textBoxRect, mPositionAlignment); // 0, 0 because the transform does the translation
+    QPointF textPos = getTextDrawPoint(QPointF(0, 0), textBoxRect,
+                                       mPositionAlignment); // 0, 0 because the transform does the translation
     textBoxRect.moveTopLeft(textPos.toPoint());
     QPolygonF rectPoly = transform.map(QPolygonF(textBoxRect));
 
@@ -288,7 +289,7 @@ QPointF QCPItemText::anchorPixelPosition(int anchorId) const {
     }
 
     qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
-    return QPointF();
+    return {};
 }
 
 /*! \internal

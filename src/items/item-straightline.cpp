@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "item-straightline.h"
@@ -84,7 +84,8 @@ double QCPItemStraightLine::selectTest(const QPointF &pos, bool onlySelectable, 
     if (onlySelectable && !mSelectable)
         return -1;
 
-    return QCPVector2D(pos).distanceToStraightLine(point1->pixelPosition(), point2->pixelPosition() - point1->pixelPosition());
+    return QCPVector2D(pos).distanceToStraightLine(point1->pixelPosition(),
+                                                   point2->pixelPosition() - point1->pixelPosition());
 }
 
 /* inherits documentation from base class */
@@ -92,7 +93,7 @@ void QCPItemStraightLine::draw(QCPPainter *painter) {
     QCPVector2D start(point1->pixelPosition());
     QCPVector2D end(point2->pixelPosition());
     // get visible segment of straight line inside clipRect:
-    double clipPad = mainPen().widthF();
+    int clipPad = qCeil(mainPen().widthF());
     QLineF line = getRectClippedStraightLine(start, end - start, clipRect().adjusted(-clipPad, -clipPad, clipPad, clipPad));
     // paint visible segment, if existent:
     if (!line.isNull()) {
@@ -108,7 +109,8 @@ void QCPItemStraightLine::draw(QCPPainter *painter) {
   
   This is a helper function for \ref draw.
 */
-QLineF QCPItemStraightLine::getRectClippedStraightLine(const QCPVector2D &base, const QCPVector2D &vec, const QRect &rect) const {
+QLineF QCPItemStraightLine::getRectClippedStraightLine(const QCPVector2D &base, const QCPVector2D &vec,
+                                                       const QRect &rect) const {
     double bx, by;
     double gamma;
     QLineF result;
@@ -121,7 +123,8 @@ QLineF QCPItemStraightLine::getRectClippedStraightLine(const QCPVector2D &base, 
         by = rect.top();
         gamma = base.x() - bx + (by - base.y()) * vec.x() / vec.y();
         if (gamma >= 0 && gamma <= rect.width())
-            result.setLine(bx + gamma, rect.top(), bx + gamma, rect.bottom()); // no need to check bottom because we know line is vertical
+            result.setLine(bx + gamma, rect.top(), bx + gamma,
+                           rect.bottom()); // no need to check bottom because we know line is vertical
     } else if (qFuzzyIsNull(vec.y())) // line is horizontal
     {
         // check left of rect:
@@ -129,7 +132,8 @@ QLineF QCPItemStraightLine::getRectClippedStraightLine(const QCPVector2D &base, 
         by = rect.top();
         gamma = base.y() - by + (bx - base.x()) * vec.y() / vec.x();
         if (gamma >= 0 && gamma <= rect.height())
-            result.setLine(rect.left(), by + gamma, rect.right(), by + gamma); // no need to check right because we know line is horizontal
+            result.setLine(rect.left(), by + gamma, rect.right(),
+                           by + gamma); // no need to check right because we know line is horizontal
     } else // line is skewed
     {
         QList<QCPVector2D> pointVectors;

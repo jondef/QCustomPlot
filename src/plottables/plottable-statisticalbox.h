@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 /*! \file */
 #ifndef QCP_PLOTTABLE_STATISTICALBOX_H
@@ -40,12 +40,14 @@ class QCP_LIB_DECL QCPStatisticalBoxData {
 public:
     QCPStatisticalBoxData();
 
-    QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum,
-                          const QVector<double> &outliers = QVector<double>());
+    QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median, double upperQuartile,
+                          double maximum, const QVector<double> &outliers = QVector<double>());
 
     inline double sortKey() const { return key; }
 
-    inline static QCPStatisticalBoxData fromSortKey(double sortKey) { return QCPStatisticalBoxData(sortKey, 0, 0, 0, 0, 0); }
+    inline static QCPStatisticalBoxData fromSortKey(double sortKey) {
+        return QCPStatisticalBoxData(sortKey, 0, 0, 0, 0, 0);
+    }
 
     inline static bool sortKeyIsMainKey() { return true; }
 
@@ -68,13 +70,13 @@ Q_DECLARE_TYPEINFO(QCPStatisticalBoxData, Q_MOVABLE_TYPE);
 
 
 /*! \typedef QCPStatisticalBoxDataContainer
-
+  
   Container for storing \ref QCPStatisticalBoxData points. The data is stored sorted by \a key.
-
+  
   This template instantiation is the container in which QCPStatisticalBox holds its data. For
   details about the generic container, see the documentation of the class template \ref
   QCPDataContainer.
-
+  
   \see QCPStatisticalBoxData, QCPStatisticalBox::setData
 */
 typedef QCPDataContainer<QCPStatisticalBoxData> QCPStatisticalBoxDataContainer;
@@ -113,8 +115,9 @@ public:
     // setters:
     void setData(QSharedPointer<QCPStatisticalBoxDataContainer> data);
 
-    void setData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile, const QVector<double> &median,
-                 const QVector<double> &upperQuartile, const QVector<double> &maximum, bool alreadySorted = false);
+    void setData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile,
+                 const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum,
+                 bool alreadySorted = false);
 
     void setWidth(double width);
 
@@ -131,8 +134,9 @@ public:
     void setOutlierStyle(const QCPScatterStyle &style);
 
     // non-property methods:
-    void addData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile, const QVector<double> &median,
-                 const QVector<double> &upperQuartile, const QVector<double> &maximum, bool alreadySorted = false);
+    void addData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile,
+                 const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum,
+                 bool alreadySorted = false);
 
     void addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum,
                  const QVector<double> &outliers = QVector<double>());
@@ -140,12 +144,13 @@ public:
     // reimplemented virtual methods:
     virtual QCPDataSelection selectTestRect(const QRectF &rect, bool onlySelectable) const Q_DECL_OVERRIDE;
 
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE;
 
     virtual QCPRange getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const Q_DECL_OVERRIDE;
 
-    virtual QCPRange
-    getValueRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth, const QCPRange &inKeyRange = QCPRange()) const Q_DECL_OVERRIDE;
+    virtual QCPRange getValueRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth,
+                                   const QCPRange &inKeyRange = QCPRange()) const Q_DECL_OVERRIDE;
 
 protected:
     // property members:
@@ -162,11 +167,12 @@ protected:
     virtual void drawLegendIcon(QCPPainter *painter, const QRectF &rect) const Q_DECL_OVERRIDE;
 
     // introduced virtual methods:
-    virtual void
-    drawStatisticalBox(QCPPainter *painter, QCPStatisticalBoxDataContainer::const_iterator it, const QCPScatterStyle &outlierStyle) const;
+    virtual void drawStatisticalBox(QCPPainter *painter, QCPStatisticalBoxDataContainer::const_iterator it,
+                                    const QCPScatterStyle &outlierStyle) const;
 
     // non-virtual methods:
-    void getVisibleDataBounds(QCPStatisticalBoxDataContainer::const_iterator &begin, QCPStatisticalBoxDataContainer::const_iterator &end) const;
+    void getVisibleDataBounds(QCPStatisticalBoxDataContainer::const_iterator &begin,
+                              QCPStatisticalBoxDataContainer::const_iterator &end) const;
 
     QRectF getQuartileBox(QCPStatisticalBoxDataContainer::const_iterator it) const;
 

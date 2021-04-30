@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-bars.h"
@@ -136,7 +136,7 @@ void QCPBarsGroup::setSpacing(double spacing) {
 
 /*!
   Returns the QCPBars instance with the specified \a index in this group. If no such QCPBars
-  exists, returns 0.
+  exists, returns \c nullptr.
 
   \see bars(), size
 */
@@ -145,7 +145,7 @@ QCPBars *QCPBarsGroup::bars(int index) const {
         return mBars.at(index);
     } else {
         qDebug() << Q_FUNC_INFO << "index out of bounds:" << index;
-        return 0;
+        return nullptr;
     }
 }
 
@@ -155,8 +155,8 @@ QCPBars *QCPBarsGroup::bars(int index) const {
   \see isEmpty
 */
 void QCPBarsGroup::clear() {
-            foreach (QCPBars *bars, mBars) // since foreach takes a copy, removing bars in the loop is okay
-            bars->setBarsGroup(0); // removes itself via removeBars
+    const QList<QCPBars *> oldBars = mBars;
+            foreach (QCPBars *bars, oldBars)bars->setBarsGroup(nullptr); // removes itself from mBars via removeBars
 }
 
 /*!
@@ -211,7 +211,7 @@ void QCPBarsGroup::remove(QCPBars *bars) {
     }
 
     if (mBars.contains(bars))
-        bars->setBarsGroup(0);
+        bars->setBarsGroup(nullptr);
     else
         qDebug() << Q_FUNC_INFO << "bars plottable is not in this bars group:" << reinterpret_cast<quintptr>(bars);
 }
@@ -269,7 +269,8 @@ double QCPBarsGroup::keyPixelOffset(const QCPBars *bars, double keyCoord) {
         } else {
             double lowerPixelWidth, upperPixelWidth;
             int startIndex;
-            int dir = (index <= (baseBars.size() - 1) / 2) ? -1 : 1; // if bar is to lower keys of center, dir is negative
+            int dir = (index <= (baseBars.size() - 1) / 2) ? -1
+                                                           : 1; // if bar is to lower keys of center, dir is negative
             if (baseBars.size() % 2 == 0) // even number of bars
             {
                 startIndex = baseBars.size() / 2 + (dir < 0 ? -1 : 0);
@@ -281,7 +282,8 @@ double QCPBarsGroup::keyPixelOffset(const QCPBars *bars, double keyCoord) {
                 result += qAbs(upperPixelWidth - lowerPixelWidth) * 0.5; // half of center bar
                 result += getPixelSpacing(baseBars.at((baseBars.size() - 1) / 2), keyCoord); // center bar spacing
             }
-            for (int i = startIndex; i != index; i += dir) // add widths and spacings of bars in between center and our bars
+            for (int i = startIndex;
+                 i != index; i += dir) // add widths and spacings of bars in between center and our bars
             {
                 baseBars.at(i)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
                 result += qAbs(upperPixelWidth - lowerPixelWidth);
@@ -465,14 +467,14 @@ QCPBarsData::QCPBarsData(double key, double value) :
 
 /*! \fn QCPBars *QCPBars::barBelow() const
   Returns the bars plottable that is directly below this bars plottable.
-  If there is no such plottable, returns 0.
+  If there is no such plottable, returns \c nullptr.
   
   \see barAbove, moveBelow, moveAbove
 */
 
 /*! \fn QCPBars *QCPBars::barAbove() const
   Returns the bars plottable that is directly above this bars plottable.
-  If there is no such plottable, returns 0.
+  If there is no such plottable, returns \c nullptr.
   
   \see barBelow, moveBelow, moveAbove
 */
@@ -493,9 +495,9 @@ QCPBars::QCPBars(QCPAxis *keyAxis, QCPAxis *valueAxis) :
         QCPAbstractPlottable1D<QCPBarsData>(keyAxis, valueAxis),
         mWidth(0.75),
         mWidthType(wtPlotCoords),
-        mBarsGroup(0),
+        mBarsGroup(nullptr),
         mBaseValue(0),
-        mStackingGap(0) {
+        mStackingGap(1) {
     // modify inherited properties from abstract plottable:
     mPen.setColor(Qt::blue);
     mPen.setStyle(Qt::SolidLine);
@@ -505,7 +507,7 @@ QCPBars::QCPBars(QCPAxis *keyAxis, QCPAxis *valueAxis) :
 }
 
 QCPBars::~QCPBars() {
-    setBarsGroup(0);
+    setBarsGroup(nullptr);
     if (mBarBelow || mBarAbove)
         connectBars(mBarBelow.data(), mBarAbove.data()); // take this bar out of any stacking
 }
@@ -571,7 +573,7 @@ void QCPBars::setWidthType(QCPBars::WidthType widthType) {
   Sets to which QCPBarsGroup this QCPBars instance belongs to. Alternatively, you can also use \ref
   QCPBarsGroup::append.
   
-  To remove this QCPBars from any group, set \a barsGroup to 0.
+  To remove this QCPBars from any group, set \a barsGroup to \c nullptr.
 */
 void QCPBars::setBarsGroup(QCPBarsGroup *barsGroup) {
     // deregister at old group:
@@ -657,7 +659,7 @@ void QCPBars::addData(double key, double value) {
   is already between two other bars, the two other bars will be stacked on top of each other after
   the operation.
   
-  To remove this bars plottable from any stacking, set \a bars to 0.
+  To remove this bars plottable from any stacking, set \a bars to \c nullptr.
   
   \see moveBelow, barAbove, barBelow
 */
@@ -687,7 +689,7 @@ void QCPBars::moveBelow(QCPBars *bars) {
   is already between two other bars, the two other bars will be stacked on top of each other after
   the operation.
   
-  To remove this bars plottable from any stacking, set \a bars to 0.
+  To remove this bars plottable from any stacking, set \a bars to \c nullptr.
   
   \see moveBelow, barBelow, barAbove
 */
@@ -722,7 +724,9 @@ QCPDataSelection QCPBars::selectTestRect(const QRectF &rect, bool onlySelectable
 
     for (QCPBarsDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
         if (rect.intersects(getBarRect(it->key, it->value)))
-            result.addDataRange(QCPDataRange(it - mDataContainer->constBegin(), it - mDataContainer->constBegin() + 1), false);
+            result.addDataRange(
+                    QCPDataRange(int(it - mDataContainer->constBegin()), int(it - mDataContainer->constBegin() + 1)),
+                    false);
     }
     result.simplify();
     return result;
@@ -743,14 +747,15 @@ double QCPBars::selectTest(const QPointF &pos, bool onlySelectable, QVariant *de
     if (!mKeyAxis || !mValueAxis)
         return -1;
 
-    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint())) {
+    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
         // get visible data range:
         QCPBarsDataContainer::const_iterator visibleBegin, visibleEnd;
         getVisibleDataBounds(visibleBegin, visibleEnd);
         for (QCPBarsDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
             if (getBarRect(it->key, it->value).contains(pos)) {
                 if (details) {
-                    int pointIndex = it - mDataContainer->constBegin();
+                    int pointIndex = int(it - mDataContainer->constBegin());
                     details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
                 }
                 return mParentPlot->selectionTolerance() * 0.99;
@@ -809,13 +814,14 @@ QCPRange QCPBars::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, 
     QCPBarsDataContainer::const_iterator itBegin = mDataContainer->constBegin();
     QCPBarsDataContainer::const_iterator itEnd = mDataContainer->constEnd();
     if (inKeyRange != QCPRange()) {
-        itBegin = mDataContainer->findBegin(inKeyRange.lower);
-        itEnd = mDataContainer->findEnd(inKeyRange.upper);
+        itBegin = mDataContainer->findBegin(inKeyRange.lower, false);
+        itEnd = mDataContainer->findEnd(inKeyRange.upper, false);
     }
     for (QCPBarsDataContainer::const_iterator it = itBegin; it != itEnd; ++it) {
         const double current = it->value + getStackedBaseValue(it->key, it->value >= 0);
         if (qIsNaN(current)) continue;
-        if (inSignDomain == QCP::sdBoth || (inSignDomain == QCP::sdNegative && current < 0) || (inSignDomain == QCP::sdPositive && current > 0)) {
+        if (inSignDomain == QCP::sdBoth || (inSignDomain == QCP::sdNegative && current < 0) ||
+            (inSignDomain == QCP::sdPositive && current > 0)) {
             if (current < range.lower || !haveLower) {
                 range.lower = current;
                 haveLower = true;
@@ -838,19 +844,20 @@ QPointF QCPBars::dataPixelPosition(int index) const {
         QCPAxis *valueAxis = mValueAxis.data();
         if (!keyAxis || !valueAxis) {
             qDebug() << Q_FUNC_INFO << "invalid key or value axis";
-            return QPointF();
+            return {};
         }
 
         const QCPDataContainer<QCPBarsData>::const_iterator it = mDataContainer->constBegin() + index;
         const double valuePixel = valueAxis->coordToPixel(getStackedBaseValue(it->key, it->value >= 0) + it->value);
-        const double keyPixel = keyAxis->coordToPixel(it->key) + (mBarsGroup ? mBarsGroup->keyPixelOffset(this, it->key) : 0);
+        const double keyPixel =
+                keyAxis->coordToPixel(it->key) + (mBarsGroup ? mBarsGroup->keyPixelOffset(this, it->key) : 0);
         if (keyAxis->orientation() == Qt::Horizontal)
-            return QPointF(keyPixel, valuePixel);
+            return {keyPixel, valuePixel};
         else
-            return QPointF(valuePixel, keyPixel);
+            return {valuePixel, keyPixel};
     } else {
         qDebug() << Q_FUNC_INFO << "Index out of bounds" << index;
-        return QPointF();
+        return {};
     }
 }
 
@@ -926,7 +933,8 @@ void QCPBars::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {
   
   if the plottable contains no data, both \a begin and \a end point to constEnd.
 */
-void QCPBars::getVisibleDataBounds(QCPBarsDataContainer::const_iterator &begin, QCPBarsDataContainer::const_iterator &end) const {
+void QCPBars::getVisibleDataBounds(QCPBarsDataContainer::const_iterator &begin,
+                                   QCPBarsDataContainer::const_iterator &end) const {
     if (!mKeyAxis) {
         qDebug() << Q_FUNC_INFO << "invalid key axis";
         begin = mDataContainer->constEnd();
@@ -990,7 +998,7 @@ QRectF QCPBars::getBarRect(double key, double value) const {
     QCPAxis *valueAxis = mValueAxis.data();
     if (!keyAxis || !valueAxis) {
         qDebug() << Q_FUNC_INFO << "invalid key or value axis";
-        return QRectF();
+        return {};
     }
 
     double lowerPixelWidth, upperPixelWidth;
@@ -1007,9 +1015,11 @@ QRectF QCPBars::getBarRect(double key, double value) const {
     if (qAbs(valuePixel - basePixel) <= qAbs(bottomOffset))
         bottomOffset = valuePixel - basePixel;
     if (keyAxis->orientation() == Qt::Horizontal) {
-        return QRectF(QPointF(keyPixel + lowerPixelWidth, valuePixel), QPointF(keyPixel + upperPixelWidth, basePixel + bottomOffset)).normalized();
+        return QRectF(QPointF(keyPixel + lowerPixelWidth, valuePixel),
+                      QPointF(keyPixel + upperPixelWidth, basePixel + bottomOffset)).normalized();
     } else {
-        return QRectF(QPointF(basePixel + bottomOffset, keyPixel + lowerPixelWidth), QPointF(valuePixel, keyPixel + upperPixelWidth)).normalized();
+        return QRectF(QPointF(basePixel + bottomOffset, keyPixel + lowerPixelWidth),
+                      QPointF(valuePixel, keyPixel + upperPixelWidth)).normalized();
     }
 }
 
@@ -1069,7 +1079,8 @@ double QCPBars::getStackedBaseValue(double key, bool positive) const {
     if (mBarBelow) {
         double max = 0; // don't initialize with mBaseValue here because only base value of bottom-most bar has meaning in a bar stack
         // find bars of mBarBelow that are approximately at key and find largest one:
-        double epsilon = qAbs(key) * (sizeof(key) == 4 ? 1e-6 : 1e-14); // should be safe even when changed to use float at some point
+        double epsilon = qAbs(key) * (sizeof(key) == 4 ? 1e-6
+                                                       : 1e-14); // should be safe even when changed to use float at some point
         if (key == 0)
             epsilon = (sizeof(key) == 4 ? 1e-6 : 1e-14);
         QCPBarsDataContainer::const_iterator it = mBarBelow.data()->mDataContainer->findBegin(key - epsilon);
@@ -1103,22 +1114,22 @@ void QCPBars::connectBars(QCPBars *lower, QCPBars *upper) {
     {
         // disconnect old bar below upper:
         if (upper->mBarBelow && upper->mBarBelow.data()->mBarAbove.data() == upper)
-            upper->mBarBelow.data()->mBarAbove = 0;
-        upper->mBarBelow = 0;
+            upper->mBarBelow.data()->mBarAbove = nullptr;
+        upper->mBarBelow = nullptr;
     } else if (!upper) // disconnect lower at top
     {
         // disconnect old bar above lower:
         if (lower->mBarAbove && lower->mBarAbove.data()->mBarBelow.data() == lower)
-            lower->mBarAbove.data()->mBarBelow = 0;
-        lower->mBarAbove = 0;
+            lower->mBarAbove.data()->mBarBelow = nullptr;
+        lower->mBarAbove = nullptr;
     } else // connect lower and upper
     {
         // disconnect old bar above lower:
         if (lower->mBarAbove && lower->mBarAbove.data()->mBarBelow.data() == lower)
-            lower->mBarAbove.data()->mBarBelow = 0;
+            lower->mBarAbove.data()->mBarBelow = nullptr;
         // disconnect old bar below upper:
         if (upper->mBarBelow && upper->mBarBelow.data()->mBarAbove.data() == upper)
-            upper->mBarBelow.data()->mBarAbove = 0;
+            upper->mBarBelow.data()->mBarAbove = nullptr;
         lower->mBarAbove = upper;
         upper->mBarBelow = lower;
     }

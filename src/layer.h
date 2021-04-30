@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,14 +19,19 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_LAYER_H
 #define QCP_LAYER_H
 
 #include "global.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+Q_MOC_INCLUDE("core.h") // Qt6 needs this if using forward declared types in Q_PROPERTY
+#endif
+
 #include "paintbuffer.h"
 
 class QCPPainter;
@@ -52,12 +57,12 @@ Q_OBJECT
 public:
 
     /*!
-    Defines the different rendering modes of a layer. Depending on the mode, certain layers can be
-    replotted individually, without the need to replot (possibly complex) layerables on other
-    layers.
+      Defines the different rendering modes of a layer. Depending on the mode, certain layers can be
+      replotted individually, without the need to replot (possibly complex) layerables on other
+      layers.
 
-    \see setMode
-  */
+      \see setMode
+    */
     enum LayerMode {
         lmLogical   ///< Layer is used only for rendering order, and shares paint buffer with all other adjacent logical layers.
         , lmBuffered ///< Layer has its own paint buffer and may be replotted individually (see \ref replot).
@@ -130,7 +135,7 @@ Q_OBJECT
     Q_PROPERTY(bool antialiased READ antialiased WRITE setAntialiased)
     /// \endcond
 public:
-    QCPLayerable(QCustomPlot *plot, QString targetLayer = QString(), QCPLayerable *parentLayerable = 0);
+    QCPLayerable(QCustomPlot *plot, QString targetLayer = QString(), QCPLayerable *parentLayerable = nullptr);
 
     virtual ~QCPLayerable();
 
@@ -155,7 +160,7 @@ public:
     void setAntialiased(bool enabled);
 
     // introduced virtual methods:
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const;
+    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const;
 
     // non-property methods:
     bool realVisibility() const;
@@ -206,7 +211,8 @@ protected:
 
     bool moveToLayer(QCPLayer *layer, bool prepend);
 
-    void applyAntialiasingHint(QCPPainter *painter, bool localAntialiased, QCP::AntialiasedElement overrideElement) const;
+    void
+    applyAntialiasingHint(QCPPainter *painter, bool localAntialiased, QCP::AntialiasedElement overrideElement) const;
 
 private:
     Q_DISABLE_COPY(QCPLayerable)

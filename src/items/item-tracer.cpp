@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "item-tracer.h"
@@ -74,7 +74,7 @@ QCPItemTracer::QCPItemTracer(QCustomPlot *parentPlot) :
         position(createPosition(QLatin1String("position"))),
         mSize(6),
         mStyle(tsCrosshair),
-        mGraph(0),
+        mGraph(nullptr),
         mGraphKey(0),
         mInterpolating(false) {
     position->setCoords(0, 0);
@@ -146,9 +146,9 @@ void QCPItemTracer::setStyle(QCPItemTracer::TracerStyle style) {
   Sets the QCPGraph this tracer sticks to. The tracer \a position will be set to type
   QCPItemPosition::ptPlotCoords and the axes will be set to the axes of \a graph.
   
-  To free the tracer from any graph, set \a graph to 0. The tracer \a position can then be placed
-  freely like any other item position. This is the state the tracer will assume when its graph gets
-  deleted while still attached to it.
+  To free the tracer from any graph, set \a graph to \c nullptr. The tracer \a position can then be
+  placed freely like any other item position. This is the state the tracer will assume when its
+  graph gets deleted while still attached to it.
   
   \see setGraphKey
 */
@@ -162,7 +162,7 @@ void QCPItemTracer::setGraph(QCPGraph *graph) {
         } else
             qDebug() << Q_FUNC_INFO << "graph isn't in same QCustomPlot instance as this item";
     } else {
-        mGraph = 0;
+        mGraph = nullptr;
     }
 }
 
@@ -208,13 +208,16 @@ double QCPItemTracer::selectTest(const QPointF &pos, bool onlySelectable, QVaria
             return -1;
         case tsPlus: {
             if (clipRect().intersects(QRectF(center - QPointF(w, w), center + QPointF(w, w)).toRect()))
-                return qSqrt(qMin(QCPVector2D(pos).distanceSquaredToLine(center + QPointF(-w, 0), center + QPointF(w, 0)),
-                                  QCPVector2D(pos).distanceSquaredToLine(center + QPointF(0, -w), center + QPointF(0, w))));
+                return qSqrt(
+                        qMin(QCPVector2D(pos).distanceSquaredToLine(center + QPointF(-w, 0), center + QPointF(w, 0)),
+                             QCPVector2D(pos).distanceSquaredToLine(center + QPointF(0, -w), center + QPointF(0, w))));
             break;
         }
         case tsCrosshair: {
-            return qSqrt(qMin(QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(clip.left(), center.y()), QCPVector2D(clip.right(), center.y())),
-                              QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(center.x(), clip.top()), QCPVector2D(center.x(), clip.bottom()))));
+            return qSqrt(qMin(QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(clip.left(), center.y()),
+                                                                     QCPVector2D(clip.right(), center.y())),
+                              QCPVector2D(pos).distanceSquaredToLine(QCPVector2D(center.x(), clip.top()),
+                                                                     QCPVector2D(center.x(), clip.bottom()))));
         }
         case tsCircle: {
             if (clip.intersects(QRectF(center - QPointF(w, w), center + QPointF(w, w)).toRect())) {
@@ -223,7 +226,8 @@ double QCPItemTracer::selectTest(const QPointF &pos, bool onlySelectable, QVaria
                 double circleLine = w;
                 double result = qAbs(centerDist - circleLine);
                 // filled ellipse, allow click inside to count as hit:
-                if (result > mParentPlot->selectionTolerance() * 0.99 && mBrush.style() != Qt::NoBrush && mBrush.color().alpha() != 0) {
+                if (result > mParentPlot->selectionTolerance() * 0.99 && mBrush.style() != Qt::NoBrush &&
+                    mBrush.color().alpha() != 0) {
                     if (centerDist <= circleLine)
                         result = mParentPlot->selectionTolerance() * 0.99;
                 }
@@ -308,14 +312,15 @@ void QCPItemTracer::updatePosition() {
                     position->setCoords(last->key, last->value);
                 else {
                     QCPGraphDataContainer::const_iterator it = mGraph->data()->findBegin(mGraphKey);
-                    if (it != mGraph->data()->constEnd()) // mGraphKey is not exactly on last iterator, but somewhere between iterators
+                    if (it !=
+                        mGraph->data()->constEnd()) // mGraphKey is not exactly on last iterator, but somewhere between iterators
                     {
                         QCPGraphDataContainer::const_iterator prevIt = it;
                         ++it; // won't advance to constEnd because we handled that case (mGraphKey >= last->key) before
                         if (mInterpolating) {
                             // interpolate between iterators around mGraphKey:
                             double slope = 0;
-                            if (!qFuzzyCompare((double) it->key, (double) prevIt->key))
+                            if (!qFuzzyCompare(double(it->key), double(prevIt->key)))
                                 slope = (it->value - prevIt->value) / (it->key - prevIt->key);
                             position->setCoords(mGraphKey, (mGraphKey - prevIt->key) * slope + prevIt->value);
                         } else {

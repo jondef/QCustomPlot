@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_SCATTERSTYLE_H
@@ -34,13 +34,13 @@ class QCP_LIB_DECL QCPScatterStyle {
 Q_GADGET
 public:
     /*!
-    Represents the various properties of a scatter style instance. For example, this enum is used
-    to specify which properties of \ref QCPSelectionDecorator::setScatterStyle will be used when
-    highlighting selected data points.
+      Represents the various properties of a scatter style instance. For example, this enum is used
+      to specify which properties of \ref QCPSelectionDecorator::setScatterStyle will be used when
+      highlighting selected data points.
 
-    Specific scatter properties can be transferred between \ref QCPScatterStyle instances via \ref
-    setFromOther.
-  */
+      Specific scatter properties can be transferred between \ref QCPScatterStyle instances via \ref
+      setFromOther.
+    */
     enum ScatterProperty {
         spNone = 0x00  ///< <tt>0x00</tt> None
         , spPen = 0x01  ///< <tt>0x01</tt> The pen property, see \ref setPen
@@ -54,31 +54,48 @@ public:
     Q_DECLARE_FLAGS(ScatterProperties, ScatterProperty)
 
     /*!
-    Defines the shape used for scatter points.
+      Defines the shape used for scatter points.
 
-    On plottables/items that draw scatters, the sizes of these visualizations (with exception of
-    \ref ssDot and \ref ssPixmap) can be controlled with the \ref setSize function. Scatters are
-    drawn with the pen and brush specified with \ref setPen and \ref setBrush.
-  */
+      On plottables/items that draw scatters, the sizes of these visualizations (with exception of
+      \ref ssDot and \ref ssPixmap) can be controlled with the \ref setSize function. Scatters are
+      drawn with the pen and brush specified with \ref setPen and \ref setBrush.
+    */
     enum ScatterShape {
         ssNone       ///< no scatter symbols are drawn (e.g. in QCPGraph, data only represented with lines)
-        , ssDot       ///< \enumimage{ssDot.png} a single pixel (use \ref ssDisc or \ref ssCircle if you want a round shape with a certain radius)
-        , ssCross     ///< \enumimage{ssCross.png} a cross
-        , ssPlus      ///< \enumimage{ssPlus.png} a plus
-        , ssCircle    ///< \enumimage{ssCircle.png} a circle
-        , ssDisc      ///< \enumimage{ssDisc.png} a circle which is filled with the pen's color (not the brush as with ssCircle)
-        , ssSquare    ///< \enumimage{ssSquare.png} a square
-        , ssDiamond   ///< \enumimage{ssDiamond.png} a diamond
-        , ssStar      ///< \enumimage{ssStar.png} a star with eight arms, i.e. a combination of cross and plus
-        , ssTriangle  ///< \enumimage{ssTriangle.png} an equilateral triangle, standing on baseline
-        , ssTriangleInverted ///< \enumimage{ssTriangleInverted.png} an equilateral triangle, standing on corner
-        , ssCrossSquare      ///< \enumimage{ssCrossSquare.png} a square with a cross inside
-        , ssPlusSquare       ///< \enumimage{ssPlusSquare.png} a square with a plus inside
-        , ssCrossCircle      ///< \enumimage{ssCrossCircle.png} a circle with a cross inside
-        , ssPlusCircle       ///< \enumimage{ssPlusCircle.png} a circle with a plus inside
-        , ssPeace     ///< \enumimage{ssPeace.png} a circle, with one vertical and two downward diagonal lines
-        , ssPixmap    ///< a custom pixmap specified by \ref setPixmap, centered on the data point coordinates
-        , ssCustom    ///< custom painter operations are performed per scatter (As QPainterPath, see \ref setCustomPath)
+        ,
+        ssDot       ///< \enumimage{ssDot.png} a single pixel (use \ref ssDisc or \ref ssCircle if you want a round shape with a certain radius)
+        ,
+        ssCross     ///< \enumimage{ssCross.png} a cross
+        ,
+        ssPlus      ///< \enumimage{ssPlus.png} a plus
+        ,
+        ssCircle    ///< \enumimage{ssCircle.png} a circle
+        ,
+        ssDisc      ///< \enumimage{ssDisc.png} a circle which is filled with the pen's color (not the brush as with ssCircle)
+        ,
+        ssSquare    ///< \enumimage{ssSquare.png} a square
+        ,
+        ssDiamond   ///< \enumimage{ssDiamond.png} a diamond
+        ,
+        ssStar      ///< \enumimage{ssStar.png} a star with eight arms, i.e. a combination of cross and plus
+        ,
+        ssTriangle  ///< \enumimage{ssTriangle.png} an equilateral triangle, standing on baseline
+        ,
+        ssTriangleInverted ///< \enumimage{ssTriangleInverted.png} an equilateral triangle, standing on corner
+        ,
+        ssCrossSquare      ///< \enumimage{ssCrossSquare.png} a square with a cross inside
+        ,
+        ssPlusSquare       ///< \enumimage{ssPlusSquare.png} a square with a plus inside
+        ,
+        ssCrossCircle      ///< \enumimage{ssCrossCircle.png} a circle with a cross inside
+        ,
+        ssPlusCircle       ///< \enumimage{ssPlusCircle.png} a circle with a plus inside
+        ,
+        ssPeace     ///< \enumimage{ssPeace.png} a circle, with one vertical and two downward diagonal lines
+        ,
+        ssPixmap    ///< a custom pixmap specified by \ref setPixmap, centered on the data point coordinates
+        ,
+        ssCustom    ///< custom painter operations are performed per scatter (As QPainterPath, see \ref setCustomPath)
     };
     Q_ENUMS(ScatterShape)
 
@@ -94,7 +111,8 @@ public:
 
     QCPScatterStyle(const QPixmap &pixmap);
 
-    QCPScatterStyle(const QPainterPath &customPath, const QPen &pen, const QBrush &brush = Qt::NoBrush, double size = 6);
+    QCPScatterStyle(const QPainterPath &customPath, const QPen &pen, const QBrush &brush = Qt::NoBrush,
+                    double size = 6);
 
     // getters:
     double size() const { return mSize; }

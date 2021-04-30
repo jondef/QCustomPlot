@@ -398,8 +398,10 @@ double QCPAbstractPlottable1D<DataType>::selectTest(const QPointF &pos, bool onl
     {
         // determine which key range comes into question, taking selection tolerance around pos into account:
         double posKeyMin, posKeyMax, dummy;
-        pixelsToCoords(pos - QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMin, dummy);
-        pixelsToCoords(pos + QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMax, dummy);
+        pixelsToCoords(pos - QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMin,
+                       dummy);
+        pixelsToCoords(pos + QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMax,
+                       dummy);
         if (posKeyMin > posKeyMax)
             qSwap(posKeyMin, posKeyMax);
         begin = mDataContainer->findBegin(posKeyMin, true);
@@ -442,10 +444,12 @@ double QCPAbstractPlottable1D<DataType>::selectTest(const QPointF &pos, bool onl
   \see setSelection
 */
 template<class DataType>
-void QCPAbstractPlottable1D<DataType>::getDataSegments(QList<QCPDataRange> &selectedSegments, QList<QCPDataRange> &unselectedSegments) const {
+void QCPAbstractPlottable1D<DataType>::getDataSegments(QList<QCPDataRange> &selectedSegments,
+                                                       QList<QCPDataRange> &unselectedSegments) const {
     selectedSegments.clear();
     unselectedSegments.clear();
-    if (mSelectable == QCP::stWhole) // stWhole selection type draws the entire plottable with selected style if mSelection isn't empty
+    if (mSelectable ==
+        QCP::stWhole) // stWhole selection type draws the entire plottable with selected style if mSelection isn't empty
     {
         if (selected())
             selectedSegments << QCPDataRange(0, dataCount());
@@ -479,7 +483,8 @@ void QCPAbstractPlottable1D<DataType>::drawPolyline(QCPPainter *painter, const Q
         int i = 0;
         bool lastIsNan = false;
         const int lineDataSize = lineData.size();
-        while (i < lineDataSize && (qIsNaN(lineData.at(i).y()) || qIsNaN(lineData.at(i).x()))) // make sure first point is not NaN
+        while (i < lineDataSize &&
+               (qIsNaN(lineData.at(i).y()) || qIsNaN(lineData.at(i).x()))) // make sure first point is not NaN
             ++i;
         ++i; // because drawing works in 1 point retrospect
         while (i < lineDataSize) {
@@ -499,7 +504,8 @@ void QCPAbstractPlottable1D<DataType>::drawPolyline(QCPPainter *painter, const Q
         const int lineDataSize = lineData.size();
         while (i < lineDataSize) {
             if (qIsNaN(lineData.at(i).y()) || qIsNaN(lineData.at(i).x()) ||
-                qIsInf(lineData.at(i).y())) // NaNs create a gap in the line. Also filter Infs which make drawPolyline block
+                qIsInf(lineData.at(
+                        i).y())) // NaNs create a gap in the line. Also filter Infs which make drawPolyline block
             {
                 painter->drawPolyline(lineData.constData() + segmentStart,
                                       i - segmentStart); // i, because we don't want to include the current NaN point

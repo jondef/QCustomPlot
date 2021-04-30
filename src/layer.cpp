@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "layer.h"
@@ -132,11 +132,11 @@ QCPLayer::~QCPLayer() {
     // call QCustomPlot::removeLayer, which moves all layerables off this layer before deleting it.)
 
     while (!mChildren.isEmpty())
-        mChildren.last()->setLayer(0); // removes itself from mChildren via removeChild()
+        mChildren.last()->setLayer(nullptr); // removes itself from mChildren via removeChild()
 
     if (mParentPlot->currentLayer() == this)
         qDebug() << Q_FUNC_INFO
-                 << "The parent plot's mCurrentLayer will be a dangling pointer. Should have been set to a valid layer or 0 beforehand.";
+                 << "The parent plot's mCurrentLayer will be a dangling pointer. Should have been set to a valid layer or nullptr beforehand.";
 }
 
 /*!
@@ -175,8 +175,8 @@ void QCPLayer::setVisible(bool visible) {
 void QCPLayer::setMode(QCPLayer::LayerMode mode) {
     if (mMode != mode) {
         mMode = mode;
-        if (!mPaintBuffer.isNull())
-            mPaintBuffer.toStrongRef().data()->setInvalidated();
+        if (QSharedPointer<QCPAbstractPaintBuffer> pb = mPaintBuffer.toStrongRef())
+            pb->setInvalidated();
     }
 }
 
@@ -207,16 +207,16 @@ void QCPLayer::draw(QCPPainter *painter) {
   \see draw
 */
 void QCPLayer::drawToPaintBuffer() {
-    if (!mPaintBuffer.isNull()) {
-        if (QCPPainter *painter = mPaintBuffer.toStrongRef().data()->startPainting()) {
+    if (QSharedPointer<QCPAbstractPaintBuffer> pb = mPaintBuffer.toStrongRef()) {
+        if (QCPPainter *painter = pb->startPainting()) {
             if (painter->isActive())
                 draw(painter);
             else
                 qDebug() << Q_FUNC_INFO << "paint buffer returned inactive painter";
             delete painter;
-            mPaintBuffer.toStrongRef().data()->donePainting();
+            pb->donePainting();
         } else
-            qDebug() << Q_FUNC_INFO << "paint buffer returned zero painter";
+            qDebug() << Q_FUNC_INFO << "paint buffer returned nullptr painter";
     } else
         qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
 }
@@ -226,24 +226,26 @@ void QCPLayer::drawToPaintBuffer() {
   the layerables on this specific layer, without the need to replot all other layers (as a call to
   \ref QCustomPlot::replot would do).
 
+  QCustomPlot also makes sure to replot all layers instead of only this one, if the layer ordering
+  or any layerable-layer-association has changed since the last full replot and any other paint
+  buffers were thus invalidated.
+
   If the layer mode is \ref lmLogical however, this method simply calls \ref QCustomPlot::replot on
   the parent QCustomPlot instance.
-
-  QCustomPlot also makes sure to replot all layers instead of only this one, if the layer ordering
-  has changed since the last full replot and the other paint buffers were thus invalidated.
 
   \see draw
 */
 void QCPLayer::replot() {
     if (mMode == lmBuffered && !mParentPlot->hasInvalidatedPaintBuffers()) {
-        if (!mPaintBuffer.isNull()) {
-            mPaintBuffer.toStrongRef().data()->clear(Qt::transparent);
+        if (QSharedPointer<QCPAbstractPaintBuffer> pb = mPaintBuffer.toStrongRef()) {
+            pb->clear(Qt::transparent);
             drawToPaintBuffer();
-            mPaintBuffer.toStrongRef().data()->setInvalidated(false);
+            pb->setInvalidated(
+                    false); // since layer is lmBuffered, we know only this layer is on buffer and we can reset invalidated flag
             mParentPlot->update();
         } else
             qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
-    } else if (mMode == lmLogical)
+    } else
         mParentPlot->replot();
 }
 
@@ -263,8 +265,8 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend) {
             mChildren.prepend(layerable);
         else
             mChildren.append(layerable);
-        if (!mPaintBuffer.isNull())
-            mPaintBuffer.toStrongRef().data()->setInvalidated();
+        if (QSharedPointer<QCPAbstractPaintBuffer> pb = mPaintBuffer.toStrongRef())
+            pb->setInvalidated();
     } else
         qDebug() << Q_FUNC_INFO << "layerable is already child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -280,8 +282,8 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend) {
 */
 void QCPLayer::removeChild(QCPLayerable *layerable) {
     if (mChildren.removeOne(layerable)) {
-        if (!mPaintBuffer.isNull())
-            mPaintBuffer.toStrongRef().data()->setInvalidated();
+        if (QSharedPointer<QCPAbstractPaintBuffer> pb = mPaintBuffer.toStrongRef())
+            pb->setInvalidated();
     } else
         qDebug() << Q_FUNC_INFO << "layerable is not child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -312,7 +314,8 @@ void QCPLayer::removeChild(QCPLayerable *layerable) {
   only get drawn if their parent layerables are visible, too.
   
   Note that a parent layerable is not necessarily also the QObject parent for memory management.
-  Further, a layerable doesn't always have a parent layerable, so this function may return 0.
+  Further, a layerable doesn't always have a parent layerable, so this function may return \c
+  nullptr.
   
   A parent layerable is set implicitly when placed inside layout elements and doesn't need to be
   set manually by the user.
@@ -384,8 +387,8 @@ void QCPLayer::removeChild(QCPLayerable *layerable) {
   targetLayer is an empty string, it places itself on the current layer of the plot (see \ref
   QCustomPlot::setCurrentLayer).
   
-  It is possible to provide 0 as \a plot. In that case, you should assign a parent plot at a later
-  time with \ref initializeParentPlot.
+  It is possible to provide \c nullptr as \a plot. In that case, you should assign a parent plot at
+  a later time with \ref initializeParentPlot.
   
   The layerable's parent layerable is set to \a parentLayerable, if provided. Direct layerable
   parents are mainly used to control visibility in a hierarchy of layerables. This means a
@@ -399,7 +402,7 @@ QCPLayerable::QCPLayerable(QCustomPlot *plot, QString targetLayer, QCPLayerable 
         mVisible(true),
         mParentPlot(plot),
         mParentLayerable(parentLayerable),
-        mLayer(0),
+        mLayer(nullptr),
         mAntialiased(true) {
     if (mParentPlot) {
         if (targetLayer.isEmpty())
@@ -412,7 +415,7 @@ QCPLayerable::QCPLayerable(QCustomPlot *plot, QString targetLayer, QCPLayerable 
 QCPLayerable::~QCPLayerable() {
     if (mLayer) {
         mLayer->removeChild(this);
-        mLayer = 0;
+        mLayer = nullptr;
     }
 }
 
@@ -477,7 +480,8 @@ void QCPLayerable::setAntialiased(bool enabled) {
   true.
 */
 bool QCPLayerable::realVisibility() const {
-    return mVisible && (!mLayer || mLayer->visible()) && (!mParentLayerable || mParentLayerable.data()->realVisibility());
+    return mVisible && (!mLayer || mLayer->visible()) &&
+           (!mParentLayerable || mParentLayerable.data()->realVisibility());
 }
 
 /*!
@@ -513,7 +517,8 @@ bool QCPLayerable::realVisibility() const {
   In the case of 1D Plottables (\ref QCPAbstractPlottable1D, like \ref QCPGraph or \ref QCPBars) \a
   details will be set to a \ref QCPDataSelection, describing the closest data point to \a pos.
   
-  You may pass 0 as \a details to indicate that you are not interested in those selection details.
+  You may pass \c nullptr as \a details to indicate that you are not interested in those selection
+  details.
   
   \see selectEvent, deselectEvent, mousePressEvent, wheelEvent, QCustomPlot::setInteractions,
   QCPAbstractPlottable1D::selectTestRect
@@ -528,11 +533,11 @@ double QCPLayerable::selectTest(const QPointF &pos, bool onlySelectable, QVarian
 /*! \internal
   
   Sets the parent plot of this layerable. Use this function once to set the parent plot if you have
-  passed 0 in the constructor. It can not be used to move a layerable from one QCustomPlot to
-  another one.
+  passed \c nullptr in the constructor. It can not be used to move a layerable from one QCustomPlot
+  to another one.
   
-  Note that, unlike when passing a non-null parent plot in the constructor, this function does not
-  make \a parentPlot the QObject-parent of this layerable. If you want this, call
+  Note that, unlike when passing a non \c nullptr parent plot in the constructor, this function
+  does not make \a parentPlot the QObject-parent of this layerable. If you want this, call
   QObject::setParent(\a parentPlot) in addition to this function.
   
   Further, you will probably want to set a layer (\ref setLayer) after calling this function, to
@@ -606,7 +611,8 @@ bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend) {
   QCustomPlot::setNotAntialiasedElements. Which override enum this function takes into account is
   controlled via \a overrideElement.
 */
-void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialiased, QCP::AntialiasedElement overrideElement) const {
+void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialiased,
+                                         QCP::AntialiasedElement overrideElement) const {
     if (mParentPlot && mParentPlot->notAntialiasedElements().testFlag(overrideElement))
         painter->setAntialiasing(false);
     else if (mParentPlot && mParentPlot->antialiasedElements().testFlag(overrideElement))
@@ -618,8 +624,8 @@ void QCPLayerable::applyAntialiasingHint(QCPPainter *painter, bool localAntialia
 /*! \internal
 
   This function is called by \ref initializeParentPlot, to allow subclasses to react on the setting
-  of a parent plot. This is the case when 0 was passed as parent plot in the constructor, and the
-  parent plot is set at a later time.
+  of a parent plot. This is the case when \c nullptr was passed as parent plot in the constructor,
+  and the parent plot is set at a later time.
   
   For example, QCPLayoutElement/QCPLayout hierarchies may be created independently of any
   QCustomPlot at first. When they are then added to a layout inside the QCustomPlot, the top level
@@ -663,7 +669,7 @@ QRect QCPLayerable::clipRect() const {
     if (mParentPlot)
         return mParentPlot->viewport();
     else
-        return QRect();
+        return {};
 }
 
 /*! \internal
@@ -694,7 +700,8 @@ QRect QCPLayerable::clipRect() const {
   
   \see selectTest, deselectEvent
 */
-void QCPLayerable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+void
+QCPLayerable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
     Q_UNUSED(event)
     Q_UNUSED(additive)
     Q_UNUSED(details)
@@ -753,7 +760,7 @@ void QCPLayerable::mousePressEvent(QMouseEvent *event, const QVariant &details) 
 
   The current pixel position of the cursor on the QCustomPlot widget is accessible via \c
   event->pos(). The parameter \a startPos indicates the position where the initial \ref
-  mousePressEvent occured, that started the mouse interaction.
+  mousePressEvent occurred, that started the mouse interaction.
 
   The default implementation does nothing.
 
@@ -770,7 +777,7 @@ void QCPLayerable::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos) {
 
   The current pixel position of the cursor on the QCustomPlot widget is accessible via \c
   event->pos(). The parameter \a startPos indicates the position where the initial \ref
-  mousePressEvent occured, that started the mouse interaction.
+  mousePressEvent occurred, that started the mouse interaction.
 
   The default implementation does nothing.
 
@@ -820,10 +827,10 @@ void QCPLayerable::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &det
   The current pixel position of the cursor on the QCustomPlot widget is accessible via \c
   event->pos().
 
-  The \c event->delta() indicates how far the mouse wheel was turned, which is usually +/- 120 for
-  single rotation steps. However, if the mouse wheel is turned rapidly, multiple steps may
-  accumulate to one event, making \c event->delta() larger. On the other hand, if the wheel has
-  very smooth steps or none at all, the delta may be smaller.
+  The \c event->angleDelta() indicates how far the mouse wheel was turned, which is usually +/- 120
+  for single rotation steps. However, if the mouse wheel is turned rapidly, multiple steps may
+  accumulate to one event, making the delta larger. On the other hand, if the wheel has very smooth
+  steps or none at all, the delta may be smaller.
 
   The default implementation does nothing.
 

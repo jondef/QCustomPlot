@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "paintbuffer.h"
@@ -158,7 +158,7 @@ void QCPAbstractPaintBuffer::setInvalidated(bool invalidated) {
 }
 
 /*!
-  Sets the the device pixel ratio to \a ratio. This is useful to render on high-DPI output devices.
+  Sets the device pixel ratio to \a ratio. This is useful to render on high-DPI output devices.
   The ratio is automatically set to the device pixel ratio used by the parent QCustomPlot instance.
 
   The buffer is reallocated (by calling \ref reallocateBuffer), so any painters that were obtained
@@ -204,7 +204,9 @@ QCPPaintBufferPixmap::~QCPPaintBufferPixmap() {
 /* inherits documentation from base class */
 QCPPainter *QCPPaintBufferPixmap::startPainting() {
     QCPPainter *result = new QCPPainter(&mBuffer);
-    result->setRenderHint(QPainter::Antialiasing);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    result->setRenderHint(QPainter::HighQualityAntialiasing);
+#endif
     return result;
 }
 
@@ -359,26 +361,31 @@ void QCPPaintBufferGlPbuffer::reallocateBuffer()
   QCustomPlot::setupOpenGl and the context and paint device are managed by the parent QCustomPlot
   instance.
 */
-QCPPaintBufferGlFbo::QCPPaintBufferGlFbo(const QSize &size, double devicePixelRatio, QWeakPointer<QOpenGLContext> glContext, QWeakPointer<QOpenGLPaintDevice> glPaintDevice) :
-  QCPAbstractPaintBuffer(size, devicePixelRatio),
-  mGlContext(glContext),
-  mGlPaintDevice(glPaintDevice),
-  mGlFrameBuffer(0)
-{
-  QCPPaintBufferGlFbo::reallocateBuffer();
+QCPPaintBufferGlFbo::QCPPaintBufferGlFbo(const QSize &size, double devicePixelRatio,
+                                         QWeakPointer<QOpenGLContext> glContext,
+                                         QWeakPointer<QOpenGLPaintDevice> glPaintDevice) :
+        QCPAbstractPaintBuffer(size, devicePixelRatio),
+        mGlContext(glContext),
+        mGlPaintDevice(glPaintDevice),
+        mGlFrameBuffer(0) {
+    QCPPaintBufferGlFbo::reallocateBuffer();
 }
 
-QCPPaintBufferGlFbo::~QCPPaintBufferGlFbo()
-{
-  if (mGlFrameBuffer)
-    delete mGlFrameBuffer;
+QCPPaintBufferGlFbo::~QCPPaintBufferGlFbo() {
+    if (mGlFrameBuffer)
+        delete mGlFrameBuffer;
 }
 
 /* inherits documentation from base class */
-QCPPainter *QCPPaintBufferGlFbo::startPainting()
-{
-    if (mGlPaintDevice.isNull()) {
+QCPPainter *QCPPaintBufferGlFbo::startPainting() {
+    QSharedPointer<QOpenGLPaintDevice> paintDevice = mGlPaintDevice.toStrongRef();
+    QSharedPointer<QOpenGLContext> context = mGlContext.toStrongRef();
+    if (!paintDevice) {
         qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
+        return 0;
+    }
+    if (!context) {
+        qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
         return 0;
     }
     if (!mGlFrameBuffer) {
@@ -386,42 +393,41 @@ QCPPainter *QCPPaintBufferGlFbo::startPainting()
         return 0;
     }
 
-    if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
-        mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    if (QOpenGLContext::currentContext() != context.data())
+        context->makeCurrent(context->surface());
     mGlFrameBuffer->bind();
-    QCPPainter *result = new QCPPainter(mGlPaintDevice.toStrongRef().data());
-    result->setRenderHint(QPainter::Antialiasing);
+    QCPPainter *result = new QCPPainter(paintDevice.data());
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    result->setRenderHint(QPainter::HighQualityAntialiasing);
+#endif
     return result;
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferGlFbo::donePainting()
-{
-  if (mGlFrameBuffer && mGlFrameBuffer->isBound())
-    mGlFrameBuffer->release();
-  else
-    qDebug() << Q_FUNC_INFO << "Either OpenGL frame buffer not valid or was not bound";
+void QCPPaintBufferGlFbo::donePainting() {
+    if (mGlFrameBuffer && mGlFrameBuffer->isBound())
+        mGlFrameBuffer->release();
+    else
+        qDebug() << Q_FUNC_INFO << "Either OpenGL frame buffer not valid or was not bound";
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferGlFbo::draw(QCPPainter *painter) const
-{
-  if (!painter || !painter->isActive())
-  {
-    qDebug() << Q_FUNC_INFO << "invalid or inactive painter passed";
-    return;
-  }
-  if (!mGlFrameBuffer)
-  {
-    qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
-    return;
-  }
-  painter->drawImage(0, 0, mGlFrameBuffer->toImage());
+void QCPPaintBufferGlFbo::draw(QCPPainter *painter) const {
+    if (!painter || !painter->isActive()) {
+        qDebug() << Q_FUNC_INFO << "invalid or inactive painter passed";
+        return;
+    }
+    if (!mGlFrameBuffer) {
+        qDebug() << Q_FUNC_INFO << "OpenGL frame buffer object doesn't exist, reallocateBuffer was not called?";
+        return;
+    }
+    painter->drawImage(0, 0, mGlFrameBuffer->toImage());
 }
 
 /* inherits documentation from base class */
 void QCPPaintBufferGlFbo::clear(const QColor &color) {
-    if (mGlContext.isNull()) {
+    QSharedPointer<QOpenGLContext> context = mGlContext.toStrongRef();
+    if (!context) {
         qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
         return;
     }
@@ -430,8 +436,8 @@ void QCPPaintBufferGlFbo::clear(const QColor &color) {
         return;
     }
 
-    if (QOpenGLContext::currentContext() != mGlContext.toStrongRef().data())
-        mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    if (QOpenGLContext::currentContext() != context.data())
+        context->makeCurrent(context->surface());
     mGlFrameBuffer->bind();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
@@ -440,36 +446,37 @@ void QCPPaintBufferGlFbo::clear(const QColor &color) {
 }
 
 /* inherits documentation from base class */
-void QCPPaintBufferGlFbo::reallocateBuffer()
-{
-  // release and delete possibly existing framebuffer:
-  if (mGlFrameBuffer)
-  {
-    if (mGlFrameBuffer->isBound())
-      mGlFrameBuffer->release();
-    delete mGlFrameBuffer;
-    mGlFrameBuffer = 0;
-  }
+void QCPPaintBufferGlFbo::reallocateBuffer() {
+    // release and delete possibly existing framebuffer:
+    if (mGlFrameBuffer) {
+        if (mGlFrameBuffer->isBound())
+            mGlFrameBuffer->release();
+        delete mGlFrameBuffer;
+        mGlFrameBuffer = 0;
+    }
 
-    if (mGlContext.isNull()) {
-        qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
+    QSharedPointer<QOpenGLPaintDevice> paintDevice = mGlPaintDevice.toStrongRef();
+    QSharedPointer<QOpenGLContext> context = mGlContext.toStrongRef();
+    if (!paintDevice) {
+        qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
         return;
     }
-    if (mGlPaintDevice.isNull()) {
-        qDebug() << Q_FUNC_INFO << "OpenGL paint device doesn't exist";
+    if (!context) {
+        qDebug() << Q_FUNC_INFO << "OpenGL context doesn't exist";
         return;
     }
 
     // create new fbo with appropriate size:
-    mGlContext.toStrongRef().data()->makeCurrent(mGlContext.toStrongRef().data()->surface());
+    context->makeCurrent(context->surface());
     QOpenGLFramebufferObjectFormat frameBufferFormat;
-    frameBufferFormat.setSamples(mGlContext.toStrongRef().data()->format().samples());
+    frameBufferFormat.setSamples(context->format().samples());
     frameBufferFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
     mGlFrameBuffer = new QOpenGLFramebufferObject(mSize * mDevicePixelRatio, frameBufferFormat);
-    if (mGlPaintDevice.toStrongRef().data()->size() != mSize * mDevicePixelRatio)
-        mGlPaintDevice.toStrongRef().data()->setSize(mSize * mDevicePixelRatio);
+    if (paintDevice->size() != mSize * mDevicePixelRatio)
+        paintDevice->setSize(mSize * mDevicePixelRatio);
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-    mGlPaintDevice.toStrongRef().data()->setDevicePixelRatio(mDevicePixelRatio);
+    paintDevice->setDevicePixelRatio(mDevicePixelRatio);
 #endif
 }
+
 #endif // QCP_OPENGL_FBO

@@ -291,7 +291,8 @@ void QCPDataContainer<DataType>::add(const QVector<DataType> &data, bool already
 template<class DataType>
 void QCPDataContainer<DataType>::add(const DataType &data) {
     if (isEmpty() ||
-        !qcpLessThanSortKey<DataType>(data, *(constEnd() - 1))) // quickly handle appends if new data key is greater or equal to existing ones
+        !qcpLessThanSortKey<DataType>(data, *(constEnd() -
+                                              1))) // quickly handle appends if new data key is greater or equal to existing ones
     {
         mData.append(data);
     } else if (qcpLessThanSortKey<DataType>(data, *constBegin()))  // quickly handle prepends using preallocated space
@@ -302,7 +303,8 @@ void QCPDataContainer<DataType>::add(const DataType &data) {
         *begin() = data;
     } else // handle inserts, maintaining sorted keys
     {
-        QCPDataContainer<DataType>::iterator insertionPoint = std::lower_bound(begin(), end(), data, qcpLessThanSortKey<DataType>);
+        QCPDataContainer<DataType>::iterator insertionPoint = std::lower_bound(begin(), end(), data,
+                                                                               qcpLessThanSortKey<DataType>);
         mData.insert(insertionPoint, data);
     }
 }
@@ -315,8 +317,10 @@ void QCPDataContainer<DataType>::add(const DataType &data) {
 template<class DataType>
 void QCPDataContainer<DataType>::removeBefore(double sortKey) {
     QCPDataContainer<DataType>::iterator it = begin();
-    QCPDataContainer<DataType>::iterator itEnd = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKey), qcpLessThanSortKey<DataType>);
-    mPreallocSize += itEnd - it; // don't actually delete, just add it to the preallocated block (if it gets too large, squeeze will take care of it)
+    QCPDataContainer<DataType>::iterator itEnd = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKey),
+                                                                  qcpLessThanSortKey<DataType>);
+    mPreallocSize += itEnd -
+                     it; // don't actually delete, just add it to the preallocated block (if it gets too large, squeeze will take care of it)
     if (mAutoSqueeze)
         performAutoSqueeze();
 }
@@ -328,7 +332,8 @@ void QCPDataContainer<DataType>::removeBefore(double sortKey) {
 */
 template<class DataType>
 void QCPDataContainer<DataType>::removeAfter(double sortKey) {
-    QCPDataContainer<DataType>::iterator it = std::upper_bound(begin(), end(), DataType::fromSortKey(sortKey), qcpLessThanSortKey<DataType>);
+    QCPDataContainer<DataType>::iterator it = std::upper_bound(begin(), end(), DataType::fromSortKey(sortKey),
+                                                               qcpLessThanSortKey<DataType>);
     QCPDataContainer<DataType>::iterator itEnd = end();
     mData.erase(it, itEnd); // typically adds it to the postallocated block
     if (mAutoSqueeze)
@@ -347,8 +352,10 @@ void QCPDataContainer<DataType>::remove(double sortKeyFrom, double sortKeyTo) {
     if (sortKeyFrom >= sortKeyTo || isEmpty())
         return;
 
-    QCPDataContainer<DataType>::iterator it = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKeyFrom), qcpLessThanSortKey<DataType>);
-    QCPDataContainer<DataType>::iterator itEnd = std::upper_bound(it, end(), DataType::fromSortKey(sortKeyTo), qcpLessThanSortKey<DataType>);
+    QCPDataContainer<DataType>::iterator it = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKeyFrom),
+                                                               qcpLessThanSortKey<DataType>);
+    QCPDataContainer<DataType>::iterator itEnd = std::upper_bound(it, end(), DataType::fromSortKey(sortKeyTo),
+                                                                  qcpLessThanSortKey<DataType>);
     mData.erase(it, itEnd);
     if (mAutoSqueeze)
         performAutoSqueeze();
@@ -365,7 +372,8 @@ void QCPDataContainer<DataType>::remove(double sortKeyFrom, double sortKeyTo) {
 */
 template<class DataType>
 void QCPDataContainer<DataType>::remove(double sortKey) {
-    QCPDataContainer::iterator it = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKey), qcpLessThanSortKey<DataType>);
+    QCPDataContainer::iterator it = std::lower_bound(begin(), end(), DataType::fromSortKey(sortKey),
+                                                     qcpLessThanSortKey<DataType>);
     if (it != end() && it->sortKey() == sortKey) {
         if (it == begin())
             ++mPreallocSize; // don't actually delete, just add it to the preallocated block (if it gets too large, squeeze will take care of it)
@@ -444,13 +452,16 @@ void QCPDataContainer<DataType>::squeeze(bool preAllocation, bool postAllocation
   \see findEnd, QCPPlottableInterface1D::findBegin
 */
 template<class DataType>
-typename QCPDataContainer<DataType>::const_iterator QCPDataContainer<DataType>::findBegin(double sortKey, bool expandedRange) const {
+typename QCPDataContainer<DataType>::const_iterator
+QCPDataContainer<DataType>::findBegin(double sortKey, bool expandedRange) const {
     if (isEmpty())
         return constEnd();
 
-    QCPDataContainer<DataType>::const_iterator it = std::lower_bound(constBegin(), constEnd(), DataType::fromSortKey(sortKey),
+    QCPDataContainer<DataType>::const_iterator it = std::lower_bound(constBegin(), constEnd(),
+                                                                     DataType::fromSortKey(sortKey),
                                                                      qcpLessThanSortKey<DataType>);
-    if (expandedRange && it != constBegin()) // also covers it == constEnd case, and we know --constEnd is valid because mData isn't empty
+    if (expandedRange && it !=
+                         constBegin()) // also covers it == constEnd case, and we know --constEnd is valid because mData isn't empty
         --it;
     return it;
 }
@@ -471,11 +482,13 @@ typename QCPDataContainer<DataType>::const_iterator QCPDataContainer<DataType>::
   \see findBegin, QCPPlottableInterface1D::findEnd
 */
 template<class DataType>
-typename QCPDataContainer<DataType>::const_iterator QCPDataContainer<DataType>::findEnd(double sortKey, bool expandedRange) const {
+typename QCPDataContainer<DataType>::const_iterator
+QCPDataContainer<DataType>::findEnd(double sortKey, bool expandedRange) const {
     if (isEmpty())
         return constEnd();
 
-    QCPDataContainer<DataType>::const_iterator it = std::upper_bound(constBegin(), constEnd(), DataType::fromSortKey(sortKey),
+    QCPDataContainer<DataType>::const_iterator it = std::upper_bound(constBegin(), constEnd(),
+                                                                     DataType::fromSortKey(sortKey),
                                                                      qcpLessThanSortKey<DataType>);
     if (expandedRange && it != constEnd())
         ++it;
@@ -605,7 +618,8 @@ QCPRange QCPDataContainer<DataType>::keyRange(bool &foundRange, QCP::SignDomain 
   \see keyRange
 */
 template<class DataType>
-QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomain signDomain, const QCPRange &inKeyRange) {
+QCPRange
+QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomain signDomain, const QCPRange &inKeyRange) {
     if (isEmpty()) {
         foundRange = false;
         return QCPRange();
@@ -681,7 +695,8 @@ QCPRange QCPDataContainer<DataType>::valueRange(bool &foundRange, QCP::SignDomai
   valid range.
 */
 template<class DataType>
-void QCPDataContainer<DataType>::limitIteratorsToDataRange(const_iterator &begin, const_iterator &end, const QCPDataRange &dataRange) const {
+void QCPDataContainer<DataType>::limitIteratorsToDataRange(const_iterator &begin, const_iterator &end,
+                                                           const QCPDataRange &dataRange) const {
     QCPDataRange iteratorRange(begin - constBegin(), end - constBegin());
     iteratorRange = iteratorRange.bounded(dataRange.bounded(this->dataRange()));
     begin = constBegin() + iteratorRange.begin();
@@ -704,7 +719,8 @@ void QCPDataContainer<DataType>::preallocateGrow(int minimumPreallocSize) {
 
     int newPreallocSize = minimumPreallocSize;
     newPreallocSize +=
-            (1u << qBound(4, mPreallocIteration + 4, 15)) - 12; // do 4 up to 32768-12 preallocation, doubling in each intermediate iteration
+            (1u << qBound(4, mPreallocIteration + 4, 15)) -
+            12; // do 4 up to 32768-12 preallocation, doubling in each intermediate iteration
     ++mPreallocIteration;
 
     int sizeDifference = newPreallocSize - mPreallocSize;
@@ -736,12 +752,15 @@ void QCPDataContainer<DataType>::performAutoSqueeze() {
     bool shrinkPreAllocation = false;
     if (totalAlloc > 650000) // if allocation is larger, shrink earlier with respect to total used size
     {
-        shrinkPostAllocation = postAllocSize > usedSize * 1.5; // QVector grow strategy is 2^n for static data. Watch out not to oscillate!
+        shrinkPostAllocation = postAllocSize > usedSize *
+                                               1.5; // QVector grow strategy is 2^n for static data. Watch out not to oscillate!
         shrinkPreAllocation = mPreallocSize * 10 > usedSize;
-    } else if (totalAlloc > 1000) // below 10 MiB raw data be generous with preallocated memory, below 1k points don't even bother
+    } else if (totalAlloc >
+               1000) // below 10 MiB raw data be generous with preallocated memory, below 1k points don't even bother
     {
         shrinkPostAllocation = postAllocSize > usedSize * 5;
-        shrinkPreAllocation = mPreallocSize > usedSize * 1.5; // preallocation can grow into postallocation, so can be smaller
+        shrinkPreAllocation =
+                mPreallocSize > usedSize * 1.5; // preallocation can grow into postallocation, so can be smaller
     }
 
     if (shrinkPreAllocation || shrinkPostAllocation)

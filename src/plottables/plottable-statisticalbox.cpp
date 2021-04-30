@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-statisticalbox.h"
@@ -138,8 +138,8 @@ QCPStatisticalBoxData::QCPStatisticalBoxData() :
   Constructs a data point with the specified \a key, \a minimum, \a lowerQuartile, \a median, \a
   upperQuartile, \a maximum and optionally a number of \a outliers.
 */
-QCPStatisticalBoxData::QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum,
-                                             const QVector<double> &outliers) :
+QCPStatisticalBoxData::QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median,
+                                             double upperQuartile, double maximum, const QVector<double> &outliers) :
         key(key),
         minimum(minimum),
         lowerQuartile(lowerQuartile),
@@ -267,8 +267,9 @@ void QCPStatisticalBox::setData(QSharedPointer<QCPStatisticalBoxDataContainer> d
   
   \see addData
 */
-void QCPStatisticalBox::setData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile,
-                                const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum,
+void QCPStatisticalBox::setData(const QVector<double> &keys, const QVector<double> &minimum,
+                                const QVector<double> &lowerQuartile, const QVector<double> &median,
+                                const QVector<double> &upperQuartile, const QVector<double> &maximum,
                                 bool alreadySorted) {
     mDataContainer->clear();
     addData(keys, minimum, lowerQuartile, median, upperQuartile, maximum, alreadySorted);
@@ -362,15 +363,20 @@ void QCPStatisticalBox::setOutlierStyle(const QCPScatterStyle &style) {
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile,
-                                const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum,
+void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<double> &minimum,
+                                const QVector<double> &lowerQuartile, const QVector<double> &median,
+                                const QVector<double> &upperQuartile, const QVector<double> &maximum,
                                 bool alreadySorted) {
-    if (keys.size() != minimum.size() || minimum.size() != lowerQuartile.size() || lowerQuartile.size() != median.size() ||
-        median.size() != upperQuartile.size() || upperQuartile.size() != maximum.size() || maximum.size() != keys.size())
+    if (keys.size() != minimum.size() || minimum.size() != lowerQuartile.size() ||
+        lowerQuartile.size() != median.size() ||
+        median.size() != upperQuartile.size() || upperQuartile.size() != maximum.size() ||
+        maximum.size() != keys.size())
         qDebug() << Q_FUNC_INFO << "keys, minimum, lowerQuartile, median, upperQuartile, maximum have different sizes:"
-                 << keys.size() << minimum.size() << lowerQuartile.size() << median.size() << upperQuartile.size() << maximum.size();
-    const int n = qMin(keys.size(),
-                       qMin(minimum.size(), qMin(lowerQuartile.size(), qMin(median.size(), qMin(upperQuartile.size(), maximum.size())))));
+                 << keys.size() << minimum.size() << lowerQuartile.size() << median.size() << upperQuartile.size()
+                 << maximum.size();
+    const int n = qMin(keys.size(), qMin(minimum.size(), qMin(lowerQuartile.size(), qMin(median.size(),
+                                                                                         qMin(upperQuartile.size(),
+                                                                                              maximum.size())))));
     QVector<QCPStatisticalBoxData> tempData(n);
     QVector<QCPStatisticalBoxData>::iterator it = tempData.begin();
     const QVector<QCPStatisticalBoxData>::iterator itEnd = tempData.end();
@@ -396,8 +402,8 @@ void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<doubl
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPStatisticalBox::addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum,
-                                const QVector<double> &outliers) {
+void QCPStatisticalBox::addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile,
+                                double maximum, const QVector<double> &outliers) {
     mDataContainer->add(QCPStatisticalBoxData(key, minimum, lowerQuartile, median, upperQuartile, maximum, outliers));
 }
 
@@ -416,7 +422,9 @@ QCPDataSelection QCPStatisticalBox::selectTestRect(const QRectF &rect, bool only
 
     for (QCPStatisticalBoxDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
         if (rect.intersects(getQuartileBox(it)))
-            result.addDataRange(QCPDataRange(it - mDataContainer->constBegin(), it - mDataContainer->constBegin() + 1), false);
+            result.addDataRange(
+                    QCPDataRange(int(it - mDataContainer->constBegin()), int(it - mDataContainer->constBegin() + 1)),
+                    false);
     }
     result.simplify();
     return result;
@@ -437,7 +445,8 @@ double QCPStatisticalBox::selectTest(const QPointF &pos, bool onlySelectable, QV
     if (!mKeyAxis || !mValueAxis)
         return -1;
 
-    if (mKeyAxis->axisRect()->rect().contains(pos.toPoint())) {
+    if (mKeyAxis->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
         // get visible data range:
         QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
         QCPStatisticalBoxDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
@@ -446,25 +455,27 @@ double QCPStatisticalBox::selectTest(const QPointF &pos, bool onlySelectable, QV
         for (QCPStatisticalBoxDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
             if (getQuartileBox(it).contains(pos)) // quartile box
             {
-                double currentDistSqr = mParentPlot->selectionTolerance() * 0.99 * mParentPlot->selectionTolerance() * 0.99;
+                double currentDistSqr =
+                        mParentPlot->selectionTolerance() * 0.99 * mParentPlot->selectionTolerance() * 0.99;
                 if (currentDistSqr < minDistSqr) {
                     minDistSqr = currentDistSqr;
                     closestDataPoint = it;
                 }
             } else // whiskers
             {
-                const QVector<QLineF> whiskerBackbones(getWhiskerBackboneLines(it));
-                for (int i = 0; i < whiskerBackbones.size(); ++i) {
-                    double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(whiskerBackbones.at(i));
-                    if (currentDistSqr < minDistSqr) {
-                        minDistSqr = currentDistSqr;
-                        closestDataPoint = it;
+                const QVector<QLineF> whiskerBackbones = getWhiskerBackboneLines(it);
+                const QCPVector2D posVec(pos);
+                        foreach (const QLineF &backbone, whiskerBackbones) {
+                        double currentDistSqr = posVec.distanceSquaredToLine(backbone);
+                        if (currentDistSqr < minDistSqr) {
+                            minDistSqr = currentDistSqr;
+                            closestDataPoint = it;
+                        }
                     }
-                }
             }
         }
         if (details) {
-            int pointIndex = closestDataPoint - mDataContainer->constBegin();
+            int pointIndex = int(closestDataPoint - mDataContainer->constBegin());
             details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
         }
         return qSqrt(minDistSqr);
@@ -486,7 +497,8 @@ QCPRange QCPStatisticalBox::getKeyRange(bool &foundRange, QCP::SignDomain inSign
 }
 
 /* inherits documentation from base class */
-QCPRange QCPStatisticalBox::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
+QCPRange
+QCPStatisticalBox::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
     return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
 }
 
@@ -575,7 +587,8 @@ void QCPStatisticalBox::drawStatisticalBox(QCPPainter *painter, QCPStatisticalBo
     painter->save();
     painter->setClipRect(quartileBox, Qt::IntersectClip);
     painter->setPen(mMedianPen);
-    painter->drawLine(QLineF(coordsToPixels(it->key - mWidth * 0.5, it->median), coordsToPixels(it->key + mWidth * 0.5, it->median)));
+    painter->drawLine(QLineF(coordsToPixels(it->key - mWidth * 0.5, it->median),
+                             coordsToPixels(it->key + mWidth * 0.5, it->median)));
     painter->restore();
     // draw whisker lines:
     applyAntialiasingHint(painter, mWhiskerAntialiased, QCP::aePlottables);
@@ -612,9 +625,10 @@ void QCPStatisticalBox::getVisibleDataBounds(QCPStatisticalBoxDataContainer::con
         end = mDataContainer->constEnd();
         return;
     }
-    begin = mDataContainer->findBegin(
-            mKeyAxis.data()->range().lower - mWidth * 0.5); // subtract half width of box to include partially visible data points
-    end = mDataContainer->findEnd(mKeyAxis.data()->range().upper + mWidth * 0.5); // add half width of box to include partially visible data points
+    begin = mDataContainer->findBegin(mKeyAxis.data()->range().lower - mWidth *
+                                                                       0.5); // subtract half width of box to include partially visible data points
+    end = mDataContainer->findEnd(mKeyAxis.data()->range().upper +
+                                  mWidth * 0.5); // add half width of box to include partially visible data points
 }
 
 /*!  \internal
@@ -641,8 +655,10 @@ QRectF QCPStatisticalBox::getQuartileBox(QCPStatisticalBoxDataContainer::const_i
 */
 QVector<QLineF> QCPStatisticalBox::getWhiskerBackboneLines(QCPStatisticalBoxDataContainer::const_iterator it) const {
     QVector<QLineF> result(2);
-    result[0].setPoints(coordsToPixels(it->key, it->lowerQuartile), coordsToPixels(it->key, it->minimum)); // min backbone
-    result[1].setPoints(coordsToPixels(it->key, it->upperQuartile), coordsToPixels(it->key, it->maximum)); // max backbone
+    result[0].setPoints(coordsToPixels(it->key, it->lowerQuartile),
+                        coordsToPixels(it->key, it->minimum)); // min backbone
+    result[1].setPoints(coordsToPixels(it->key, it->upperQuartile),
+                        coordsToPixels(it->key, it->maximum)); // max backbone
     return result;
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "axistickertext.h"
@@ -141,7 +141,11 @@ void QCPAxisTickerText::addTick(double position, const QString &label) {
   \see addTick, setTicks, clear
 */
 void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     mTicks.unite(ticks);
+#else
+    mTicks.insert(ticks);
+#endif
 }
 
 /*! \overload
@@ -157,7 +161,8 @@ void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks) {
 */
 void QCPAxisTickerText::addTicks(const QVector<double> &positions, const QVector<QString> &labels) {
     if (positions.size() != labels.size())
-        qDebug() << Q_FUNC_INFO << "passed unequal length vectors for positions and labels:" << positions.size() << labels.size();
+        qDebug() << Q_FUNC_INFO << "passed unequal length vectors for positions and labels:" << positions.size()
+                 << labels.size();
     int n = qMin(positions.size(), labels.size());
     for (int i = 0; i < n; ++i)
         mTicks.insert(positions.at(i), labels.at(i));

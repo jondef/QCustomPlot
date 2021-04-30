@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_LINEENDING_H
@@ -35,27 +35,36 @@ class QCP_LIB_DECL QCPLineEnding {
 Q_GADGET
 public:
     /*!
-    Defines the type of ending decoration for line-like items, e.g. an arrow.
+      Defines the type of ending decoration for line-like items, e.g. an arrow.
 
-    \image html QCPLineEnding.png
+      \image html QCPLineEnding.png
 
-    The width and length of these decorations can be controlled with the functions \ref setWidth
-    and \ref setLength. Some decorations like \ref esDisc, \ref esSquare, \ref esDiamond and \ref esBar only
-    support a width, the length property is ignored.
+      The width and length of these decorations can be controlled with the functions \ref setWidth
+      and \ref setLength. Some decorations like \ref esDisc, \ref esSquare, \ref esDiamond and \ref esBar only
+      support a width, the length property is ignored.
 
-    \see QCPItemLine::setHead, QCPItemLine::setTail, QCPItemCurve::setHead, QCPItemCurve::setTail, QCPAxis::setLowerEnding, QCPAxis::setUpperEnding
-  */
+      \see QCPItemLine::setHead, QCPItemLine::setTail, QCPItemCurve::setHead, QCPItemCurve::setTail, QCPAxis::setLowerEnding, QCPAxis::setUpperEnding
+    */
     enum EndingStyle {
         esNone          ///< No ending decoration
-        , esFlatArrow    ///< A filled arrow head with a straight/flat back (a triangle)
-        , esSpikeArrow   ///< A filled arrow head with an indented back
-        , esLineArrow    ///< A non-filled arrow head with open back
-        , esDisc         ///< A filled circle
-        , esSquare       ///< A filled square
-        , esDiamond      ///< A filled diamond (45 degrees rotated square)
-        , esBar          ///< A bar perpendicular to the line
-        , esHalfBar      ///< A bar perpendicular to the line, pointing out to only one side (to which side can be changed with \ref setInverted)
-        , esSkewedBar    ///< A bar that is skewed (skew controllable via \ref setLength)
+        ,
+        esFlatArrow    ///< A filled arrow head with a straight/flat back (a triangle)
+        ,
+        esSpikeArrow   ///< A filled arrow head with an indented back
+        ,
+        esLineArrow    ///< A non-filled arrow head with open back
+        ,
+        esDisc         ///< A filled circle
+        ,
+        esSquare       ///< A filled square
+        ,
+        esDiamond      ///< A filled diamond (45 degrees rotated square)
+        ,
+        esBar          ///< A bar perpendicular to the line
+        ,
+        esHalfBar      ///< A bar perpendicular to the line, pointing out to only one side (to which side can be changed with \ref setInverted)
+        ,
+        esSkewedBar    ///< A bar that is skewed (skew controllable via \ref setLength)
     };
     Q_ENUMS(EndingStyle)
 

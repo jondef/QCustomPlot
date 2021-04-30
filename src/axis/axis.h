@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,14 +19,20 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_AXIS_H
 #define QCP_AXIS_H
 
 #include "../global.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+Q_MOC_INCLUDE(
+        "layoutelements/layoutelement-axisrect.h") // Qt6 needs this if using forward declared types in Q_PROPERTY; path is relative to .pro
+#endif
+
 #include "range.h"
 #include "../vector2d.h"
 #include "../layer.h"
@@ -161,9 +167,9 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-    Defines at which side of the axis rect the axis will appear. This also affects how the tick
-    marks are drawn, on which side the labels are placed etc.
-  */
+      Defines at which side of the axis rect the axis will appear. This also affects how the tick
+      marks are drawn, on which side the labels are placed etc.
+    */
     enum AxisType {
         atLeft = 0x01  ///< <tt>0x01</tt> Axis is vertical and on the left side of the axis rect
         , atRight = 0x02  ///< <tt>0x02</tt> Axis is vertical and on the right side of the axis rect
@@ -174,19 +180,19 @@ public:
     Q_FLAGS(AxisTypes)
     Q_DECLARE_FLAGS(AxisTypes, AxisType)
     /*!
-    Defines on which side of the axis the tick labels (numbers) shall appear.
+      Defines on which side of the axis the tick labels (numbers) shall appear.
 
-    \see setTickLabelSide
-  */
+      \see setTickLabelSide
+    */
     enum LabelSide {
         lsInside    ///< Tick labels will be displayed inside the axis rect and clipped to the inner axis rect
         , lsOutside  ///< Tick labels will be displayed outside the axis rect
     };
     Q_ENUMS(LabelSide)
     /*!
-    Defines the scale of an axis.
-    \see setScaleType
-  */
+      Defines the scale of an axis.
+      \see setScaleType
+    */
     enum ScaleType {
         stLinear       ///< Linear scaling
         ,
@@ -194,9 +200,9 @@ public:
     };
     Q_ENUMS(ScaleType)
     /*!
-    Defines the selectable parts of an axis.
-    \see setSelectableParts, setSelectedParts
-  */
+      Defines the selectable parts of an axis.
+      \see setSelectableParts, setSelectedParts
+    */
     enum SelectablePart {
         spNone = 0      ///< None of the selectable parts
         , spAxis = 0x001  ///< The axis backbone and tick marks
@@ -209,7 +215,7 @@ public:
 
     explicit QCPAxis(QCPAxisRect *parent, AxisType type);
 
-    virtual ~QCPAxis();
+    virtual ~QCPAxis() Q_DECL_OVERRIDE;
 
     // getters:
     AxisType axisType() const { return mAxisType; }
@@ -388,7 +394,8 @@ public:
     void setUpperEnding(const QCPLineEnding &ending);
 
     // reimplemented virtual methods:
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE;
 
     // non-property methods:
     Qt::Orientation orientation() const { return mOrientation; }
@@ -419,7 +426,9 @@ public:
 
     static AxisType marginSideToAxisType(QCP::MarginSide side);
 
-    static Qt::Orientation orientation(AxisType type) { return type == atBottom || type == atTop ? Qt::Horizontal : Qt::Vertical; }
+    static Qt::Orientation orientation(AxisType type) {
+        return type == atBottom || type == atTop ? Qt::Horizontal : Qt::Vertical;
+    }
 
     static AxisType opposite(AxisType type);
 
@@ -496,7 +505,8 @@ protected:
     virtual QCP::Interaction selectionCategory() const Q_DECL_OVERRIDE;
 
     // events:
-    virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) Q_DECL_OVERRIDE;
+    virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details,
+                             bool *selectionStateChanged) Q_DECL_OVERRIDE;
 
     virtual void deselectEvent(bool *selectionStateChanged) Q_DECL_OVERRIDE;
 
@@ -557,7 +567,7 @@ public:
 
     virtual void draw(QCPPainter *painter);
 
-    virtual int size() const;
+    virtual int size();
 
     void clearCache();
 
@@ -585,7 +595,7 @@ public:
     QFont tickLabelFont;
     QColor tickLabelColor;
     QRect axisRect, viewportRect;
-    double offset; // directly accessed by QCPAxis setters/getters
+    int offset; // directly accessed by QCPAxis setters/getters
     bool abbreviateDecimalPowers;
     bool reversedEndings;
 
@@ -610,7 +620,8 @@ protected:
 
     virtual QByteArray generateLabelParameterHash() const;
 
-    virtual void placeTickLabel(QCPPainter *painter, double position, int distanceToAxis, const QString &text, QSize *tickLabelsSize);
+    virtual void placeTickLabel(QCPPainter *painter, double position, int distanceToAxis, const QString &text,
+                                QSize *tickLabelsSize);
 
     virtual void drawTickLabel(QCPPainter *painter, double x, double y, const TickLabelData &labelData) const;
 

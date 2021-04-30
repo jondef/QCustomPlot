@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable.h"
@@ -67,9 +67,8 @@
 QCPSelectionDecorator::QCPSelectionDecorator() :
         mPen(QColor(80, 80, 255), 2.5),
         mBrush(Qt::NoBrush),
-        mScatterStyle(),
         mUsedScatterProperties(QCPScatterStyle::spNone),
-        mPlottable(0) {
+        mPlottable(nullptr) {
 }
 
 QCPSelectionDecorator::~QCPSelectionDecorator() {
@@ -96,7 +95,8 @@ void QCPSelectionDecorator::setBrush(const QBrush &brush) {
   \a usedProperties specifies which parts of the passed \a scatterStyle will be used by the
   plottable. The used properties can also be changed via \ref setUsedScatterProperties.
 */
-void QCPSelectionDecorator::setScatterStyle(const QCPScatterStyle &scatterStyle, QCPScatterStyle::ScatterProperties usedProperties) {
+void QCPSelectionDecorator::setScatterStyle(const QCPScatterStyle &scatterStyle,
+                                            QCPScatterStyle::ScatterProperties usedProperties) {
     mScatterStyle = scatterStyle;
     setUsedScatterProperties(usedProperties);
 }
@@ -188,7 +188,8 @@ bool QCPSelectionDecorator::registerWithPlottable(QCPAbstractPlottable *plottabl
         mPlottable = plottable;
         return true;
     } else {
-        qDebug() << Q_FUNC_INFO << "This selection decorator is already registered with plottable:" << reinterpret_cast<quintptr>(mPlottable);
+        qDebug() << Q_FUNC_INFO << "This selection decorator is already registered with plottable:"
+                 << reinterpret_cast<quintptr>(mPlottable);
         return false;
     }
 }
@@ -261,7 +262,7 @@ bool QCPSelectionDecorator::registerWithPlottable(QCPAbstractPlottable *plottabl
   </tr><tr>
     <td>QPointer<\ref QCPAxis> \b mKeyAxis, \b mValueAxis</td>
     <td>The key and value axes this plottable is attached to. Call their QCPAxis::coordToPixel functions to translate coordinates
-        to pixels in either the key or value dimension. Make sure to check whether the pointer is null before using it. If one of
+        to pixels in either the key or value dimension. Make sure to check whether the pointer is \c nullptr before using it. If one of
         the axes is null, don't draw the plottable.</td>
   </tr><tr>
     <td>\ref QCPSelectionDecorator \b mSelectionDecorator</td>
@@ -419,7 +420,7 @@ QCPAbstractPlottable::QCPAbstractPlottable(QCPAxis *keyAxis, QCPAxis *valueAxis)
         mKeyAxis(keyAxis),
         mValueAxis(valueAxis),
         mSelectable(QCP::stWhole),
-        mSelectionDecorator(0) {
+        mSelectionDecorator(nullptr) {
     if (keyAxis->parentPlot() != valueAxis->parentPlot())
         qDebug() << Q_FUNC_INFO << "Parent plot of keyAxis is not the same as that of valueAxis.";
     if (keyAxis->orientation() == valueAxis->orientation())
@@ -432,7 +433,7 @@ QCPAbstractPlottable::QCPAbstractPlottable(QCPAxis *keyAxis, QCPAxis *valueAxis)
 QCPAbstractPlottable::~QCPAbstractPlottable() {
     if (mSelectionDecorator) {
         delete mSelectionDecorator;
-        mSelectionDecorator = 0;
+        mSelectionDecorator = nullptr;
     }
 }
 
@@ -559,14 +560,13 @@ void QCPAbstractPlottable::setSelection(QCPDataSelection selection) {
 void QCPAbstractPlottable::setSelectionDecorator(QCPSelectionDecorator *decorator) {
     if (decorator) {
         if (decorator->registerWithPlottable(this)) {
-            if (mSelectionDecorator) // delete old decorator if necessary
-                delete mSelectionDecorator;
+            delete mSelectionDecorator; // delete old decorator if necessary
             mSelectionDecorator = decorator;
         }
     } else if (mSelectionDecorator) // just clear decorator
     {
         delete mSelectionDecorator;
-        mSelectionDecorator = 0;
+        mSelectionDecorator = nullptr;
     }
 }
 
@@ -858,7 +858,7 @@ QRect QCPAbstractPlottable::clipRect() const {
     if (mKeyAxis && mValueAxis)
         return mKeyAxis.data()->axisRect()->rect() & mValueAxis.data()->axisRect()->rect();
     else
-        return QRect();
+        return {};
 }
 
 /* inherits documentation from base class */
@@ -916,14 +916,16 @@ void QCPAbstractPlottable::applyScattersAntialiasingHint(QCPPainter *painter) co
 }
 
 /* inherits documentation from base class */
-void QCPAbstractPlottable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+void QCPAbstractPlottable::selectEvent(QMouseEvent *event, bool additive, const QVariant &details,
+                                       bool *selectionStateChanged) {
     Q_UNUSED(event)
 
     if (mSelectable != QCP::stNone) {
         QCPDataSelection newSelection = details.value<QCPDataSelection>();
         QCPDataSelection selectionBefore = mSelection;
         if (additive) {
-            if (mSelectable == QCP::stWhole) // in whole selection mode, we toggle to no selection even if currently unselected point was hit
+            if (mSelectable ==
+                QCP::stWhole) // in whole selection mode, we toggle to no selection even if currently unselected point was hit
             {
                 if (selected())
                     setSelection(QCPDataSelection());

@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_LAYOUT_H
@@ -83,9 +83,9 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-    Defines the phases of the update process, that happens just before a replot. At each phase,
-    \ref update is called with the according UpdatePhase value.
-  */
+      Defines the phases of the update process, that happens just before a replot. At each phase,
+      \ref update is called with the according UpdatePhase value.
+    */
     enum UpdatePhase {
         upPreparation ///< Phase used for any type of preparation that needs to be done before margin calculation and layout
         , upMargins    ///< Phase in which the margins are calculated and set
@@ -94,22 +94,22 @@ public:
     Q_ENUMS(UpdatePhase)
 
     /*!
-    Defines to which rect of a layout element the size constraints that can be set via \ref
-    setMinimumSize and \ref setMaximumSize apply. The outer rect (\ref outerRect) includes the
-    margins (e.g. in the case of a QCPAxisRect the axis labels), whereas the inner rect (\ref rect)
-    does not.
+      Defines to which rect of a layout element the size constraints that can be set via \ref
+      setMinimumSize and \ref setMaximumSize apply. The outer rect (\ref outerRect) includes the
+      margins (e.g. in the case of a QCPAxisRect the axis labels), whereas the inner rect (\ref rect)
+      does not.
 
-    \see setSizeConstraintRect
-  */
+      \see setSizeConstraintRect
+    */
     enum SizeConstraintRect {
         scrInnerRect ///< Minimum/Maximum size constraints apply to inner rect
         , scrOuterRect ///< Minimum/Maximum size constraints apply to outer rect, thus include layout element margins
     };
     Q_ENUMS(SizeConstraintRect)
 
-    explicit QCPLayoutElement(QCustomPlot *parentPlot = 0);
+    explicit QCPLayoutElement(QCustomPlot *parentPlot = nullptr);
 
-    virtual ~QCPLayoutElement();
+    virtual ~QCPLayoutElement() Q_DECL_OVERRIDE;
 
     // getters:
     QCPLayout *layout() const { return mParentLayout; }
@@ -130,7 +130,7 @@ public:
 
     SizeConstraintRect sizeConstraintRect() const { return mSizeConstraintRect; }
 
-    QCPMarginGroup *marginGroup(QCP::MarginSide side) const { return mMarginGroups.value(side, (QCPMarginGroup *) 0); }
+    QCPMarginGroup *marginGroup(QCP::MarginSide side) const { return mMarginGroups.value(side, nullptr); }
 
     QHash<QCP::MarginSide, QCPMarginGroup *> marginGroups() const { return mMarginGroups; }
 
@@ -165,7 +165,8 @@ public:
     virtual QList<QCPLayoutElement *> elements(bool recursive) const;
 
     // reimplemented virtual methods:
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE;
 
 protected:
     // property members:
@@ -241,7 +242,8 @@ protected:
 
     void releaseElement(QCPLayoutElement *el);
 
-    QVector<int> getSectionSizes(QVector<int> maxSizes, QVector<int> minSizes, QVector<double> stretchFactors, int totalSize) const;
+    QVector<int>
+    getSectionSizes(QVector<int> maxSizes, QVector<int> minSizes, QVector<double> stretchFactors, int totalSize) const;
 
     static QSize getFinalMinimumOuterSize(const QCPLayoutElement *el);
 
@@ -269,21 +271,22 @@ Q_OBJECT
 public:
 
     /*!
-    Defines in which direction the grid is filled when using \ref addElement(QCPLayoutElement*).
-    The column/row at which wrapping into the next row/column occurs can be specified with \ref
-    setWrap.
+      Defines in which direction the grid is filled when using \ref addElement(QCPLayoutElement*).
+      The column/row at which wrapping into the next row/column occurs can be specified with \ref
+      setWrap.
 
-    \see setFillOrder
-  */
+      \see setFillOrder
+    */
     enum FillOrder {
         foRowsFirst    ///< Rows are filled first, and a new element is wrapped to the next column if the row count would exceed \ref setWrap.
-        , foColumnsFirst ///< Columns are filled first, and a new element is wrapped to the next row if the column count would exceed \ref setWrap.
+        ,
+        foColumnsFirst ///< Columns are filled first, and a new element is wrapped to the next row if the column count would exceed \ref setWrap.
     };
     Q_ENUMS(FillOrder)
 
     explicit QCPLayoutGrid();
 
-    virtual ~QCPLayoutGrid();
+    virtual ~QCPLayoutGrid() Q_DECL_OVERRIDE;
 
     // getters:
     int rowCount() const { return mElements.size(); }
@@ -382,8 +385,8 @@ class QCP_LIB_DECL QCPLayoutInset : public QCPLayout {
 Q_OBJECT
 public:
     /*!
-    Defines how the placement and sizing is handled for a certain element in a QCPLayoutInset.
-  */
+      Defines how the placement and sizing is handled for a certain element in a QCPLayoutInset.
+    */
     enum InsetPlacement {
         ipFree            ///< The element may be positioned/sized arbitrarily, see \ref setInsetRect
         , ipBorderAligned  ///< The element is aligned to one of the layout sides, see \ref setInsetAlignment
@@ -392,7 +395,7 @@ public:
 
     explicit QCPLayoutInset();
 
-    virtual ~QCPLayoutInset();
+    virtual ~QCPLayoutInset() Q_DECL_OVERRIDE;
 
     // getters:
     InsetPlacement insetPlacement(int index) const;
@@ -421,7 +424,8 @@ public:
 
     virtual void simplify() Q_DECL_OVERRIDE {}
 
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE;
 
     // non-virtual methods:
     void addElement(QCPLayoutElement *element, Qt::Alignment alignment);

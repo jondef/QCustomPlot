@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 /*! \file */
 #ifndef QCP_GLOBAL_H
@@ -53,6 +53,7 @@
 #include <QtCore/QSharedPointer>
 #include <QtCore/QTimer>
 #include <QtGui/QPainter>
+#include <QtGui/QPainterPath>
 #include <QtGui/QPaintEvent>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
@@ -71,10 +72,21 @@
 #include <algorithm>
 
 #ifdef QCP_OPENGL_FBO
+
 #  include <QtGui/QOpenGLContext>
-#  include <QtGui/QOpenGLFramebufferObject>
+
+#  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#    include <QtGui/QOpenGLFramebufferObject>
+#  else
+
+#    include <QOpenGLFramebufferObject>
+#    include <QOpenGLPaintDevice>
+
+#  endif
 #  ifdef QCP_OPENGL_OFFSCREENSURFACE
+
 #    include <QtGui/QOffscreenSurface>
+
 #  else
 #    include <QtGui/QWindow>
 #  endif
@@ -94,10 +106,20 @@
 #  include <QtPrintSupport/QtPrintSupport>
 
 #endif
+#if QT_VERSION >= QT_VERSION_CHECK(4, 8, 0)
+
+#  include <QtCore/QElapsedTimer>
+
+#endif
+# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+
+#  include <QtCore/QTimeZone>
+
+#endif
 // amalgamation: include end
 
-#define QCUSTOMPLOT_VERSION_STR "2.0.1"
-#define QCUSTOMPLOT_VERSION 0x020001
+#define QCUSTOMPLOT_VERSION_STR "2.1.0"
+#define QCUSTOMPLOT_VERSION 0x020100
 
 // decl definitions for shared library compilation/usage:
 #if defined(QT_STATIC_BUILD)
@@ -118,7 +140,7 @@
 /*!
   The QCP Namespace contains general enums, QFlags and functions used throughout the QCustomPlot
   library.
-
+  
   It provides QMetaObject-based reflection of its enums and flags via \a QCP::staticMetaObject.
 */
 #ifndef Q_MOC_RUN
@@ -168,7 +190,7 @@ namespace QCP {
 /*!
   Represents negative and positive sign domain, e.g. for passing to \ref
   QCPAbstractPlottable::getKeyRange and \ref QCPAbstractPlottable::getValueRange.
-
+  
   This is primarily needed when working with logarithmic axis scales, since only one of the sign
   domains can be visible at a time.
 */
@@ -180,7 +202,7 @@ namespace QCP {
 
 /*!
   Defines the sides of a rectangular entity to which margins can be applied.
-
+  
   \see QCPLayoutElement::setAutoMargins, QCPAxisRect::setAutoMargins
 */
     enum MarginSide {
@@ -197,31 +219,43 @@ namespace QCP {
   Defines what objects of a plot can be forcibly drawn antialiased/not antialiased. If an object is
   neither forcibly drawn antialiased nor forcibly drawn not antialiased, it is up to the respective
   element how it is drawn. Typically it provides a \a setAntialiased function for this.
-
+  
   \c AntialiasedElements is a flag of or-combined elements of this enum type.
-
+  
   \see QCustomPlot::setAntialiasedElements, QCustomPlot::setNotAntialiasedElements
 */
     enum AntialiasedElement {
         aeAxes = 0x0001 ///< <tt>0x0001</tt> Axis base line and tick marks
-        , aeGrid = 0x0002 ///< <tt>0x0002</tt> Grid lines
-        , aeSubGrid = 0x0004 ///< <tt>0x0004</tt> Sub grid lines
-        , aeLegend = 0x0008 ///< <tt>0x0008</tt> Legend box
-        , aeLegendItems = 0x0010 ///< <tt>0x0010</tt> Legend items
-        , aePlottables = 0x0020 ///< <tt>0x0020</tt> Main lines of plottables
-        , aeItems = 0x0040 ///< <tt>0x0040</tt> Main lines of items
-        , aeScatters = 0x0080 ///< <tt>0x0080</tt> Scatter symbols of plottables (excluding scatter symbols of type ssPixmap)
-        , aeFills = 0x0100 ///< <tt>0x0100</tt> Borders of fills (e.g. under or between graphs)
-        , aeZeroLine = 0x0200 ///< <tt>0x0200</tt> Zero-lines, see \ref QCPGrid::setZeroLinePen
-        , aeOther = 0x8000 ///< <tt>0x8000</tt> Other elements that don't fit into any of the existing categories
-        , aeAll = 0xFFFF ///< <tt>0xFFFF</tt> All elements
-        , aeNone = 0x0000 ///< <tt>0x0000</tt> No elements
+        ,
+        aeGrid = 0x0002 ///< <tt>0x0002</tt> Grid lines
+        ,
+        aeSubGrid = 0x0004 ///< <tt>0x0004</tt> Sub grid lines
+        ,
+        aeLegend = 0x0008 ///< <tt>0x0008</tt> Legend box
+        ,
+        aeLegendItems = 0x0010 ///< <tt>0x0010</tt> Legend items
+        ,
+        aePlottables = 0x0020 ///< <tt>0x0020</tt> Main lines of plottables
+        ,
+        aeItems = 0x0040 ///< <tt>0x0040</tt> Main lines of items
+        ,
+        aeScatters = 0x0080 ///< <tt>0x0080</tt> Scatter symbols of plottables (excluding scatter symbols of type ssPixmap)
+        ,
+        aeFills = 0x0100 ///< <tt>0x0100</tt> Borders of fills (e.g. under or between graphs)
+        ,
+        aeZeroLine = 0x0200 ///< <tt>0x0200</tt> Zero-lines, see \ref QCPGrid::setZeroLinePen
+        ,
+        aeOther = 0x8000 ///< <tt>0x8000</tt> Other elements that don't fit into any of the existing categories
+        ,
+        aeAll = 0xFFFF ///< <tt>0xFFFF</tt> All elements
+        ,
+        aeNone = 0x0000 ///< <tt>0x0000</tt> No elements
     };
     Q_DECLARE_FLAGS(AntialiasedElements, AntialiasedElement)
 
 /*!
   Defines plotting hints that control various aspects of the quality and speed of plotting.
-
+  
   \see QCustomPlot::setPlottingHints
 */
     enum PlottingHint {
@@ -239,12 +273,14 @@ namespace QCP {
 
 /*!
   Defines the mouse interactions possible with QCustomPlot.
-
+  
   \c Interactions is a flag of or-combined elements of this enum type.
-
+  
   \see QCustomPlot::setInteractions
 */
     enum Interaction {
+        iNone = 0x000 ///< <tt>0x000</tt> None of the interactions are possible
+        ,
         iRangeDrag = 0x001 ///< <tt>0x001</tt> Axis ranges are draggable (see \ref QCPAxisRect::setRangeDrag, \ref QCPAxisRect::setRangeDragAxes)
         ,
         iRangeZoom = 0x002 ///< <tt>0x002</tt> Axis ranges are zoomable with the mouse wheel (see \ref QCPAxisRect::setRangeZoom, \ref QCPAxisRect::setRangeZoomAxes)
@@ -260,12 +296,14 @@ namespace QCP {
         iSelectItems = 0x040 ///< <tt>0x040</tt> Items are selectable (Rectangles, Arrows, Textitems, etc. see \ref QCPAbstractItem)
         ,
         iSelectOther = 0x080 ///< <tt>0x080</tt> All other objects are selectable (e.g. your own derived layerables, other layout elements,...)
+        ,
+        iSelectPlottablesBeyondAxisRect = 0x100 ///< <tt>0x100</tt> When performing plottable selection/hit tests, this flag extends the sensitive area beyond the axis rect
     };
     Q_DECLARE_FLAGS(Interactions, Interaction)
 
 /*!
   Defines the behaviour of the selection rect.
-
+  
   \see QCustomPlot::setSelectionRectMode, QCustomPlot::selectionRect, QCPSelectionRect
 */
     enum SelectionRectMode {
@@ -281,7 +319,7 @@ namespace QCP {
 /*!
   Defines the different ways a plottable can be selected. These images show the effect of the
   different selection types, when the indicated selection rect was dragged:
-
+  
   <center>
   <table>
   <tr>
@@ -293,7 +331,7 @@ namespace QCP {
   </tr>
   </table>
   </center>
-
+  
   \see QCPAbstractPlottable::setSelectable, QCPDataSelection::enforceType
 */
     enum SelectionType {
@@ -309,7 +347,7 @@ namespace QCP {
     };
 
 /*! \internal
-
+  
   Returns whether the specified \a value is considered an invalid data value for plottables (i.e.
   is \e nan or \e +/-inf). This function is used to check data validity upon replots, when the
   compiler flag \c QCUSTOMPLOT_CHECK_DATA is set.
@@ -320,7 +358,7 @@ namespace QCP {
 
 /*! \internal
   \overload
-
+  
   Checks two arguments instead of one.
 */
     inline bool isInvalidData(double value1, double value2) {
@@ -328,9 +366,9 @@ namespace QCP {
     }
 
 /*! \internal
-
+  
   Sets the specified \a side of \a margins to \a value
-
+  
   \see getMarginValue
 */
     inline void setMarginValue(QMargins &margins, QCP::MarginSide side, int value) {
@@ -356,10 +394,10 @@ namespace QCP {
     }
 
 /*! \internal
-
+  
   Returns the value of the specified \a side of \a margins. If \a side is \ref QCP::msNone or
   \ref QCP::msAll, returns 0.
-
+  
   \see setMarginValue
 */
     inline int getMarginValue(const QMargins &margins, QCP::MarginSide side) {

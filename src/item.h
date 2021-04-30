@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_ITEM_H
@@ -64,7 +64,7 @@ protected:
     QSet<QCPItemPosition *> mChildrenX, mChildrenY;
 
     // introduced virtual methods:
-    virtual QCPItemPosition *toQCPItemPosition() { return 0; }
+    virtual QCPItemPosition *toQCPItemPosition() { return nullptr; }
 
     // non-virtual methods:
     void addChildX(QCPItemPosition *pos); // called from pos when this anchor is set as parent
@@ -83,11 +83,11 @@ class QCP_LIB_DECL QCPItemPosition : public QCPItemAnchor {
 Q_GADGET
 public:
     /*!
-    Defines the ways an item position can be specified. Thus it defines what the numbers passed to
-    \ref setCoords actually mean.
+      Defines the ways an item position can be specified. Thus it defines what the numbers passed to
+      \ref setCoords actually mean.
 
-    \see setType
-  */
+      \see setType
+    */
     enum PositionType {
         ptAbsolute        ///< Static positioning in pixels, starting from the top left corner of the viewport/widget.
         ,
@@ -105,7 +105,7 @@ public:
 
     QCPItemPosition(QCustomPlot *parentPlot, QCPAbstractItem *parentItem, const QString &name);
 
-    virtual ~QCPItemPosition();
+    virtual ~QCPItemPosition() Q_DECL_OVERRIDE;
 
     // getters:
     PositionType type() const { return typeX(); }
@@ -149,7 +149,7 @@ public:
 
     void setCoords(double key, double value);
 
-    void setCoords(const QPointF &coords);
+    void setCoords(const QPointF &pos);
 
     void setAxes(QCPAxis *keyAxis, QCPAxis *valueAxis);
 
@@ -187,7 +187,7 @@ Q_OBJECT
 public:
     explicit QCPAbstractItem(QCustomPlot *parentPlot);
 
-    virtual ~QCPAbstractItem();
+    virtual ~QCPAbstractItem() Q_DECL_OVERRIDE;
 
     // getters:
     bool clipToAxisRect() const { return mClipToAxisRect; }
@@ -208,7 +208,8 @@ public:
     Q_SLOT void setSelected(bool selected);
 
     // reimplemented virtual methods:
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE = 0;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE = 0;
 
     // non-virtual methods:
     QList<QCPItemPosition *> positions() const { return mPositions; }
@@ -245,7 +246,8 @@ protected:
     virtual void draw(QCPPainter *painter) Q_DECL_OVERRIDE = 0;
 
     // events:
-    virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) Q_DECL_OVERRIDE;
+    virtual void selectEvent(QMouseEvent *event, bool additive, const QVariant &details,
+                             bool *selectionStateChanged) Q_DECL_OVERRIDE;
 
     virtual void deselectEvent(bool *selectionStateChanged) Q_DECL_OVERRIDE;
 

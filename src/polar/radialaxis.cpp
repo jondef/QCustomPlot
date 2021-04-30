@@ -117,139 +117,129 @@
   create them manually and then inject them also via \ref QCPAxisRect::addAxis.
 */
 QCPPolarAxisRadial::QCPPolarAxisRadial(QCPPolarAxisAngular *parent) :
-  QCPLayerable(parent->parentPlot(), QString(), parent),
-  mRangeDrag(true),
-  mRangeZoom(true),
-  mRangeZoomFactor(0.85),
-  // axis base:
-  mAngularAxis(parent),
-  mAngle(45),
-  mAngleReference(arAngularAxis),
-  mSelectableParts(spAxis | spTickLabels | spAxisLabel),
-  mSelectedParts(spNone),
-  mBasePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedBasePen(QPen(Qt::blue, 2)),
-  // axis label:
-  mLabelPadding(0),
-  mLabel(),
-  mLabelFont(mParentPlot->font()),
-  mSelectedLabelFont(QFont(mLabelFont.family(), mLabelFont.pointSize(), QFont::Bold)),
-  mLabelColor(Qt::black),
-  mSelectedLabelColor(Qt::blue),
-  // tick labels:
-  // mTickLabelPadding(0), in label painter
-  mTickLabels(true),
-  // mTickLabelRotation(0), in label painter
-  mTickLabelFont(mParentPlot->font()),
-  mSelectedTickLabelFont(QFont(mTickLabelFont.family(), mTickLabelFont.pointSize(), QFont::Bold)),
-  mTickLabelColor(Qt::black),
-  mSelectedTickLabelColor(Qt::blue),
-  mNumberPrecision(6),
-  mNumberFormatChar('g'),
-  mNumberBeautifulPowers(true),
-  mNumberMultiplyCross(false),
-  // ticks and subticks:
-  mTicks(true),
-  mSubTicks(true),
-  mTickLengthIn(5),
-  mTickLengthOut(0),
-  mSubTickLengthIn(2),
-  mSubTickLengthOut(0),
-  mTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedTickPen(QPen(Qt::blue, 2)),
-  mSubTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
-  mSelectedSubTickPen(QPen(Qt::blue, 2)),
-  // scale and range:
-  mRange(0, 5),
-  mRangeReversed(false),
-  mScaleType(stLinear),
-  // internal members:
-  mRadius(1), // non-zero initial value, will be overwritten in ::update() according to inner rect
-  mTicker(new QCPAxisTicker),
-  mLabelPainter(mParentPlot)
-{
-  setParent(parent);
-  setAntialiased(true);
-  
-  setTickLabelPadding(5);
-  setTickLabelRotation(0);
-  setTickLabelMode(lmUpright);
-  mLabelPainter.setAnchorReferenceType(QCPLabelPainterPrivate::artTangent);
-  mLabelPainter.setAbbreviateDecimalPowers(false);
+        QCPLayerable(parent->parentPlot(), QString(), parent),
+        mRangeDrag(true),
+        mRangeZoom(true),
+        mRangeZoomFactor(0.85),
+        // axis base:
+        mAngularAxis(parent),
+        mAngle(45),
+        mAngleReference(arAngularAxis),
+        mSelectableParts(spAxis | spTickLabels | spAxisLabel),
+        mSelectedParts(spNone),
+        mBasePen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedBasePen(QPen(Qt::blue, 2)),
+        // axis label:
+        mLabelPadding(0),
+        mLabel(),
+        mLabelFont(mParentPlot->font()),
+        mSelectedLabelFont(QFont(mLabelFont.family(), mLabelFont.pointSize(), QFont::Bold)),
+        mLabelColor(Qt::black),
+        mSelectedLabelColor(Qt::blue),
+        // tick labels:
+        // mTickLabelPadding(0), in label painter
+        mTickLabels(true),
+        // mTickLabelRotation(0), in label painter
+        mTickLabelFont(mParentPlot->font()),
+        mSelectedTickLabelFont(QFont(mTickLabelFont.family(), mTickLabelFont.pointSize(), QFont::Bold)),
+        mTickLabelColor(Qt::black),
+        mSelectedTickLabelColor(Qt::blue),
+        mNumberPrecision(6),
+        mNumberFormatChar('g'),
+        mNumberBeautifulPowers(true),
+        mNumberMultiplyCross(false),
+        // ticks and subticks:
+        mTicks(true),
+        mSubTicks(true),
+        mTickLengthIn(5),
+        mTickLengthOut(0),
+        mSubTickLengthIn(2),
+        mSubTickLengthOut(0),
+        mTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedTickPen(QPen(Qt::blue, 2)),
+        mSubTickPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::SquareCap)),
+        mSelectedSubTickPen(QPen(Qt::blue, 2)),
+        // scale and range:
+        mRange(0, 5),
+        mRangeReversed(false),
+        mScaleType(stLinear),
+        // internal members:
+        mRadius(1), // non-zero initial value, will be overwritten in ::update() according to inner rect
+        mTicker(new QCPAxisTicker),
+        mLabelPainter(mParentPlot) {
+    setParent(parent);
+    setAntialiased(true);
+
+    setTickLabelPadding(5);
+    setTickLabelRotation(0);
+    setTickLabelMode(lmUpright);
+    mLabelPainter.setAnchorReferenceType(QCPLabelPainterPrivate::artTangent);
+    mLabelPainter.setAbbreviateDecimalPowers(false);
 }
 
-QCPPolarAxisRadial::~QCPPolarAxisRadial()
-{
+QCPPolarAxisRadial::~QCPPolarAxisRadial() {
 }
 
-QCPPolarAxisRadial::LabelMode QCPPolarAxisRadial::tickLabelMode() const
-{
-  switch (mLabelPainter.anchorMode())
-  {
-    case QCPLabelPainterPrivate::amSkewedUpright: return lmUpright;
-    case QCPLabelPainterPrivate::amSkewedRotated: return lmRotated;
-    default: qDebug() << Q_FUNC_INFO << "invalid mode for polar axis"; break;
-  }
-  return lmUpright;
-}
-
-/* No documentation as it is a property getter */
-QString QCPPolarAxisRadial::numberFormat() const
-{
-  QString result;
-  result.append(mNumberFormatChar);
-  if (mNumberBeautifulPowers)
-  {
-    result.append(QLatin1Char('b'));
-    if (mNumberMultiplyCross)
-      result.append(QLatin1Char('c'));
-  }
-  return result;
+QCPPolarAxisRadial::LabelMode QCPPolarAxisRadial::tickLabelMode() const {
+    switch (mLabelPainter.anchorMode()) {
+        case QCPLabelPainterPrivate::amSkewedUpright:
+            return lmUpright;
+        case QCPLabelPainterPrivate::amSkewedRotated:
+            return lmRotated;
+        default:
+            qDebug() << Q_FUNC_INFO << "invalid mode for polar axis";
+            break;
+    }
+    return lmUpright;
 }
 
 /* No documentation as it is a property getter */
-int QCPPolarAxisRadial::tickLengthIn() const
-{
-  return mTickLengthIn;
+QString QCPPolarAxisRadial::numberFormat() const {
+    QString result;
+    result.append(mNumberFormatChar);
+    if (mNumberBeautifulPowers) {
+        result.append(QLatin1Char('b'));
+        if (mNumberMultiplyCross)
+            result.append(QLatin1Char('c'));
+    }
+    return result;
 }
 
 /* No documentation as it is a property getter */
-int QCPPolarAxisRadial::tickLengthOut() const
-{
-  return mTickLengthOut;
+int QCPPolarAxisRadial::tickLengthIn() const {
+    return mTickLengthIn;
 }
 
 /* No documentation as it is a property getter */
-int QCPPolarAxisRadial::subTickLengthIn() const
-{
-  return mSubTickLengthIn;
+int QCPPolarAxisRadial::tickLengthOut() const {
+    return mTickLengthOut;
 }
 
 /* No documentation as it is a property getter */
-int QCPPolarAxisRadial::subTickLengthOut() const
-{
-  return mSubTickLengthOut;
+int QCPPolarAxisRadial::subTickLengthIn() const {
+    return mSubTickLengthIn;
 }
 
 /* No documentation as it is a property getter */
-int QCPPolarAxisRadial::labelPadding() const
-{
-  return mLabelPadding;
+int QCPPolarAxisRadial::subTickLengthOut() const {
+    return mSubTickLengthOut;
 }
 
-void QCPPolarAxisRadial::setRangeDrag(bool enabled)
-{
-  mRangeDrag = enabled;
+/* No documentation as it is a property getter */
+int QCPPolarAxisRadial::labelPadding() const {
+    return mLabelPadding;
 }
 
-void QCPPolarAxisRadial::setRangeZoom(bool enabled)
-{
-  mRangeZoom = enabled;
+void QCPPolarAxisRadial::setRangeDrag(bool enabled) {
+    mRangeDrag = enabled;
 }
 
-void QCPPolarAxisRadial::setRangeZoomFactor(double factor)
-{
-  mRangeZoomFactor = factor;
+void QCPPolarAxisRadial::setRangeZoom(bool enabled) {
+    mRangeZoom = enabled;
+}
+
+void QCPPolarAxisRadial::setRangeZoomFactor(double factor) {
+    mRangeZoomFactor = factor;
 }
 
 /*!
@@ -266,16 +256,14 @@ void QCPPolarAxisRadial::setRangeZoomFactor(double factor)
   
   \ref setNumberPrecision
 */
-void QCPPolarAxisRadial::setScaleType(QCPPolarAxisRadial::ScaleType type)
-{
-  if (mScaleType != type)
-  {
-    mScaleType = type;
-    if (mScaleType == stLogarithmic)
-      setRange(mRange.sanitizedForLogScale());
-    //mCachedMarginValid = false;
-    emit scaleTypeChanged(mScaleType);
-  }
+void QCPPolarAxisRadial::setScaleType(QCPPolarAxisRadial::ScaleType type) {
+    if (mScaleType != type) {
+        mScaleType = type;
+        if (mScaleType == stLogarithmic)
+            setRange(mRange.sanitizedForLogScale());
+        //mCachedMarginValid = false;
+        emit scaleTypeChanged(mScaleType);
+    }
 }
 
 /*!
@@ -286,22 +274,19 @@ void QCPPolarAxisRadial::setScaleType(QCPPolarAxisRadial::ScaleType type)
   
   To invert the direction of an axis, use \ref setRangeReversed.
 */
-void QCPPolarAxisRadial::setRange(const QCPRange &range)
-{
-  if (range.lower == mRange.lower && range.upper == mRange.upper)
-    return;
-  
-  if (!QCPRange::validRange(range)) return;
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = range.sanitizedForLogScale();
-  } else
-  {
-    mRange = range.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPPolarAxisRadial::setRange(const QCPRange &range) {
+    if (range.lower == mRange.lower && range.upper == mRange.upper)
+        return;
+
+    if (!QCPRange::validRange(range)) return;
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLogarithmic) {
+        mRange = range.sanitizedForLogScale();
+    } else {
+        mRange = range.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -314,13 +299,11 @@ void QCPPolarAxisRadial::setRange(const QCPRange &range)
   
   \see SelectablePart, setSelectedParts
 */
-void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
-{
-  if (mSelectableParts != selectable)
-  {
-    mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
-  }
+void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable) {
+    if (mSelectableParts != selectable) {
+        mSelectableParts = selectable;
+        emit selectableChanged(mSelectableParts);
+    }
 }
 
 /*!
@@ -338,13 +321,11 @@ void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
 */
-void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected)
-{
-  if (mSelectedParts != selected)
-  {
-    mSelectedParts = selected;
-    emit selectionChanged(mSelectedParts);
-  }
+void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected) {
+    if (mSelectedParts != selected) {
+        mSelectedParts = selected;
+        emit selectionChanged(mSelectedParts);
+    }
 }
 
 /*!
@@ -356,24 +337,21 @@ void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected)
   
   There is also a slot to set a range, see \ref setRange(const QCPRange &range).
 */
-void QCPPolarAxisRadial::setRange(double lower, double upper)
-{
-  if (lower == mRange.lower && upper == mRange.upper)
-    return;
-  
-  if (!QCPRange::validRange(lower, upper)) return;
-  QCPRange oldRange = mRange;
-  mRange.lower = lower;
-  mRange.upper = upper;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPPolarAxisRadial::setRange(double lower, double upper) {
+    if (lower == mRange.lower && upper == mRange.upper)
+        return;
+
+    if (!QCPRange::validRange(lower, upper)) return;
+    QCPRange oldRange = mRange;
+    mRange.lower = lower;
+    mRange.upper = upper;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -387,58 +365,51 @@ void QCPPolarAxisRadial::setRange(double lower, double upper)
   or center of the range to be aligned with \a position. Any other values of \a alignment will
   default to Qt::AlignCenter.
 */
-void QCPPolarAxisRadial::setRange(double position, double size, Qt::AlignmentFlag alignment)
-{
-  if (alignment == Qt::AlignLeft)
-    setRange(position, position+size);
-  else if (alignment == Qt::AlignRight)
-    setRange(position-size, position);
-  else // alignment == Qt::AlignCenter
-    setRange(position-size/2.0, position+size/2.0);
+void QCPPolarAxisRadial::setRange(double position, double size, Qt::AlignmentFlag alignment) {
+    if (alignment == Qt::AlignLeft)
+        setRange(position, position + size);
+    else if (alignment == Qt::AlignRight)
+        setRange(position - size, position);
+    else // alignment == Qt::AlignCenter
+        setRange(position - size / 2.0, position + size / 2.0);
 }
 
 /*!
   Sets the lower bound of the axis range. The upper bound is not changed.
   \see setRange
 */
-void QCPPolarAxisRadial::setRangeLower(double lower)
-{
-  if (mRange.lower == lower)
-    return;
-  
-  QCPRange oldRange = mRange;
-  mRange.lower = lower;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPPolarAxisRadial::setRangeLower(double lower) {
+    if (mRange.lower == lower)
+        return;
+
+    QCPRange oldRange = mRange;
+    mRange.lower = lower;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
   Sets the upper bound of the axis range. The lower bound is not changed.
   \see setRange
 */
-void QCPPolarAxisRadial::setRangeUpper(double upper)
-{
-  if (mRange.upper == upper)
-    return;
-  
-  QCPRange oldRange = mRange;
-  mRange.upper = upper;
-  if (mScaleType == stLogarithmic)
-  {
-    mRange = mRange.sanitizedForLogScale();
-  } else
-  {
-    mRange = mRange.sanitizedForLinScale();
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPPolarAxisRadial::setRangeUpper(double upper) {
+    if (mRange.upper == upper)
+        return;
+
+    QCPRange oldRange = mRange;
+    mRange.upper = upper;
+    if (mScaleType == stLogarithmic) {
+        mRange = mRange.sanitizedForLogScale();
+    } else {
+        mRange = mRange.sanitizedForLinScale();
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -450,19 +421,16 @@ void QCPPolarAxisRadial::setRangeUpper(double upper)
   of the \ref setRange interface will still reference the mathematically smaller number than the \a
   upper part.
 */
-void QCPPolarAxisRadial::setRangeReversed(bool reversed)
-{
-  mRangeReversed = reversed;
+void QCPPolarAxisRadial::setRangeReversed(bool reversed) {
+    mRangeReversed = reversed;
 }
 
-void QCPPolarAxisRadial::setAngle(double degrees)
-{
-  mAngle = degrees;
+void QCPPolarAxisRadial::setAngle(double degrees) {
+    mAngle = degrees;
 }
 
-void QCPPolarAxisRadial::setAngleReference(AngleReference reference)
-{
-  mAngleReference = reference;
+void QCPPolarAxisRadial::setAngleReference(AngleReference reference) {
+    mAngleReference = reference;
 }
 
 /*!
@@ -478,13 +446,12 @@ void QCPPolarAxisRadial::setAngleReference(AngleReference reference)
   
   \see ticker
 */
-void QCPPolarAxisRadial::setTicker(QSharedPointer<QCPAxisTicker> ticker)
-{
-  if (ticker)
-    mTicker = ticker;
-  else
-    qDebug() << Q_FUNC_INFO << "can not set 0 as axis ticker";
-  // no need to invalidate margin cache here because produced tick labels are checked for changes in setupTickVector
+void QCPPolarAxisRadial::setTicker(QSharedPointer<QCPAxisTicker> ticker) {
+    if (ticker)
+        mTicker = ticker;
+    else
+        qDebug() << Q_FUNC_INFO << "can not set 0 as axis ticker";
+    // no need to invalidate margin cache here because produced tick labels are checked for changes in setupTickVector
 }
 
 /*!
@@ -495,36 +462,31 @@ void QCPPolarAxisRadial::setTicker(QSharedPointer<QCPAxisTicker> ticker)
   
   \see setSubTicks
 */
-void QCPPolarAxisRadial::setTicks(bool show)
-{
-  if (mTicks != show)
-  {
-    mTicks = show;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setTicks(bool show) {
+    if (mTicks != show) {
+        mTicks = show;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
   Sets whether tick labels are displayed. Tick labels are the numbers drawn next to tick marks.
 */
-void QCPPolarAxisRadial::setTickLabels(bool show)
-{
-  if (mTickLabels != show)
-  {
-    mTickLabels = show;
-    //mCachedMarginValid = false;
-    if (!mTickLabels)
-      mTickVectorLabels.clear();
-  }
+void QCPPolarAxisRadial::setTickLabels(bool show) {
+    if (mTickLabels != show) {
+        mTickLabels = show;
+        //mCachedMarginValid = false;
+        if (!mTickLabels)
+            mTickVectorLabels.clear();
+    }
 }
 
 /*!
   Sets the distance between the axis base line (including any outward ticks) and the tick labels.
   \see setLabelPadding, setPadding
 */
-void QCPPolarAxisRadial::setTickLabelPadding(int padding)
-{
-  mLabelPainter.setPadding(padding);
+void QCPPolarAxisRadial::setTickLabelPadding(int padding) {
+    mLabelPainter.setPadding(padding);
 }
 
 /*!
@@ -532,13 +494,11 @@ void QCPPolarAxisRadial::setTickLabelPadding(int padding)
   
   \see setTickLabels, setTickLabelColor
 */
-void QCPPolarAxisRadial::setTickLabelFont(const QFont &font)
-{
-  if (font != mTickLabelFont)
-  {
-    mTickLabelFont = font;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setTickLabelFont(const QFont &font) {
+    if (font != mTickLabelFont) {
+        mTickLabelFont = font;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -546,9 +506,8 @@ void QCPPolarAxisRadial::setTickLabelFont(const QFont &font)
   
   \see setTickLabels, setTickLabelFont
 */
-void QCPPolarAxisRadial::setTickLabelColor(const QColor &color)
-{
-  mTickLabelColor = color;
+void QCPPolarAxisRadial::setTickLabelColor(const QColor &color) {
+    mTickLabelColor = color;
 }
 
 /*!
@@ -560,18 +519,19 @@ void QCPPolarAxisRadial::setTickLabelColor(const QColor &color)
   other angles, the label is drawn with an offset such that it seems to point toward or away from
   the tick mark.
 */
-void QCPPolarAxisRadial::setTickLabelRotation(double degrees)
-{
-  mLabelPainter.setRotation(degrees);
+void QCPPolarAxisRadial::setTickLabelRotation(double degrees) {
+    mLabelPainter.setRotation(degrees);
 }
 
-void QCPPolarAxisRadial::setTickLabelMode(LabelMode mode)
-{
-  switch (mode)
-  {
-    case lmUpright: mLabelPainter.setAnchorMode(QCPLabelPainterPrivate::amSkewedUpright); break;
-    case lmRotated: mLabelPainter.setAnchorMode(QCPLabelPainterPrivate::amSkewedRotated); break;
-  }
+void QCPPolarAxisRadial::setTickLabelMode(LabelMode mode) {
+    switch (mode) {
+        case lmUpright:
+            mLabelPainter.setAnchorMode(QCPLabelPainterPrivate::amSkewedUpright);
+            break;
+        case lmRotated:
+            mLabelPainter.setAnchorMode(QCPLabelPainterPrivate::amSkewedRotated);
+            break;
+    }
 }
 
 /*!
@@ -604,54 +564,50 @@ void QCPPolarAxisRadial::setTickLabelMode(LabelMode mode)
   \li \c hello illegal format code, since first char is not 'e', 'E', 'f', 'g' or 'G'. Current format
   code will not be changed.
 */
-void QCPPolarAxisRadial::setNumberFormat(const QString &formatCode)
-{
-  if (formatCode.isEmpty())
-  {
-    qDebug() << Q_FUNC_INFO << "Passed formatCode is empty";
-    return;
-  }
-  //mCachedMarginValid = false;
-  
-  // interpret first char as number format char:
-  QString allowedFormatChars(QLatin1String("eEfgG"));
-  if (allowedFormatChars.contains(formatCode.at(0)))
-  {
-    mNumberFormatChar = QLatin1Char(formatCode.at(0).toLatin1());
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "Invalid number format code (first char not in 'eEfgG'):" << formatCode;
-    return;
-  }
-  
-  if (formatCode.length() < 2)
-  {
-    mNumberBeautifulPowers = false;
-    mNumberMultiplyCross = false;
-  } else
-  {
-    // interpret second char as indicator for beautiful decimal powers:
-    if (formatCode.at(1) == QLatin1Char('b') && (mNumberFormatChar == QLatin1Char('e') || mNumberFormatChar == QLatin1Char('g')))
-      mNumberBeautifulPowers = true;
-    else
-      qDebug() << Q_FUNC_INFO << "Invalid number format code (second char not 'b' or first char neither 'e' nor 'g'):" << formatCode;
-    
-    if (formatCode.length() < 3)
-    {
-      mNumberMultiplyCross = false;
-    } else
-    {
-      // interpret third char as indicator for dot or cross multiplication symbol:
-      if (formatCode.at(2) == QLatin1Char('c'))
-        mNumberMultiplyCross = true;
-      else if (formatCode.at(2) == QLatin1Char('d'))
-        mNumberMultiplyCross = false;
-      else
-        qDebug() << Q_FUNC_INFO << "Invalid number format code (third char neither 'c' nor 'd'):" << formatCode;
+void QCPPolarAxisRadial::setNumberFormat(const QString &formatCode) {
+    if (formatCode.isEmpty()) {
+        qDebug() << Q_FUNC_INFO << "Passed formatCode is empty";
+        return;
     }
-  }
-  mLabelPainter.setSubstituteExponent(mNumberBeautifulPowers);
-  mLabelPainter.setMultiplicationSymbol(mNumberMultiplyCross ? QCPLabelPainterPrivate::SymbolCross : QCPLabelPainterPrivate::SymbolDot);
+    //mCachedMarginValid = false;
+
+    // interpret first char as number format char:
+    QString allowedFormatChars(QLatin1String("eEfgG"));
+    if (allowedFormatChars.contains(formatCode.at(0))) {
+        mNumberFormatChar = QLatin1Char(formatCode.at(0).toLatin1());
+    } else {
+        qDebug() << Q_FUNC_INFO << "Invalid number format code (first char not in 'eEfgG'):" << formatCode;
+        return;
+    }
+
+    if (formatCode.length() < 2) {
+        mNumberBeautifulPowers = false;
+        mNumberMultiplyCross = false;
+    } else {
+        // interpret second char as indicator for beautiful decimal powers:
+        if (formatCode.at(1) == QLatin1Char('b') &&
+            (mNumberFormatChar == QLatin1Char('e') || mNumberFormatChar == QLatin1Char('g')))
+            mNumberBeautifulPowers = true;
+        else
+            qDebug() << Q_FUNC_INFO
+                     << "Invalid number format code (second char not 'b' or first char neither 'e' nor 'g'):"
+                     << formatCode;
+
+        if (formatCode.length() < 3) {
+            mNumberMultiplyCross = false;
+        } else {
+            // interpret third char as indicator for dot or cross multiplication symbol:
+            if (formatCode.at(2) == QLatin1Char('c'))
+                mNumberMultiplyCross = true;
+            else if (formatCode.at(2) == QLatin1Char('d'))
+                mNumberMultiplyCross = false;
+            else
+                qDebug() << Q_FUNC_INFO << "Invalid number format code (third char neither 'c' nor 'd'):" << formatCode;
+        }
+    }
+    mLabelPainter.setSubstituteExponent(mNumberBeautifulPowers);
+    mLabelPainter.setMultiplicationSymbol(
+            mNumberMultiplyCross ? QCPLabelPainterPrivate::SymbolCross : QCPLabelPainterPrivate::SymbolDot);
 }
 
 /*!
@@ -659,13 +615,11 @@ void QCPPolarAxisRadial::setNumberFormat(const QString &formatCode)
   for details. The effect of precisions are most notably for number Formats starting with 'e', see
   \ref setNumberFormat
 */
-void QCPPolarAxisRadial::setNumberPrecision(int precision)
-{
-  if (mNumberPrecision != precision)
-  {
-    mNumberPrecision = precision;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setNumberPrecision(int precision) {
+    if (mNumberPrecision != precision) {
+        mNumberPrecision = precision;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -676,10 +630,9 @@ void QCPPolarAxisRadial::setNumberPrecision(int precision)
   
   \see setSubTickLength, setTickLengthIn, setTickLengthOut
 */
-void QCPPolarAxisRadial::setTickLength(int inside, int outside)
-{
-  setTickLengthIn(inside);
-  setTickLengthOut(outside);
+void QCPPolarAxisRadial::setTickLength(int inside, int outside) {
+    setTickLengthIn(inside);
+    setTickLengthOut(outside);
 }
 
 /*!
@@ -688,12 +641,10 @@ void QCPPolarAxisRadial::setTickLength(int inside, int outside)
   
   \see setTickLengthOut, setTickLength, setSubTickLength
 */
-void QCPPolarAxisRadial::setTickLengthIn(int inside)
-{
-  if (mTickLengthIn != inside)
-  {
-    mTickLengthIn = inside;
-  }
+void QCPPolarAxisRadial::setTickLengthIn(int inside) {
+    if (mTickLengthIn != inside) {
+        mTickLengthIn = inside;
+    }
 }
 
 /*!
@@ -703,13 +654,11 @@ void QCPPolarAxisRadial::setTickLengthIn(int inside)
   
   \see setTickLengthIn, setTickLength, setSubTickLength
 */
-void QCPPolarAxisRadial::setTickLengthOut(int outside)
-{
-  if (mTickLengthOut != outside)
-  {
-    mTickLengthOut = outside;
-    //mCachedMarginValid = false; // only outside tick length can change margin
-  }
+void QCPPolarAxisRadial::setTickLengthOut(int outside) {
+    if (mTickLengthOut != outside) {
+        mTickLengthOut = outside;
+        //mCachedMarginValid = false; // only outside tick length can change margin
+    }
 }
 
 /*!
@@ -719,13 +668,11 @@ void QCPPolarAxisRadial::setTickLengthOut(int outside)
   
   \see setTicks
 */
-void QCPPolarAxisRadial::setSubTicks(bool show)
-{
-  if (mSubTicks != show)
-  {
-    mSubTicks = show;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setSubTicks(bool show) {
+    if (mSubTicks != show) {
+        mSubTicks = show;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -736,10 +683,9 @@ void QCPPolarAxisRadial::setSubTicks(bool show)
   
   \see setTickLength, setSubTickLengthIn, setSubTickLengthOut
 */
-void QCPPolarAxisRadial::setSubTickLength(int inside, int outside)
-{
-  setSubTickLengthIn(inside);
-  setSubTickLengthOut(outside);
+void QCPPolarAxisRadial::setSubTickLength(int inside, int outside) {
+    setSubTickLengthIn(inside);
+    setSubTickLengthOut(outside);
 }
 
 /*!
@@ -748,12 +694,10 @@ void QCPPolarAxisRadial::setSubTickLength(int inside, int outside)
   
   \see setSubTickLengthOut, setSubTickLength, setTickLength
 */
-void QCPPolarAxisRadial::setSubTickLengthIn(int inside)
-{
-  if (mSubTickLengthIn != inside)
-  {
-    mSubTickLengthIn = inside;
-  }
+void QCPPolarAxisRadial::setSubTickLengthIn(int inside) {
+    if (mSubTickLengthIn != inside) {
+        mSubTickLengthIn = inside;
+    }
 }
 
 /*!
@@ -763,13 +707,11 @@ void QCPPolarAxisRadial::setSubTickLengthIn(int inside)
   
   \see setSubTickLengthIn, setSubTickLength, setTickLength
 */
-void QCPPolarAxisRadial::setSubTickLengthOut(int outside)
-{
-  if (mSubTickLengthOut != outside)
-  {
-    mSubTickLengthOut = outside;
-    //mCachedMarginValid = false; // only outside tick length can change margin
-  }
+void QCPPolarAxisRadial::setSubTickLengthOut(int outside) {
+    if (mSubTickLengthOut != outside) {
+        mSubTickLengthOut = outside;
+        //mCachedMarginValid = false; // only outside tick length can change margin
+    }
 }
 
 /*!
@@ -777,9 +719,8 @@ void QCPPolarAxisRadial::setSubTickLengthOut(int outside)
   
   \see setTickPen, setSubTickPen
 */
-void QCPPolarAxisRadial::setBasePen(const QPen &pen)
-{
-  mBasePen = pen;
+void QCPPolarAxisRadial::setBasePen(const QPen &pen) {
+    mBasePen = pen;
 }
 
 /*!
@@ -787,9 +728,8 @@ void QCPPolarAxisRadial::setBasePen(const QPen &pen)
   
   \see setTickLength, setBasePen
 */
-void QCPPolarAxisRadial::setTickPen(const QPen &pen)
-{
-  mTickPen = pen;
+void QCPPolarAxisRadial::setTickPen(const QPen &pen) {
+    mTickPen = pen;
 }
 
 /*!
@@ -797,9 +737,8 @@ void QCPPolarAxisRadial::setTickPen(const QPen &pen)
   
   \see setSubTickCount, setSubTickLength, setBasePen
 */
-void QCPPolarAxisRadial::setSubTickPen(const QPen &pen)
-{
-  mSubTickPen = pen;
+void QCPPolarAxisRadial::setSubTickPen(const QPen &pen) {
+    mSubTickPen = pen;
 }
 
 /*!
@@ -807,13 +746,11 @@ void QCPPolarAxisRadial::setSubTickPen(const QPen &pen)
   
   \see setLabelColor
 */
-void QCPPolarAxisRadial::setLabelFont(const QFont &font)
-{
-  if (mLabelFont != font)
-  {
-    mLabelFont = font;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setLabelFont(const QFont &font) {
+    if (mLabelFont != font) {
+        mLabelFont = font;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -821,22 +758,19 @@ void QCPPolarAxisRadial::setLabelFont(const QFont &font)
   
   \see setLabelFont
 */
-void QCPPolarAxisRadial::setLabelColor(const QColor &color)
-{
-  mLabelColor = color;
+void QCPPolarAxisRadial::setLabelColor(const QColor &color) {
+    mLabelColor = color;
 }
 
 /*!
   Sets the text of the axis label that will be shown below/above or next to the axis, depending on
   its orientation. To disable axis labels, pass an empty string as \a str.
 */
-void QCPPolarAxisRadial::setLabel(const QString &str)
-{
-  if (mLabel != str)
-  {
-    mLabel = str;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setLabel(const QString &str) {
+    if (mLabel != str) {
+        mLabel = str;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -844,13 +778,11 @@ void QCPPolarAxisRadial::setLabel(const QString &str)
   
   \see setTickLabelPadding, setPadding
 */
-void QCPPolarAxisRadial::setLabelPadding(int padding)
-{
-  if (mLabelPadding != padding)
-  {
-    mLabelPadding = padding;
-    //mCachedMarginValid = false;
-  }
+void QCPPolarAxisRadial::setLabelPadding(int padding) {
+    if (mLabelPadding != padding) {
+        mLabelPadding = padding;
+        //mCachedMarginValid = false;
+    }
 }
 
 /*!
@@ -858,13 +790,11 @@ void QCPPolarAxisRadial::setLabelPadding(int padding)
   
   \see setTickLabelFont, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedTickLabelFont(const QFont &font)
-{
-  if (font != mSelectedTickLabelFont)
-  {
-    mSelectedTickLabelFont = font;
-    // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
-  }
+void QCPPolarAxisRadial::setSelectedTickLabelFont(const QFont &font) {
+    if (font != mSelectedTickLabelFont) {
+        mSelectedTickLabelFont = font;
+        // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
+    }
 }
 
 /*!
@@ -872,10 +802,9 @@ void QCPPolarAxisRadial::setSelectedTickLabelFont(const QFont &font)
   
   \see setLabelFont, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedLabelFont(const QFont &font)
-{
-  mSelectedLabelFont = font;
-  // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
+void QCPPolarAxisRadial::setSelectedLabelFont(const QFont &font) {
+    mSelectedLabelFont = font;
+    // don't set mCachedMarginValid to false here because margin calculation is always done with non-selected fonts
 }
 
 /*!
@@ -883,12 +812,10 @@ void QCPPolarAxisRadial::setSelectedLabelFont(const QFont &font)
   
   \see setTickLabelColor, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedTickLabelColor(const QColor &color)
-{
-  if (color != mSelectedTickLabelColor)
-  {
-    mSelectedTickLabelColor = color;
-  }
+void QCPPolarAxisRadial::setSelectedTickLabelColor(const QColor &color) {
+    if (color != mSelectedTickLabelColor) {
+        mSelectedTickLabelColor = color;
+    }
 }
 
 /*!
@@ -896,9 +823,8 @@ void QCPPolarAxisRadial::setSelectedTickLabelColor(const QColor &color)
   
   \see setLabelColor, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedLabelColor(const QColor &color)
-{
-  mSelectedLabelColor = color;
+void QCPPolarAxisRadial::setSelectedLabelColor(const QColor &color) {
+    mSelectedLabelColor = color;
 }
 
 /*!
@@ -906,9 +832,8 @@ void QCPPolarAxisRadial::setSelectedLabelColor(const QColor &color)
   
   \see setBasePen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedBasePen(const QPen &pen)
-{
-  mSelectedBasePen = pen;
+void QCPPolarAxisRadial::setSelectedBasePen(const QPen &pen) {
+    mSelectedBasePen = pen;
 }
 
 /*!
@@ -916,9 +841,8 @@ void QCPPolarAxisRadial::setSelectedBasePen(const QPen &pen)
   
   \see setTickPen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedTickPen(const QPen &pen)
-{
-  mSelectedTickPen = pen;
+void QCPPolarAxisRadial::setSelectedTickPen(const QPen &pen) {
+    mSelectedTickPen = pen;
 }
 
 /*!
@@ -926,9 +850,8 @@ void QCPPolarAxisRadial::setSelectedTickPen(const QPen &pen)
   
   \see setSubTickPen, setSelectableParts, setSelectedParts, QCustomPlot::setInteractions
 */
-void QCPPolarAxisRadial::setSelectedSubTickPen(const QPen &pen)
-{
-  mSelectedSubTickPen = pen;
+void QCPPolarAxisRadial::setSelectedSubTickPen(const QPen &pen) {
+    mSelectedSubTickPen = pen;
 }
 
 /*!
@@ -938,20 +861,18 @@ void QCPPolarAxisRadial::setSelectedSubTickPen(const QPen &pen)
   If the scale type is \ref stLogarithmic, the range bounds are multiplied by \a diff. This
   corresponds to an apparent "linear" move in logarithmic scaling by a distance of log(diff).
 */
-void QCPPolarAxisRadial::moveRange(double diff)
-{
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLinear)
-  {
-    mRange.lower += diff;
-    mRange.upper += diff;
-  } else // mScaleType == stLogarithmic
-  {
-    mRange.lower *= diff;
-    mRange.upper *= diff;
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+void QCPPolarAxisRadial::moveRange(double diff) {
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLinear) {
+        mRange.lower += diff;
+        mRange.upper += diff;
+    } else // mScaleType == stLogarithmic
+    {
+        mRange.lower *= diff;
+        mRange.upper *= diff;
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -963,9 +884,8 @@ void QCPPolarAxisRadial::moveRange(double diff)
   If you wish to scale around a different coordinate than the current axis range center, use the
   overload \ref scaleRange(double factor, double center).
 */
-void QCPPolarAxisRadial::scaleRange(double factor)
-{
-  scaleRange(factor, range().center());
+void QCPPolarAxisRadial::scaleRange(double factor) {
+    scaleRange(factor, range().center());
 }
 
 /*! \overload
@@ -977,30 +897,30 @@ void QCPPolarAxisRadial::scaleRange(double factor)
 
   \see scaleRange(double factor)
 */
-void QCPPolarAxisRadial::scaleRange(double factor, double center)
-{
-  QCPRange oldRange = mRange;
-  if (mScaleType == stLinear)
-  {
-    QCPRange newRange;
-    newRange.lower = (mRange.lower-center)*factor + center;
-    newRange.upper = (mRange.upper-center)*factor + center;
-    if (QCPRange::validRange(newRange))
-      mRange = newRange.sanitizedForLinScale();
-  } else // mScaleType == stLogarithmic
-  {
-    if ((mRange.upper < 0 && center < 0) || (mRange.upper > 0 && center > 0)) // make sure center has same sign as range
+void QCPPolarAxisRadial::scaleRange(double factor, double center) {
+    QCPRange oldRange = mRange;
+    if (mScaleType == stLinear) {
+        QCPRange newRange;
+        newRange.lower = (mRange.lower - center) * factor + center;
+        newRange.upper = (mRange.upper - center) * factor + center;
+        if (QCPRange::validRange(newRange))
+            mRange = newRange.sanitizedForLinScale();
+    } else // mScaleType == stLogarithmic
     {
-      QCPRange newRange;
-      newRange.lower = qPow(mRange.lower/center, factor)*center;
-      newRange.upper = qPow(mRange.upper/center, factor)*center;
-      if (QCPRange::validRange(newRange))
-        mRange = newRange.sanitizedForLogScale();
-    } else
-      qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
-  }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+        if ((mRange.upper < 0 && center < 0) ||
+            (mRange.upper > 0 && center > 0)) // make sure center has same sign as range
+        {
+            QCPRange newRange;
+            newRange.lower = qPow(mRange.lower / center, factor) * center;
+            newRange.upper = qPow(mRange.upper / center, factor) * center;
+            if (QCPRange::validRange(newRange))
+                mRange = newRange.sanitizedForLogScale();
+        } else
+            qDebug() << Q_FUNC_INFO
+                     << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
+    }
+    emit rangeChanged(mRange);
+    emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -1009,114 +929,108 @@ void QCPPolarAxisRadial::scaleRange(double factor, double center)
   
   \see QCPAbstractPlottable::rescaleAxes, QCustomPlot::rescaleAxes
 */
-void QCPPolarAxisRadial::rescale(bool onlyVisiblePlottables)
-{
-  Q_UNUSED(onlyVisiblePlottables)
-  /* TODO
-  QList<QCPAbstractPlottable*> p = plottables();
-  QCPRange newRange;
-  bool haveRange = false;
-  for (int i=0; i<p.size(); ++i)
-  {
-    if (!p.at(i)->realVisibility() && onlyVisiblePlottables)
-      continue;
-    QCPRange plottableRange;
-    bool currentFoundRange;
-    QCP::SignDomain signDomain = QCP::sdBoth;
-    if (mScaleType == stLogarithmic)
-      signDomain = (mRange.upper < 0 ? QCP::sdNegative : QCP::sdPositive);
-    if (p.at(i)->keyAxis() == this)
-      plottableRange = p.at(i)->getKeyRange(currentFoundRange, signDomain);
-    else
-      plottableRange = p.at(i)->getValueRange(currentFoundRange, signDomain);
-    if (currentFoundRange)
+void QCPPolarAxisRadial::rescale(bool onlyVisiblePlottables) {
+    Q_UNUSED(onlyVisiblePlottables)
+    /* TODO
+    QList<QCPAbstractPlottable*> p = plottables();
+    QCPRange newRange;
+    bool haveRange = false;
+    for (int i=0; i<p.size(); ++i)
     {
-      if (!haveRange)
-        newRange = plottableRange;
+      if (!p.at(i)->realVisibility() && onlyVisiblePlottables)
+        continue;
+      QCPRange plottableRange;
+      bool currentFoundRange;
+      QCP::SignDomain signDomain = QCP::sdBoth;
+      if (mScaleType == stLogarithmic)
+        signDomain = (mRange.upper < 0 ? QCP::sdNegative : QCP::sdPositive);
+      if (p.at(i)->keyAxis() == this)
+        plottableRange = p.at(i)->getKeyRange(currentFoundRange, signDomain);
       else
-        newRange.expand(plottableRange);
-      haveRange = true;
-    }
-  }
-  if (haveRange)
-  {
-    if (!QCPRange::validRange(newRange)) // likely due to range being zero (plottable has only constant data in this axis dimension), shift current range to at least center the plottable
-    {
-      double center = (newRange.lower+newRange.upper)*0.5; // upper and lower should be equal anyway, but just to make sure, incase validRange returned false for other reason
-      if (mScaleType == stLinear)
+        plottableRange = p.at(i)->getValueRange(currentFoundRange, signDomain);
+      if (currentFoundRange)
       {
-        newRange.lower = center-mRange.size()/2.0;
-        newRange.upper = center+mRange.size()/2.0;
-      } else // mScaleType == stLogarithmic
-      {
-        newRange.lower = center/qSqrt(mRange.upper/mRange.lower);
-        newRange.upper = center*qSqrt(mRange.upper/mRange.lower);
+        if (!haveRange)
+          newRange = plottableRange;
+        else
+          newRange.expand(plottableRange);
+        haveRange = true;
       }
     }
-    setRange(newRange);
-  }
-  */
+    if (haveRange)
+    {
+      if (!QCPRange::validRange(newRange)) // likely due to range being zero (plottable has only constant data in this axis dimension), shift current range to at least center the plottable
+      {
+        double center = (newRange.lower+newRange.upper)*0.5; // upper and lower should be equal anyway, but just to make sure, incase validRange returned false for other reason
+        if (mScaleType == stLinear)
+        {
+          newRange.lower = center-mRange.size()/2.0;
+          newRange.upper = center+mRange.size()/2.0;
+        } else // mScaleType == stLogarithmic
+        {
+          newRange.lower = center/qSqrt(mRange.upper/mRange.lower);
+          newRange.upper = center*qSqrt(mRange.upper/mRange.lower);
+        }
+      }
+      setRange(newRange);
+    }
+    */
 }
 
 /*!
   Transforms \a value, in pixel coordinates of the QCustomPlot widget, to axis coordinates.
 */
-void QCPPolarAxisRadial::pixelToCoord(QPointF pixelPos, double &angleCoord, double &radiusCoord) const
-{
-  QCPVector2D posVector(pixelPos-mCenter);
-  radiusCoord = radiusToCoord(posVector.length());
-  angleCoord = mAngularAxis->angleRadToCoord(posVector.angle());
+void QCPPolarAxisRadial::pixelToCoord(QPointF pixelPos, double &angleCoord, double &radiusCoord) const {
+    QCPVector2D posVector(pixelPos - mCenter);
+    radiusCoord = radiusToCoord(posVector.length());
+    angleCoord = mAngularAxis->angleRadToCoord(posVector.angle());
 }
 
 /*!
   Transforms \a value, in coordinates of the axis, to pixel coordinates of the QCustomPlot widget.
 */
-QPointF QCPPolarAxisRadial::coordToPixel(double angleCoord, double radiusCoord) const
-{
-  const double radiusPixel = coordToRadius(radiusCoord);
-  const double angleRad = mAngularAxis->coordToAngleRad(angleCoord);
-  return QPointF(mCenter.x()+qCos(angleRad)*radiusPixel, mCenter.y()+qSin(angleRad)*radiusPixel);
+QPointF QCPPolarAxisRadial::coordToPixel(double angleCoord, double radiusCoord) const {
+    const double radiusPixel = coordToRadius(radiusCoord);
+    const double angleRad = mAngularAxis->coordToAngleRad(angleCoord);
+    return QPointF(mCenter.x() + qCos(angleRad) * radiusPixel, mCenter.y() + qSin(angleRad) * radiusPixel);
 }
 
-double QCPPolarAxisRadial::coordToRadius(double coord) const
-{
-  if (mScaleType == stLinear)
-  {
-    if (!mRangeReversed)
-      return (coord-mRange.lower)/mRange.size()*mRadius;
-    else
-      return (mRange.upper-coord)/mRange.size()*mRadius;
-  } else // mScaleType == stLogarithmic
-  {
-    if (coord >= 0.0 && mRange.upper < 0.0) // invalid value for logarithmic scale, just return outside visible range
-      return !mRangeReversed ? mRadius+200 : mRadius-200;
-    else if (coord <= 0.0 && mRange.upper >= 0.0) // invalid value for logarithmic scale, just return outside visible range
-      return !mRangeReversed ? mRadius-200 :mRadius+200;
-    else
+double QCPPolarAxisRadial::coordToRadius(double coord) const {
+    if (mScaleType == stLinear) {
+        if (!mRangeReversed)
+            return (coord - mRange.lower) / mRange.size() * mRadius;
+        else
+            return (mRange.upper - coord) / mRange.size() * mRadius;
+    } else // mScaleType == stLogarithmic
     {
-      if (!mRangeReversed)
-        return qLn(coord/mRange.lower)/qLn(mRange.upper/mRange.lower)*mRadius;
-      else
-        return qLn(mRange.upper/coord)/qLn(mRange.upper/mRange.lower)*mRadius;
+        if (coord >= 0.0 &&
+            mRange.upper < 0.0) // invalid value for logarithmic scale, just return outside visible range
+            return !mRangeReversed ? mRadius + 200 : mRadius - 200;
+        else if (coord <= 0.0 &&
+                 mRange.upper >= 0.0) // invalid value for logarithmic scale, just return outside visible range
+            return !mRangeReversed ? mRadius - 200 : mRadius + 200;
+        else {
+            if (!mRangeReversed)
+                return qLn(coord / mRange.lower) / qLn(mRange.upper / mRange.lower) * mRadius;
+            else
+                return qLn(mRange.upper / coord) / qLn(mRange.upper / mRange.lower) * mRadius;
+        }
     }
-  }
 }
 
-double QCPPolarAxisRadial::radiusToCoord(double radius) const
-{
-  if (mScaleType == stLinear)
-  {
-    if (!mRangeReversed)
-      return (radius)/mRadius*mRange.size()+mRange.lower;
-    else
-      return -(radius)/mRadius*mRange.size()+mRange.upper;
-  } else // mScaleType == stLogarithmic
-  {
-    if (!mRangeReversed)
-      return qPow(mRange.upper/mRange.lower, (radius)/mRadius)*mRange.lower;
-    else
-      return qPow(mRange.upper/mRange.lower, (-radius)/mRadius)*mRange.upper;
-  }
+double QCPPolarAxisRadial::radiusToCoord(double radius) const {
+    if (mScaleType == stLinear) {
+        if (!mRangeReversed)
+            return (radius) / mRadius * mRange.size() + mRange.lower;
+        else
+            return -(radius) / mRadius * mRange.size() + mRange.upper;
+    } else // mScaleType == stLogarithmic
+    {
+        if (!mRangeReversed)
+            return qPow(mRange.upper / mRange.lower, (radius) / mRadius) * mRange.lower;
+        else
+            return qPow(mRange.upper / mRange.lower, (-radius) / mRadius) * mRange.upper;
+    }
 }
 
 
@@ -1129,58 +1043,54 @@ double QCPPolarAxisRadial::radiusToCoord(double radius) const
   
   \see setSelectedParts, setSelectableParts, QCustomPlot::setInteractions
 */
-QCPPolarAxisRadial::SelectablePart QCPPolarAxisRadial::getPartAt(const QPointF &pos) const
-{
-  Q_UNUSED(pos) // TODO remove later
-  if (!mVisible)
-    return spNone;
-  
-  /*
-    TODO:
-  if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
-    return spAxis;
-  else if (mAxisPainter->tickLabelsSelectionBox().contains(pos.toPoint()))
-    return spTickLabels;
-  else if (mAxisPainter->labelSelectionBox().contains(pos.toPoint()))
-    return spAxisLabel;
-  else */
+QCPPolarAxisRadial::SelectablePart QCPPolarAxisRadial::getPartAt(const QPointF &pos) const {
+    Q_UNUSED(pos) // TODO remove later
+    if (!mVisible)
+        return spNone;
+
+    /*
+      TODO:
+    if (mAxisPainter->axisSelectionBox().contains(pos.toPoint()))
+      return spAxis;
+    else if (mAxisPainter->tickLabelsSelectionBox().contains(pos.toPoint()))
+      return spTickLabels;
+    else if (mAxisPainter->labelSelectionBox().contains(pos.toPoint()))
+      return spAxisLabel;
+    else */
     return spNone;
 }
 
 /* inherits documentation from base class */
-double QCPPolarAxisRadial::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  if (!mParentPlot) return -1;
-  SelectablePart part = getPartAt(pos);
-  if ((onlySelectable && !mSelectableParts.testFlag(part)) || part == spNone)
-    return -1;
-  
-  if (details)
-    details->setValue(part);
-  return mParentPlot->selectionTolerance()*0.99;
+double QCPPolarAxisRadial::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    if (!mParentPlot) return -1;
+    SelectablePart part = getPartAt(pos);
+    if ((onlySelectable && !mSelectableParts.testFlag(part)) || part == spNone)
+        return -1;
+
+    if (details)
+        details->setValue(part);
+    return mParentPlot->selectionTolerance() * 0.99;
 }
 
 /* inherits documentation from base class */
-void QCPPolarAxisRadial::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  SelectablePart part = details.value<SelectablePart>();
-  if (mSelectableParts.testFlag(part))
-  {
+void QCPPolarAxisRadial::selectEvent(QMouseEvent *event, bool additive, const QVariant &details,
+                                     bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    SelectablePart part = details.value<SelectablePart>();
+    if (mSelectableParts.testFlag(part)) {
+        SelectableParts selBefore = mSelectedParts;
+        setSelectedParts(additive ? mSelectedParts ^ part : part);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelectedParts != selBefore;
+    }
+}
+
+/* inherits documentation from base class */
+void QCPPolarAxisRadial::deselectEvent(bool *selectionStateChanged) {
     SelectableParts selBefore = mSelectedParts;
-    setSelectedParts(additive ? mSelectedParts^part : part);
+    setSelectedParts(mSelectedParts & ~mSelectableParts);
     if (selectionStateChanged)
-      *selectionStateChanged = mSelectedParts != selBefore;
-  }
-}
-
-/* inherits documentation from base class */
-void QCPPolarAxisRadial::deselectEvent(bool *selectionStateChanged)
-{
-  SelectableParts selBefore = mSelectedParts;
-  setSelectedParts(mSelectedParts & ~mSelectableParts);
-  if (selectionStateChanged)
-    *selectionStateChanged = mSelectedParts != selBefore;
+        *selectionStateChanged = mSelectedParts != selBefore;
 }
 
 /*! \internal
@@ -1198,28 +1108,24 @@ void QCPPolarAxisRadial::deselectEvent(bool *selectionStateChanged)
   \note The dragging of possibly multiple axes at once by starting the drag anywhere in the axis
   rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::mousePressEvent.
 */
-void QCPPolarAxisRadial::mousePressEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag))
-  {
-    event->ignore();
-    return;
-  }
-  
-  if (event->buttons() & Qt::LeftButton)
-  {
-    mDragging = true;
-    // initialize antialiasing backup in case we start dragging:
-    if (mParentPlot->noAntialiasingOnDrag())
-    {
-      mAADragBackup = mParentPlot->antialiasedElements();
-      mNotAADragBackup = mParentPlot->notAntialiasedElements();
+void QCPPolarAxisRadial::mousePressEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    if (!mParentPlot->interactions().testFlag(QCP::iRangeDrag)) {
+        event->ignore();
+        return;
     }
-    // Mouse range dragging interaction:
-    if (mParentPlot->interactions().testFlag(QCP::iRangeDrag))
-      mDragStartRange = mRange;
-  }
+
+    if (event->buttons() & Qt::LeftButton) {
+        mDragging = true;
+        // initialize antialiasing backup in case we start dragging:
+        if (mParentPlot->noAntialiasingOnDrag()) {
+            mAADragBackup = mParentPlot->antialiasedElements();
+            mNotAADragBackup = mParentPlot->notAntialiasedElements();
+        }
+        // Mouse range dragging interaction:
+        if (mParentPlot->interactions().testFlag(QCP::iRangeDrag))
+            mDragStartRange = mRange;
+    }
 }
 
 /*! \internal
@@ -1234,30 +1140,28 @@ void QCPPolarAxisRadial::mousePressEvent(QMouseEvent *event, const QVariant &det
   
   \see QCPAxis::mousePressEvent
 */
-void QCPPolarAxisRadial::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  Q_UNUSED(event) // TODO remove later
-  Q_UNUSED(startPos) // TODO remove later
-  if (mDragging)
-  {
-    /* TODO
-    const double startPixel = orientation() == Qt::Horizontal ? startPos.x() : startPos.y();
-    const double currentPixel = orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y();
-    if (mScaleType == QCPPolarAxisRadial::stLinear)
-    {
-      const double diff = pixelToCoord(startPixel) - pixelToCoord(currentPixel);
-      setRange(mDragStartRange.lower+diff, mDragStartRange.upper+diff);
-    } else if (mScaleType == QCPPolarAxisRadial::stLogarithmic)
-    {
-      const double diff = pixelToCoord(startPixel) / pixelToCoord(currentPixel);
-      setRange(mDragStartRange.lower*diff, mDragStartRange.upper*diff);
+void QCPPolarAxisRadial::mouseMoveEvent(QMouseEvent *event, const QPointF &startPos) {
+    Q_UNUSED(event) // TODO remove later
+    Q_UNUSED(startPos) // TODO remove later
+    if (mDragging) {
+        /* TODO
+        const double startPixel = orientation() == Qt::Horizontal ? startPos.x() : startPos.y();
+        const double currentPixel = orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y();
+        if (mScaleType == QCPPolarAxisRadial::stLinear)
+        {
+          const double diff = pixelToCoord(startPixel) - pixelToCoord(currentPixel);
+          setRange(mDragStartRange.lower+diff, mDragStartRange.upper+diff);
+        } else if (mScaleType == QCPPolarAxisRadial::stLogarithmic)
+        {
+          const double diff = pixelToCoord(startPixel) / pixelToCoord(currentPixel);
+          setRange(mDragStartRange.lower*diff, mDragStartRange.upper*diff);
+        }
+        */
+
+        if (mParentPlot->noAntialiasingOnDrag())
+            mParentPlot->setNotAntialiasedElements(QCP::aeAll);
+        mParentPlot->replot(QCustomPlot::rpQueuedReplot);
     }
-    */
-    
-    if (mParentPlot->noAntialiasingOnDrag())
-      mParentPlot->setNotAntialiasedElements(QCP::aeAll);
-    mParentPlot->replot(QCustomPlot::rpQueuedReplot);
-  }
 }
 
 /*! \internal
@@ -1272,16 +1176,14 @@ void QCPPolarAxisRadial::mouseMoveEvent(QMouseEvent *event, const QPointF &start
   
   \see QCPAxis::mousePressEvent
 */
-void QCPPolarAxisRadial::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  Q_UNUSED(event)
-  Q_UNUSED(startPos)
-  mDragging = false;
-  if (mParentPlot->noAntialiasingOnDrag())
-  {
-    mParentPlot->setAntialiasedElements(mAADragBackup);
-    mParentPlot->setNotAntialiasedElements(mNotAADragBackup);
-  }
+void QCPPolarAxisRadial::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos) {
+    Q_UNUSED(event)
+    Q_UNUSED(startPos)
+    mDragging = false;
+    if (mParentPlot->noAntialiasingOnDrag()) {
+        mParentPlot->setAntialiasedElements(mAADragBackup);
+        mParentPlot->setNotAntialiasedElements(mNotAADragBackup);
+    }
 }
 
 /*! \internal
@@ -1299,27 +1201,24 @@ void QCPPolarAxisRadial::mouseReleaseEvent(QMouseEvent *event, const QPointF &st
   \note The zooming of possibly multiple axes at once by performing the wheel event anywhere in the
   axis rect is handled by the axis rect's mouse event, e.g. \ref QCPAxisRect::wheelEvent.
 */
-void QCPPolarAxisRadial::wheelEvent(QWheelEvent *event)
-{
-  // Mouse range zooming interaction:
-  if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom))
-  {
-    event->ignore();
-    return;
-  }
-  
-  // TODO:
-  //const double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
-  //const double factor = qPow(mRangeZoomFactor, wheelSteps);
-  //scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
-  mParentPlot->replot();
+void QCPPolarAxisRadial::wheelEvent(QWheelEvent *event) {
+    // Mouse range zooming interaction:
+    if (!mParentPlot->interactions().testFlag(QCP::iRangeZoom)) {
+        event->ignore();
+        return;
+    }
+
+    // TODO:
+    //const double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
+    //const double factor = qPow(mRangeZoomFactor, wheelSteps);
+    //scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
+    mParentPlot->replot();
 }
 
-void QCPPolarAxisRadial::updateGeometry(const QPointF &center, double radius)
-{
-  mCenter = center;
-  mRadius = radius;
-  if (mRadius < 1) mRadius = 1;
+void QCPPolarAxisRadial::updateGeometry(const QPointF &center, double radius) {
+    mCenter = center;
+    mRadius = radius;
+    if (mRadius < 1) mRadius = 1;
 }
 
 /*! \internal
@@ -1337,9 +1236,8 @@ void QCPPolarAxisRadial::updateGeometry(const QPointF &center, double radius)
   
   \see setAntialiased
 */
-void QCPPolarAxisRadial::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeAxes);
+void QCPPolarAxisRadial::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeAxes);
 }
 
 /*! \internal
@@ -1348,49 +1246,51 @@ void QCPPolarAxisRadial::applyDefaultAntialiasingHint(QCPPainter *painter) const
 
   \seebaseclassmethod
 */
-void QCPPolarAxisRadial::draw(QCPPainter *painter)
-{
-  const double axisAngleRad = (mAngle+(mAngleReference==arAngularAxis ? mAngularAxis->angle() : 0))/180.0*M_PI;
-  const QPointF axisVector(qCos(axisAngleRad), qSin(axisAngleRad)); // semantically should be QCPVector2D, but we save time in loops when we keep it as QPointF
-  const QPointF tickNormal = QCPVector2D(axisVector).perpendicular().toPointF(); // semantically should be QCPVector2D, but we save time in loops when we keep it as QPointF
-  
-  // draw baseline:
-  painter->setPen(getBasePen());
-  painter->drawLine(QLineF(mCenter, mCenter+axisVector*(mRadius-0.5)));
-  
-  // draw subticks:
-  if (!mSubTickVector.isEmpty())
-  {
-    painter->setPen(getSubTickPen());
-    for (int i=0; i<mSubTickVector.size(); ++i)
-    {
-      const QPointF tickPosition = mCenter+axisVector*coordToRadius(mSubTickVector.at(i));
-      painter->drawLine(QLineF(tickPosition-tickNormal*mSubTickLengthIn, tickPosition+tickNormal*mSubTickLengthOut));
+void QCPPolarAxisRadial::draw(QCPPainter *painter) {
+    const double axisAngleRad =
+            (mAngle + (mAngleReference == arAngularAxis ? mAngularAxis->angle() : 0)) / 180.0 * M_PI;
+    const QPointF axisVector(qCos(axisAngleRad),
+                             qSin(axisAngleRad)); // semantically should be QCPVector2D, but we save time in loops when we keep it as QPointF
+    const QPointF tickNormal = QCPVector2D(
+            axisVector).perpendicular().toPointF(); // semantically should be QCPVector2D, but we save time in loops when we keep it as QPointF
+
+    // draw baseline:
+    painter->setPen(getBasePen());
+    painter->drawLine(QLineF(mCenter, mCenter + axisVector * (mRadius - 0.5)));
+
+    // draw subticks:
+    if (!mSubTickVector.isEmpty()) {
+        painter->setPen(getSubTickPen());
+        for (int i = 0; i < mSubTickVector.size(); ++i) {
+            const QPointF tickPosition = mCenter + axisVector * coordToRadius(mSubTickVector.at(i));
+            painter->drawLine(QLineF(tickPosition - tickNormal * mSubTickLengthIn,
+                                     tickPosition + tickNormal * mSubTickLengthOut));
+        }
     }
-  }
-  
-  // draw ticks and labels:
-  if (!mTickVector.isEmpty())
-  {
-    mLabelPainter.setAnchorReference(mCenter-axisVector); // subtract (normalized) axisVector, just to prevent degenerate tangents for tick label at exact lower axis range
-    mLabelPainter.setFont(getTickLabelFont());
-    mLabelPainter.setColor(getTickLabelColor());
-    const QPen ticksPen = getTickPen();
-    painter->setPen(ticksPen);
-    for (int i=0; i<mTickVector.size(); ++i)
-    {
-      const double r = coordToRadius(mTickVector.at(i));
-      const QPointF tickPosition = mCenter+axisVector*r;
-      painter->drawLine(QLineF(tickPosition-tickNormal*mTickLengthIn, tickPosition+tickNormal*mTickLengthOut));
-      // possibly draw tick labels:
-      if (!mTickVectorLabels.isEmpty())
-      {
-        if ((!mRangeReversed && (i < mTickVectorLabels.count()-1 || mRadius-r > 10)) ||
-            (mRangeReversed && (i > 0 || mRadius-r > 10))) // skip last label if it's closer than 10 pixels to angular axis
-          mLabelPainter.drawTickLabel(painter, tickPosition+tickNormal*mSubTickLengthOut, mTickVectorLabels.at(i));
-      }
+
+    // draw ticks and labels:
+    if (!mTickVector.isEmpty()) {
+        mLabelPainter.setAnchorReference(mCenter -
+                                         axisVector); // subtract (normalized) axisVector, just to prevent degenerate tangents for tick label at exact lower axis range
+        mLabelPainter.setFont(getTickLabelFont());
+        mLabelPainter.setColor(getTickLabelColor());
+        const QPen ticksPen = getTickPen();
+        painter->setPen(ticksPen);
+        for (int i = 0; i < mTickVector.size(); ++i) {
+            const double r = coordToRadius(mTickVector.at(i));
+            const QPointF tickPosition = mCenter + axisVector * r;
+            painter->drawLine(
+                    QLineF(tickPosition - tickNormal * mTickLengthIn, tickPosition + tickNormal * mTickLengthOut));
+            // possibly draw tick labels:
+            if (!mTickVectorLabels.isEmpty()) {
+                if ((!mRangeReversed && (i < mTickVectorLabels.count() - 1 || mRadius - r > 10)) ||
+                    (mRangeReversed &&
+                     (i > 0 || mRadius - r > 10))) // skip last label if it's closer than 10 pixels to angular axis
+                    mLabelPainter.drawTickLabel(painter, tickPosition + tickNormal * mSubTickLengthOut,
+                                                mTickVectorLabels.at(i));
+            }
+        }
     }
-  }
 }
 
 /*! \internal
@@ -1401,12 +1301,12 @@ void QCPPolarAxisRadial::draw(QCPPainter *painter)
   If a change in the label text/count is detected, the cached axis margin is invalidated to make
   sure the next margin calculation recalculates the label sizes and returns an up-to-date value.
 */
-void QCPPolarAxisRadial::setupTickVectors()
-{
-  if (!mParentPlot) return;
-  if ((!mTicks && !mTickLabels) || mRange.size() <= 0) return;
-  
-  mTicker->generate(mRange, mParentPlot->locale(), mNumberFormatChar, mNumberPrecision, mTickVector, mSubTicks ? &mSubTickVector : 0, mTickLabels ? &mTickVectorLabels : 0);
+void QCPPolarAxisRadial::setupTickVectors() {
+    if (!mParentPlot) return;
+    if ((!mTicks && !mTickLabels) || mRange.size() <= 0) return;
+
+    mTicker->generate(mRange, mParentPlot->locale(), mNumberFormatChar, mNumberPrecision, mTickVector,
+                      mSubTicks ? &mSubTickVector : 0, mTickLabels ? &mTickVectorLabels : 0);
 }
 
 /*! \internal
@@ -1414,9 +1314,8 @@ void QCPPolarAxisRadial::setupTickVectors()
   Returns the pen that is used to draw the axis base line. Depending on the selection state, this
   is either mSelectedBasePen or mBasePen.
 */
-QPen QCPPolarAxisRadial::getBasePen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedBasePen : mBasePen;
+QPen QCPPolarAxisRadial::getBasePen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedBasePen : mBasePen;
 }
 
 /*! \internal
@@ -1424,9 +1323,8 @@ QPen QCPPolarAxisRadial::getBasePen() const
   Returns the pen that is used to draw the (major) ticks. Depending on the selection state, this
   is either mSelectedTickPen or mTickPen.
 */
-QPen QCPPolarAxisRadial::getTickPen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedTickPen : mTickPen;
+QPen QCPPolarAxisRadial::getTickPen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedTickPen : mTickPen;
 }
 
 /*! \internal
@@ -1434,9 +1332,8 @@ QPen QCPPolarAxisRadial::getTickPen() const
   Returns the pen that is used to draw the subticks. Depending on the selection state, this
   is either mSelectedSubTickPen or mSubTickPen.
 */
-QPen QCPPolarAxisRadial::getSubTickPen() const
-{
-  return mSelectedParts.testFlag(spAxis) ? mSelectedSubTickPen : mSubTickPen;
+QPen QCPPolarAxisRadial::getSubTickPen() const {
+    return mSelectedParts.testFlag(spAxis) ? mSelectedSubTickPen : mSubTickPen;
 }
 
 /*! \internal
@@ -1444,9 +1341,8 @@ QPen QCPPolarAxisRadial::getSubTickPen() const
   Returns the font that is used to draw the tick labels. Depending on the selection state, this
   is either mSelectedTickLabelFont or mTickLabelFont.
 */
-QFont QCPPolarAxisRadial::getTickLabelFont() const
-{
-  return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelFont : mTickLabelFont;
+QFont QCPPolarAxisRadial::getTickLabelFont() const {
+    return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelFont : mTickLabelFont;
 }
 
 /*! \internal
@@ -1454,9 +1350,8 @@ QFont QCPPolarAxisRadial::getTickLabelFont() const
   Returns the font that is used to draw the axis label. Depending on the selection state, this
   is either mSelectedLabelFont or mLabelFont.
 */
-QFont QCPPolarAxisRadial::getLabelFont() const
-{
-  return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelFont : mLabelFont;
+QFont QCPPolarAxisRadial::getLabelFont() const {
+    return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelFont : mLabelFont;
 }
 
 /*! \internal
@@ -1464,9 +1359,8 @@ QFont QCPPolarAxisRadial::getLabelFont() const
   Returns the color that is used to draw the tick labels. Depending on the selection state, this
   is either mSelectedTickLabelColor or mTickLabelColor.
 */
-QColor QCPPolarAxisRadial::getTickLabelColor() const
-{
-  return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelColor : mTickLabelColor;
+QColor QCPPolarAxisRadial::getTickLabelColor() const {
+    return mSelectedParts.testFlag(spTickLabels) ? mSelectedTickLabelColor : mTickLabelColor;
 }
 
 /*! \internal
@@ -1474,14 +1368,12 @@ QColor QCPPolarAxisRadial::getTickLabelColor() const
   Returns the color that is used to draw the axis label. Depending on the selection state, this
   is either mSelectedLabelColor or mLabelColor.
 */
-QColor QCPPolarAxisRadial::getLabelColor() const
-{
-  return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelColor : mLabelColor;
+QColor QCPPolarAxisRadial::getLabelColor() const {
+    return mSelectedParts.testFlag(spAxisLabel) ? mSelectedLabelColor : mLabelColor;
 }
 
 
 /* inherits documentation from base class */
-QCP::Interaction QCPPolarAxisRadial::selectionCategory() const
-{
-  return QCP::iSelectAxes;
+QCP::Interaction QCPPolarAxisRadial::selectionCategory() const {
+    return QCP::iSelectAxes;
 }

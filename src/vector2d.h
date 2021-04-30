@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCPVECTOR2D_H
@@ -57,7 +57,9 @@ public:
 
     double lengthSquared() const { return mX * mX + mY * mY; }
 
-    QPoint toPoint() const { return QPoint(mX, mY); }
+    double angle() const { return qAtan2(mY, mX); }
+
+    QPoint toPoint() const { return QPoint(int(mX), int(mY)); }
 
     QPointF toPointF() const { return QPointF(mX, mY); }
 
@@ -104,15 +106,25 @@ private:
 
 Q_DECLARE_TYPEINFO(QCPVector2D, Q_MOVABLE_TYPE);
 
-inline const QCPVector2D operator*(double factor, const QCPVector2D &vec) { return QCPVector2D(vec.mX * factor, vec.mY * factor); }
+inline const QCPVector2D operator*(double factor, const QCPVector2D &vec) {
+    return QCPVector2D(vec.mX * factor, vec.mY * factor);
+}
 
-inline const QCPVector2D operator*(const QCPVector2D &vec, double factor) { return QCPVector2D(vec.mX * factor, vec.mY * factor); }
+inline const QCPVector2D operator*(const QCPVector2D &vec, double factor) {
+    return QCPVector2D(vec.mX * factor, vec.mY * factor);
+}
 
-inline const QCPVector2D operator/(const QCPVector2D &vec, double divisor) { return QCPVector2D(vec.mX / divisor, vec.mY / divisor); }
+inline const QCPVector2D operator/(const QCPVector2D &vec, double divisor) {
+    return QCPVector2D(vec.mX / divisor, vec.mY / divisor);
+}
 
-inline const QCPVector2D operator+(const QCPVector2D &vec1, const QCPVector2D &vec2) { return QCPVector2D(vec1.mX + vec2.mX, vec1.mY + vec2.mY); }
+inline const QCPVector2D operator+(const QCPVector2D &vec1, const QCPVector2D &vec2) {
+    return QCPVector2D(vec1.mX + vec2.mX, vec1.mY + vec2.mY);
+}
 
-inline const QCPVector2D operator-(const QCPVector2D &vec1, const QCPVector2D &vec2) { return QCPVector2D(vec1.mX - vec2.mX, vec1.mY - vec2.mY); }
+inline const QCPVector2D operator-(const QCPVector2D &vec1, const QCPVector2D &vec2) {
+    return QCPVector2D(vec1.mX - vec2.mX, vec1.mY - vec2.mY);
+}
 
 inline const QCPVector2D operator-(const QCPVector2D &vec) { return QCPVector2D(-vec.mX, -vec.mY); }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "item-pixmap.h"
@@ -90,7 +90,8 @@ void QCPItemPixmap::setPixmap(const QPixmap &pixmap) {
   Sets whether the pixmap will be scaled to fit the rectangle defined by the \a topLeft and \a
   bottomRight positions.
 */
-void QCPItemPixmap::setScaled(bool scaled, Qt::AspectRatioMode aspectRatioMode, Qt::TransformationMode transformationMode) {
+void
+QCPItemPixmap::setScaled(bool scaled, Qt::AspectRatioMode aspectRatioMode, Qt::TransformationMode transformationMode) {
     mScaled = scaled;
     mAspectRatioMode = aspectRatioMode;
     mTransformationMode = transformationMode;
@@ -129,7 +130,7 @@ void QCPItemPixmap::draw(QCPPainter *painter) {
     bool flipHorz = false;
     bool flipVert = false;
     QRect rect = getFinalRect(&flipHorz, &flipVert);
-    double clipPad = mainPen().style() == Qt::NoPen ? 0 : mainPen().widthF();
+    int clipPad = mainPen().style() == Qt::NoPen ? 0 : qCeil(mainPen().widthF());
     QRect boundingRect = rect.adjusted(-clipPad, -clipPad, clipPad, clipPad);
     if (boundingRect.intersects(clipRect())) {
         updateScaledPixmap(rect, flipHorz, flipVert);
@@ -145,8 +146,8 @@ void QCPItemPixmap::draw(QCPPainter *painter) {
 
 /* inherits documentation from base class */
 QPointF QCPItemPixmap::anchorPixelPosition(int anchorId) const {
-    bool flipHorz;
-    bool flipVert;
+    bool flipHorz = false;
+    bool flipVert = false;
     QRect rect = getFinalRect(&flipHorz, &flipVert);
     // we actually want denormal rects (negative width/height) here, so restore
     // the flipped state:
@@ -167,11 +168,11 @@ QPointF QCPItemPixmap::anchorPixelPosition(int anchorId) const {
         case aiBottomLeft:
             return rect.bottomLeft();
         case aiLeft:
-            return (rect.topLeft() + rect.bottomLeft()) * 0.5;;
+            return (rect.topLeft() + rect.bottomLeft()) * 0.5;
     }
 
     qDebug() << Q_FUNC_INFO << "invalid anchorId" << anchorId;
-    return QPointF();
+    return {};
 }
 
 /*! \internal
@@ -233,7 +234,7 @@ QRect QCPItemPixmap::getFinalRect(bool *flippedHorz, bool *flippedVert) const {
     QPoint p1 = topLeft->pixelPosition().toPoint();
     QPoint p2 = bottomRight->pixelPosition().toPoint();
     if (p1 == p2)
-        return QRect(p1, QSize(0, 0));
+        return {p1, QSize(0, 0)};
     if (mScaled) {
         QSize newSize = QSize(p2.x() - p1.x(), p2.y() - p1.y());
         QPoint topLeft = p1;

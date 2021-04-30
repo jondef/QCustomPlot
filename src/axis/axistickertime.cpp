@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "axistickertime.h"
@@ -145,8 +145,7 @@ void QCPAxisTickerTime::setFieldWidth(QCPAxisTickerTime::TimeUnit unit, int widt
   \seebaseclassmethod
 */
 double QCPAxisTickerTime::getTickStep(const QCPRange &range) {
-    double result =
-            range.size() / (double) (mTickCount + 1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
+    double result = range.size() / double(mTickCount + 1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
 
     if (result < 1) // ideal tick step is below 1 second -> use normal clean mantissa algorithm in units of seconds
     {
@@ -247,7 +246,8 @@ QString QCPAxisTickerTime::getTickLabel(double tick, const QLocale &locale, QCha
     bool negative = tick < 0;
     if (negative) tick *= -1;
     double values[tuDays + 1]; // contains the msec/sec/min/... value with its respective modulo (e.g. minute 0..59)
-    double restValues[tuDays + 1]; // contains the msec/sec/min/... value as if it's the largest available unit and thus consumes the remaining time
+    double restValues[tuDays +
+                      1]; // contains the msec/sec/min/... value as if it's the largest available unit and thus consumes the remaining time
 
     restValues[tuMilliseconds] = tick * 1000;
     values[tuMilliseconds] = modf(restValues[tuMilliseconds] / 1000, &restValues[tuSeconds]) * 1000;

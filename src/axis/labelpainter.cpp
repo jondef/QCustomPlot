@@ -53,113 +53,97 @@ const QChar QCPLabelPainterPrivate::SymbolCross(215);
   to delete it appropriately.
 */
 QCPLabelPainterPrivate::QCPLabelPainterPrivate(QCustomPlot *parentPlot) :
-  mAnchorMode(amRectangular),
-  mAnchorSide(asLeft),
-  mAnchorReferenceType(artNormal),
-  mColor(Qt::black),
-  mPadding(0),
-  mRotation(0),
-  mSubstituteExponent(true),
-  mMultiplicationSymbol(QChar(215)),
-  mAbbreviateDecimalPowers(false),
-  mParentPlot(parentPlot),
-  mLabelCache(16)
-{
-  analyzeFontMetrics();
-}
-
-QCPLabelPainterPrivate::~QCPLabelPainterPrivate()
-{
-}
-
-void QCPLabelPainterPrivate::setAnchorSide(AnchorSide side)
-{
-  mAnchorSide = side;
-}
-
-void QCPLabelPainterPrivate::setAnchorMode(AnchorMode mode)
-{
-  mAnchorMode = mode;
-}
-
-void QCPLabelPainterPrivate::setAnchorReference(const QPointF &pixelPoint)
-{
-  mAnchorReference = pixelPoint;
-}
-
-void QCPLabelPainterPrivate::setAnchorReferenceType(AnchorReferenceType type)
-{
-  mAnchorReferenceType = type;
-}
-
-void QCPLabelPainterPrivate::setFont(const QFont &font)
-{
-  if (mFont != font)
-  {
-    mFont = font;
+        mAnchorMode(amRectangular),
+        mAnchorSide(asLeft),
+        mAnchorReferenceType(artNormal),
+        mColor(Qt::black),
+        mPadding(0),
+        mRotation(0),
+        mSubstituteExponent(true),
+        mMultiplicationSymbol(QChar(215)),
+        mAbbreviateDecimalPowers(false),
+        mParentPlot(parentPlot),
+        mLabelCache(16) {
     analyzeFontMetrics();
-  }
 }
 
-void QCPLabelPainterPrivate::setColor(const QColor &color)
-{
-  mColor = color;
+QCPLabelPainterPrivate::~QCPLabelPainterPrivate() {
 }
 
-void QCPLabelPainterPrivate::setPadding(int padding)
-{
-  mPadding = padding;
+void QCPLabelPainterPrivate::setAnchorSide(AnchorSide side) {
+    mAnchorSide = side;
 }
 
-void QCPLabelPainterPrivate::setRotation(double rotation)
-{
-  mRotation = qBound(-90.0, rotation, 90.0);
+void QCPLabelPainterPrivate::setAnchorMode(AnchorMode mode) {
+    mAnchorMode = mode;
 }
 
-void QCPLabelPainterPrivate::setSubstituteExponent(bool enabled)
-{
-  mSubstituteExponent = enabled;
+void QCPLabelPainterPrivate::setAnchorReference(const QPointF &pixelPoint) {
+    mAnchorReference = pixelPoint;
 }
 
-void QCPLabelPainterPrivate::setMultiplicationSymbol(QChar symbol)
-{
-  mMultiplicationSymbol = symbol;
+void QCPLabelPainterPrivate::setAnchorReferenceType(AnchorReferenceType type) {
+    mAnchorReferenceType = type;
 }
 
-void QCPLabelPainterPrivate::setAbbreviateDecimalPowers(bool enabled)
-{
-  mAbbreviateDecimalPowers = enabled;
+void QCPLabelPainterPrivate::setFont(const QFont &font) {
+    if (mFont != font) {
+        mFont = font;
+        analyzeFontMetrics();
+    }
 }
 
-void QCPLabelPainterPrivate::setCacheSize(int labelCount)
-{
-  mLabelCache.setMaxCost(labelCount);
+void QCPLabelPainterPrivate::setColor(const QColor &color) {
+    mColor = color;
 }
 
-int QCPLabelPainterPrivate::cacheSize() const
-{
-  return mLabelCache.maxCost();
+void QCPLabelPainterPrivate::setPadding(int padding) {
+    mPadding = padding;
 }
 
-void QCPLabelPainterPrivate::drawTickLabel(QCPPainter *painter, const QPointF &tickPos, const QString &text)
-{
-  double realRotation = mRotation;
-  
-  AnchorSide realSide = mAnchorSide;
-  // for circular axes, the anchor side is determined depending on the quadrant of tickPos with respect to mCircularReference
-  if (mAnchorMode == amSkewedUpright)
-  {
-    realSide = skewedAnchorSide(tickPos, 0.2, 0.3); 
-  } else if (mAnchorMode == amSkewedRotated) // in this mode every label is individually rotated to match circle tangent
-  {
-    realSide = skewedAnchorSide(tickPos, 0, 0);
-    realRotation += QCPVector2D(tickPos-mAnchorReference).angle()/M_PI*180.0;
-    if (realRotation > 90) realRotation -= 180;
-    else if (realRotation < -90) realRotation += 180;
-  }
-  
-  realSide = rotationCorrectedSide(realSide, realRotation); // rotation angles may change the true anchor side of the label
-  drawLabelMaybeCached(painter, mFont, mColor, getAnchorPos(tickPos), realSide, realRotation, text);
+void QCPLabelPainterPrivate::setRotation(double rotation) {
+    mRotation = qBound(-90.0, rotation, 90.0);
+}
+
+void QCPLabelPainterPrivate::setSubstituteExponent(bool enabled) {
+    mSubstituteExponent = enabled;
+}
+
+void QCPLabelPainterPrivate::setMultiplicationSymbol(QChar symbol) {
+    mMultiplicationSymbol = symbol;
+}
+
+void QCPLabelPainterPrivate::setAbbreviateDecimalPowers(bool enabled) {
+    mAbbreviateDecimalPowers = enabled;
+}
+
+void QCPLabelPainterPrivate::setCacheSize(int labelCount) {
+    mLabelCache.setMaxCost(labelCount);
+}
+
+int QCPLabelPainterPrivate::cacheSize() const {
+    return mLabelCache.maxCost();
+}
+
+void QCPLabelPainterPrivate::drawTickLabel(QCPPainter *painter, const QPointF &tickPos, const QString &text) {
+    double realRotation = mRotation;
+
+    AnchorSide realSide = mAnchorSide;
+    // for circular axes, the anchor side is determined depending on the quadrant of tickPos with respect to mCircularReference
+    if (mAnchorMode == amSkewedUpright) {
+        realSide = skewedAnchorSide(tickPos, 0.2, 0.3);
+    } else if (mAnchorMode ==
+               amSkewedRotated) // in this mode every label is individually rotated to match circle tangent
+    {
+        realSide = skewedAnchorSide(tickPos, 0, 0);
+        realRotation += QCPVector2D(tickPos - mAnchorReference).angle() / M_PI * 180.0;
+        if (realRotation > 90) realRotation -= 180;
+        else if (realRotation < -90) realRotation += 180;
+    }
+
+    realSide = rotationCorrectedSide(realSide,
+                                     realRotation); // rotation angles may change the true anchor side of the label
+    drawLabelMaybeCached(painter, mFont, mColor, getAnchorPos(tickPos), realSide, realRotation, text);
 }
 
 /*! \internal
@@ -207,9 +191,8 @@ int QCPLabelPainterPrivate::size() const
   method is called automatically if any parameters have changed that invalidate the cached labels,
   such as font, color, etc. Usually you won't need to call this method manually.
 */
-void QCPLabelPainterPrivate::clearCache()
-{
-  mLabelCache.clear();
+void QCPLabelPainterPrivate::clearCache() {
+    mLabelCache.clear();
 }
 
 /*! \internal
@@ -219,17 +202,16 @@ void QCPLabelPainterPrivate::clearCache()
   return value of this method hasn't changed since the last redraw, the respective label parameters
   haven't changed and cached labels may be used.
 */
-QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const
-{
-  QByteArray result;
-  result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
-  result.append(QByteArray::number(mRotation));
-  //result.append(QByteArray::number((int)tickLabelSide)); TODO: check whether this is really a cache-invalidating property
-  result.append(QByteArray::number((int)mSubstituteExponent));
-  result.append(QString(mMultiplicationSymbol).toUtf8());
-  result.append(mColor.name().toLatin1()+QByteArray::number(mColor.alpha(), 16));
-  result.append(mFont.toString().toLatin1());
-  return result;
+QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const {
+    QByteArray result;
+    result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
+    result.append(QByteArray::number(mRotation));
+    //result.append(QByteArray::number((int)tickLabelSide)); TODO: check whether this is really a cache-invalidating property
+    result.append(QByteArray::number((int) mSubstituteExponent));
+    result.append(QString(mMultiplicationSymbol).toUtf8());
+    result.append(mColor.name().toLatin1() + QByteArray::number(mColor.alpha(), 16));
+    result.append(mFont.toString().toLatin1());
+    return result;
 }
 
 /*! \internal
@@ -251,96 +233,101 @@ QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const
   superscripted powers, the font is temporarily made smaller by a fixed factor (see \ref
   getTickLabelData).
 */
-void QCPLabelPainterPrivate::drawLabelMaybeCached(QCPPainter *painter, const QFont &font, const QColor &color, const QPointF &pos, AnchorSide side, double rotation, const QString &text)
-{
-  // warning: if you change anything here, also adapt getMaxTickLabelSize() accordingly!
-  if (text.isEmpty()) return;
-  QSize finalSize;
+void QCPLabelPainterPrivate::drawLabelMaybeCached(QCPPainter *painter, const QFont &font, const QColor &color,
+                                                  const QPointF &pos, AnchorSide side, double rotation,
+                                                  const QString &text) {
+    // warning: if you change anything here, also adapt getMaxTickLabelSize() accordingly!
+    if (text.isEmpty()) return;
+    QSize finalSize;
 
-  if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) && !painter->modes().testFlag(QCPPainter::pmNoCaching)) // label caching enabled
-  {
-    QByteArray key = cacheKey(text, color, rotation, side);
-    CachedLabel *cachedLabel = mLabelCache.take(QString::fromUtf8(key)); // attempt to take label from cache (don't use object() because we want ownership/prevent deletion during our operations, we re-insert it afterwards)
-    if (!cachedLabel)  // no cached label existed, create it
+    if (mParentPlot->plottingHints().testFlag(QCP::phCacheLabels) &&
+        !painter->modes().testFlag(QCPPainter::pmNoCaching)) // label caching enabled
     {
-      LabelData labelData = getTickLabelData(font, color, rotation, side, text);
-      cachedLabel = createCachedLabel(labelData);
+        QByteArray key = cacheKey(text, color, rotation, side);
+        CachedLabel *cachedLabel = mLabelCache.take(QString::fromUtf8(
+                key)); // attempt to take label from cache (don't use object() because we want ownership/prevent deletion during our operations, we re-insert it afterwards)
+        if (!cachedLabel)  // no cached label existed, create it
+        {
+            LabelData labelData = getTickLabelData(font, color, rotation, side, text);
+            cachedLabel = createCachedLabel(labelData);
+        }
+        // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
+        bool labelClippedByBorder = false;
+        /*
+        if (tickLabelSide == QCPAxis::lsOutside)
+        {
+          if (QCPAxis::orientation(type) == Qt::Horizontal)
+            labelClippedByBorder = labelAnchor.x()+cachedLabel->offset.x()+cachedLabel->pixmap.width()/mParentPlot->bufferDevicePixelRatio() > viewportRect.right() || labelAnchor.x()+cachedLabel->offset.x() < viewportRect.left();
+          else
+            labelClippedByBorder = labelAnchor.y()+cachedLabel->offset.y()+cachedLabel->pixmap.height()/mParentPlot->bufferDevicePixelRatio() > viewportRect.bottom() || labelAnchor.y()+cachedLabel->offset.y() < viewportRect.top();
+        }
+        */
+        if (!labelClippedByBorder) {
+            painter->drawPixmap(pos + cachedLabel->offset, cachedLabel->pixmap);
+            finalSize = cachedLabel->pixmap.size() /
+                        mParentPlot->bufferDevicePixelRatio(); // TODO: collect this in a member rect list?
+        }
+        mLabelCache.insert(QString::fromUtf8(key), cachedLabel);
+    } else // label caching disabled, draw text directly on surface:
+    {
+        LabelData labelData = getTickLabelData(font, color, rotation, side, text);
+        // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
+        bool labelClippedByBorder = false;
+        /*
+       if (tickLabelSide == QCPAxis::lsOutside)
+       {
+         if (QCPAxis::orientation(type) == Qt::Horizontal)
+           labelClippedByBorder = finalPosition.x()+(labelData.rotatedTotalBounds.width()+labelData.rotatedTotalBounds.left()) > viewportRect.right() || finalPosition.x()+labelData.rotatedTotalBounds.left() < viewportRect.left();
+         else
+           labelClippedByBorder = finalPosition.y()+(labelData.rotatedTotalBounds.height()+labelData.rotatedTotalBounds.top()) > viewportRect.bottom() || finalPosition.y()+labelData.rotatedTotalBounds.top() < viewportRect.top();
+       }
+       */
+        if (!labelClippedByBorder) {
+            drawText(painter, pos, labelData);
+            finalSize = labelData.rotatedTotalBounds.size();
+        }
     }
-    // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
-    bool labelClippedByBorder = false;
     /*
-    if (tickLabelSide == QCPAxis::lsOutside)
-    {
-      if (QCPAxis::orientation(type) == Qt::Horizontal)
-        labelClippedByBorder = labelAnchor.x()+cachedLabel->offset.x()+cachedLabel->pixmap.width()/mParentPlot->bufferDevicePixelRatio() > viewportRect.right() || labelAnchor.x()+cachedLabel->offset.x() < viewportRect.left();
-      else
-        labelClippedByBorder = labelAnchor.y()+cachedLabel->offset.y()+cachedLabel->pixmap.height()/mParentPlot->bufferDevicePixelRatio() > viewportRect.bottom() || labelAnchor.y()+cachedLabel->offset.y() < viewportRect.top();
-    }
+    // expand passed tickLabelsSize if current tick label is larger:
+    if (finalSize.width() > tickLabelsSize->width())
+      tickLabelsSize->setWidth(finalSize.width());
+    if (finalSize.height() > tickLabelsSize->height())
+      tickLabelsSize->setHeight(finalSize.height());
     */
-    if (!labelClippedByBorder)
-    {
-      painter->drawPixmap(pos+cachedLabel->offset, cachedLabel->pixmap);
-      finalSize = cachedLabel->pixmap.size()/mParentPlot->bufferDevicePixelRatio(); // TODO: collect this in a member rect list?
-    }
-    mLabelCache.insert(QString::fromUtf8(key), cachedLabel);
-  } else // label caching disabled, draw text directly on surface:
-  {
-    LabelData labelData = getTickLabelData(font, color, rotation, side, text);
-    // if label would be partly clipped by widget border on sides, don't draw it (only for outside tick labels):
-     bool labelClippedByBorder = false;
-     /*
-    if (tickLabelSide == QCPAxis::lsOutside)
-    {
-      if (QCPAxis::orientation(type) == Qt::Horizontal)
-        labelClippedByBorder = finalPosition.x()+(labelData.rotatedTotalBounds.width()+labelData.rotatedTotalBounds.left()) > viewportRect.right() || finalPosition.x()+labelData.rotatedTotalBounds.left() < viewportRect.left();
-      else
-        labelClippedByBorder = finalPosition.y()+(labelData.rotatedTotalBounds.height()+labelData.rotatedTotalBounds.top()) > viewportRect.bottom() || finalPosition.y()+labelData.rotatedTotalBounds.top() < viewportRect.top();
-    }
-    */
-    if (!labelClippedByBorder)
-    {
-      drawText(painter, pos, labelData);
-      finalSize = labelData.rotatedTotalBounds.size();
-    }
-  }
-  /*
-  // expand passed tickLabelsSize if current tick label is larger:
-  if (finalSize.width() > tickLabelsSize->width())
-    tickLabelsSize->setWidth(finalSize.width());
-  if (finalSize.height() > tickLabelsSize->height())
-    tickLabelsSize->setHeight(finalSize.height());
-  */
 }
 
-QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
-{
-  switch (mAnchorMode)
-  {
-    case amRectangular:
-    {
-      switch (mAnchorSide)
-      {
-        case asLeft:   return tickPos+QPointF(mPadding, 0);
-        case asRight:  return tickPos+QPointF(-mPadding, 0);
-        case asTop:    return tickPos+QPointF(0, mPadding);
-        case asBottom: return tickPos+QPointF(0, -mPadding);
-        case asTopLeft:     return tickPos+QPointF(mPadding*M_SQRT1_2, mPadding*M_SQRT1_2);
-        case asTopRight:    return tickPos+QPointF(-mPadding*M_SQRT1_2, mPadding*M_SQRT1_2);
-        case asBottomRight: return tickPos+QPointF(-mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
-        case asBottomLeft:  return tickPos+QPointF(mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
-      }
+QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos) {
+    switch (mAnchorMode) {
+        case amRectangular: {
+            switch (mAnchorSide) {
+                case asLeft:
+                    return tickPos + QPointF(mPadding, 0);
+                case asRight:
+                    return tickPos + QPointF(-mPadding, 0);
+                case asTop:
+                    return tickPos + QPointF(0, mPadding);
+                case asBottom:
+                    return tickPos + QPointF(0, -mPadding);
+                case asTopLeft:
+                    return tickPos + QPointF(mPadding * M_SQRT1_2, mPadding * M_SQRT1_2);
+                case asTopRight:
+                    return tickPos + QPointF(-mPadding * M_SQRT1_2, mPadding * M_SQRT1_2);
+                case asBottomRight:
+                    return tickPos + QPointF(-mPadding * M_SQRT1_2, -mPadding * M_SQRT1_2);
+                case asBottomLeft:
+                    return tickPos + QPointF(mPadding * M_SQRT1_2, -mPadding * M_SQRT1_2);
+            }
+        }
+        case amSkewedUpright:
+        case amSkewedRotated: {
+            QCPVector2D anchorNormal(tickPos - mAnchorReference);
+            if (mAnchorReferenceType == artTangent)
+                anchorNormal = anchorNormal.perpendicular();
+            anchorNormal.normalize();
+            return tickPos + (anchorNormal * mPadding).toPointF();
+        }
     }
-    case amSkewedUpright:
-    case amSkewedRotated:
-    {
-      QCPVector2D anchorNormal(tickPos-mAnchorReference);
-      if (mAnchorReferenceType == artTangent)
-        anchorNormal = anchorNormal.perpendicular();
-      anchorNormal.normalize();
-      return tickPos+(anchorNormal*mPadding).toPointF();
-    }
-  }
-  return tickPos;
+    return tickPos;
 }
 
 /*! \internal
@@ -352,48 +339,49 @@ QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
   directly draw the labels on the QCustomPlot surface when label caching is disabled, i.e. when
   QCP::phCacheLabels plotting hint is not set.
 */
-void QCPLabelPainterPrivate::drawText(QCPPainter *painter, const QPointF &pos, const LabelData &labelData) const
-{
-  // backup painter settings that we're about to change:
-  QTransform oldTransform = painter->transform();
-  QFont oldFont = painter->font();
-  QPen oldPen = painter->pen();
-  
-  // transform painter to position/rotation:
-  painter->translate(pos);
-  painter->setTransform(labelData.transform, true);
-  
-  // draw text:
-  painter->setFont(labelData.baseFont);
-  painter->setPen(QPen(labelData.color));
-  if (!labelData.expPart.isEmpty()) // use superscripted exponent typesetting
-  {
-    painter->drawText(0, 0, 0, 0, Qt::TextDontClip, labelData.basePart);
-    if (!labelData.suffixPart.isEmpty())
-      painter->drawText(labelData.baseBounds.width()+1+labelData.expBounds.width(), 0, 0, 0, Qt::TextDontClip, labelData.suffixPart);
-    painter->setFont(labelData.expFont);
-    painter->drawText(labelData.baseBounds.width()+1, 0, labelData.expBounds.width(), labelData.expBounds.height(), Qt::TextDontClip,  labelData.expPart);
-  } else
-  {
-    painter->drawText(0, 0, labelData.totalBounds.width(), labelData.totalBounds.height(), Qt::TextDontClip | Qt::AlignHCenter, labelData.basePart);
-  }
-  
-  /* Debug code to draw label bounding boxes, baseline, and capheight
-  painter->save();
-  painter->setPen(QPen(QColor(0, 0, 0, 150)));
-  painter->drawRect(labelData.totalBounds);
-  const int baseline = labelData.totalBounds.height()-mLetterDescent;
-  painter->setPen(QPen(QColor(255, 0, 0, 150)));
-  painter->drawLine(QLineF(0, baseline, labelData.totalBounds.width(), baseline));
-  painter->setPen(QPen(QColor(0, 0, 255, 150)));
-  painter->drawLine(QLineF(0, baseline-mLetterCapHeight, labelData.totalBounds.width(), baseline-mLetterCapHeight));
-  painter->restore();
-  */
-  
-  // reset painter settings to what it was before:
-  painter->setTransform(oldTransform);
-  painter->setFont(oldFont);
-  painter->setPen(oldPen);
+void QCPLabelPainterPrivate::drawText(QCPPainter *painter, const QPointF &pos, const LabelData &labelData) const {
+    // backup painter settings that we're about to change:
+    QTransform oldTransform = painter->transform();
+    QFont oldFont = painter->font();
+    QPen oldPen = painter->pen();
+
+    // transform painter to position/rotation:
+    painter->translate(pos);
+    painter->setTransform(labelData.transform, true);
+
+    // draw text:
+    painter->setFont(labelData.baseFont);
+    painter->setPen(QPen(labelData.color));
+    if (!labelData.expPart.isEmpty()) // use superscripted exponent typesetting
+    {
+        painter->drawText(0, 0, 0, 0, Qt::TextDontClip, labelData.basePart);
+        if (!labelData.suffixPart.isEmpty())
+            painter->drawText(labelData.baseBounds.width() + 1 + labelData.expBounds.width(), 0, 0, 0, Qt::TextDontClip,
+                              labelData.suffixPart);
+        painter->setFont(labelData.expFont);
+        painter->drawText(labelData.baseBounds.width() + 1, 0, labelData.expBounds.width(),
+                          labelData.expBounds.height(), Qt::TextDontClip, labelData.expPart);
+    } else {
+        painter->drawText(0, 0, labelData.totalBounds.width(), labelData.totalBounds.height(),
+                          Qt::TextDontClip | Qt::AlignHCenter, labelData.basePart);
+    }
+
+    /* Debug code to draw label bounding boxes, baseline, and capheight
+    painter->save();
+    painter->setPen(QPen(QColor(0, 0, 0, 150)));
+    painter->drawRect(labelData.totalBounds);
+    const int baseline = labelData.totalBounds.height()-mLetterDescent;
+    painter->setPen(QPen(QColor(255, 0, 0, 150)));
+    painter->drawLine(QLineF(0, baseline, labelData.totalBounds.width(), baseline));
+    painter->setPen(QPen(QColor(0, 0, 255, 150)));
+    painter->drawLine(QLineF(0, baseline-mLetterCapHeight, labelData.totalBounds.width(), baseline-mLetterCapHeight));
+    painter->restore();
+    */
+
+    // reset painter settings to what it was before:
+    painter->setTransform(oldTransform);
+    painter->setFont(oldFont);
+    painter->setPen(oldPen);
 }
 
 /*! \internal
@@ -404,94 +392,104 @@ void QCPLabelPainterPrivate::drawText(QCPPainter *painter, const QPointF &pos, c
   processed by \ref getTickLabelDrawOffset and \ref drawTickLabel. It splits the text into base and
   exponent if necessary (member substituteExponent) and calculates appropriate bounding boxes.
 */
-QCPLabelPainterPrivate::LabelData QCPLabelPainterPrivate::getTickLabelData(const QFont &font, const QColor &color, double rotation, AnchorSide side, const QString &text) const
-{
-  LabelData result;
-  result.rotation = rotation;
-  result.side = side;
-  result.color = color;
-  
-  // determine whether beautiful decimal powers should be used
-  bool useBeautifulPowers = false;
-  int ePos = -1; // first index of exponent part, text before that will be basePart, text until eLast will be expPart
-  int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
-  if (mSubstituteExponent)
-  {
-    ePos = text.indexOf(QLatin1Char('e'));
-    if (ePos > 0 && text.at(ePos-1).isDigit())
-    {
-      eLast = ePos;
-      while (eLast+1 < text.size() && (text.at(eLast+1) == QLatin1Char('+') || text.at(eLast+1) == QLatin1Char('-') || text.at(eLast+1).isDigit()))
-        ++eLast;
-      if (eLast > ePos) // only if also to right of 'e' is a digit/+/- interpret it as beautifiable power
-        useBeautifulPowers = true;
+QCPLabelPainterPrivate::LabelData
+QCPLabelPainterPrivate::getTickLabelData(const QFont &font, const QColor &color, double rotation, AnchorSide side,
+                                         const QString &text) const {
+    LabelData result;
+    result.rotation = rotation;
+    result.side = side;
+    result.color = color;
+
+    // determine whether beautiful decimal powers should be used
+    bool useBeautifulPowers = false;
+    int ePos = -1; // first index of exponent part, text before that will be basePart, text until eLast will be expPart
+    int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
+    if (mSubstituteExponent) {
+        ePos = text.indexOf(QLatin1Char('e'));
+        if (ePos > 0 && text.at(ePos - 1).isDigit()) {
+            eLast = ePos;
+            while (eLast + 1 < text.size() &&
+                   (text.at(eLast + 1) == QLatin1Char('+') || text.at(eLast + 1) == QLatin1Char('-') ||
+                    text.at(eLast + 1).isDigit()))
+                ++eLast;
+            if (eLast > ePos) // only if also to right of 'e' is a digit/+/- interpret it as beautifiable power
+                useBeautifulPowers = true;
+        }
     }
-  }
-  
-  // calculate text bounding rects and do string preparation for beautiful decimal powers:
-  result.baseFont = font;
-  if (result.baseFont.pointSizeF() > 0) // might return -1 if specified with setPixelSize, in that case we can't do correction in next line
-    result.baseFont.setPointSizeF(result.baseFont.pointSizeF()+0.05); // QFontMetrics.boundingRect has a bug for exact point sizes that make the results oscillate due to internal rounding
-  
-  QFontMetrics baseFontMetrics(result.baseFont);
-  if (useBeautifulPowers)
-  {
-    // split text into parts of number/symbol that will be drawn normally and part that will be drawn as exponent:
-    result.basePart = text.left(ePos);
-    result.suffixPart = text.mid(eLast+1); // also drawn normally but after exponent
-    // in log scaling, we want to turn "1*10^n" into "10^n", else add multiplication sign and decimal base:
-    if (mAbbreviateDecimalPowers && result.basePart == QLatin1String("1"))
-      result.basePart = QLatin1String("10");
-    else
-      result.basePart += QString(mMultiplicationSymbol) + QLatin1String("10");
-    result.expPart = text.mid(ePos+1, eLast-ePos);
-    // clip "+" and leading zeros off expPart:
-    while (result.expPart.length() > 2 && result.expPart.at(1) == QLatin1Char('0')) // length > 2 so we leave one zero when numberFormatChar is 'e'
-      result.expPart.remove(1, 1);
-    if (!result.expPart.isEmpty() && result.expPart.at(0) == QLatin1Char('+'))
-      result.expPart.remove(0, 1);
-    // prepare smaller font for exponent:
-    result.expFont = font;
-    if (result.expFont.pointSize() > 0)
-      result.expFont.setPointSize(result.expFont.pointSize()*0.75);
-    else
-      result.expFont.setPixelSize(result.expFont.pixelSize()*0.75);
-    // calculate bounding rects of base part(s), exponent part and total one:
-    result.baseBounds = baseFontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.basePart);
-    result.expBounds = QFontMetrics(result.expFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.expPart);
-    if (!result.suffixPart.isEmpty())
-      result.suffixBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.suffixPart);
-    result.totalBounds = result.baseBounds.adjusted(0, 0, result.expBounds.width()+result.suffixBounds.width()+2, 0); // +2 consists of the 1 pixel spacing between base and exponent (see drawTickLabel) and an extra pixel to include AA
-  } else // useBeautifulPowers == false
-  {
-    result.basePart = text;
-    result.totalBounds = baseFontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter, result.basePart);
-  }
-  result.totalBounds.moveTopLeft(QPoint(0, 0));
-  applyAnchorTransform(result);
-  result.rotatedTotalBounds = result.transform.mapRect(result.totalBounds);
-  
-  return result;
+
+    // calculate text bounding rects and do string preparation for beautiful decimal powers:
+    result.baseFont = font;
+    if (result.baseFont.pointSizeF() >
+        0) // might return -1 if specified with setPixelSize, in that case we can't do correction in next line
+        result.baseFont.setPointSizeF(result.baseFont.pointSizeF() +
+                                      0.05); // QFontMetrics.boundingRect has a bug for exact point sizes that make the results oscillate due to internal rounding
+
+    QFontMetrics baseFontMetrics(result.baseFont);
+    if (useBeautifulPowers) {
+        // split text into parts of number/symbol that will be drawn normally and part that will be drawn as exponent:
+        result.basePart = text.left(ePos);
+        result.suffixPart = text.mid(eLast + 1); // also drawn normally but after exponent
+        // in log scaling, we want to turn "1*10^n" into "10^n", else add multiplication sign and decimal base:
+        if (mAbbreviateDecimalPowers && result.basePart == QLatin1String("1"))
+            result.basePart = QLatin1String("10");
+        else
+            result.basePart += QString(mMultiplicationSymbol) + QLatin1String("10");
+        result.expPart = text.mid(ePos + 1, eLast - ePos);
+        // clip "+" and leading zeros off expPart:
+        while (result.expPart.length() > 2 &&
+               result.expPart.at(1) == QLatin1Char('0')) // length > 2 so we leave one zero when numberFormatChar is 'e'
+            result.expPart.remove(1, 1);
+        if (!result.expPart.isEmpty() && result.expPart.at(0) == QLatin1Char('+'))
+            result.expPart.remove(0, 1);
+        // prepare smaller font for exponent:
+        result.expFont = font;
+        if (result.expFont.pointSize() > 0)
+            result.expFont.setPointSize(result.expFont.pointSize() * 0.75);
+        else
+            result.expFont.setPixelSize(result.expFont.pixelSize() * 0.75);
+        // calculate bounding rects of base part(s), exponent part and total one:
+        result.baseBounds = baseFontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.basePart);
+        result.expBounds = QFontMetrics(result.expFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip, result.expPart);
+        if (!result.suffixPart.isEmpty())
+            result.suffixBounds = QFontMetrics(result.baseFont).boundingRect(0, 0, 0, 0, Qt::TextDontClip,
+                                                                             result.suffixPart);
+        result.totalBounds = result.baseBounds.adjusted(0, 0,
+                                                        result.expBounds.width() + result.suffixBounds.width() + 2,
+                                                        0); // +2 consists of the 1 pixel spacing between base and exponent (see drawTickLabel) and an extra pixel to include AA
+    } else // useBeautifulPowers == false
+    {
+        result.basePart = text;
+        result.totalBounds = baseFontMetrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip | Qt::AlignHCenter,
+                                                          result.basePart);
+    }
+    result.totalBounds.moveTopLeft(QPoint(0, 0));
+    applyAnchorTransform(result);
+    result.rotatedTotalBounds = result.transform.mapRect(result.totalBounds);
+
+    return result;
 }
 
-void QCPLabelPainterPrivate::applyAnchorTransform(LabelData &labelData) const
-{
-  if (!qFuzzyIsNull(labelData.rotation))
-    labelData.transform.rotate(labelData.rotation); // rotates effectively clockwise (due to flipped y axis of painter vs widget coordinate system)
-  
-  // from now on we translate in rotated label-local coordinate system.
-  // shift origin of coordinate system to appropriate point on label:
-  labelData.transform.translate(0, -labelData.totalBounds.height()+mLetterDescent+mLetterCapHeight); // shifts origin to true top of capital (or number) characters
-  
-  if (labelData.side == asLeft || labelData.side == asRight) // anchor is centered vertically
-    labelData.transform.translate(0, -mLetterCapHeight/2.0);
-  else if (labelData.side == asTop || labelData.side == asBottom) // anchor is centered horizontally
-    labelData.transform.translate(-labelData.totalBounds.width()/2.0, 0);
-  
-  if (labelData.side == asTopRight || labelData.side == asRight || labelData.side == asBottomRight) // anchor is at right
-    labelData.transform.translate(-labelData.totalBounds.width(), 0);
-  if (labelData.side == asBottomLeft || labelData.side == asBottom || labelData.side == asBottomRight) // anchor is at bottom (no elseif!)
-    labelData.transform.translate(0, -mLetterCapHeight);
+void QCPLabelPainterPrivate::applyAnchorTransform(LabelData &labelData) const {
+    if (!qFuzzyIsNull(labelData.rotation))
+        labelData.transform.rotate(
+                labelData.rotation); // rotates effectively clockwise (due to flipped y axis of painter vs widget coordinate system)
+
+    // from now on we translate in rotated label-local coordinate system.
+    // shift origin of coordinate system to appropriate point on label:
+    labelData.transform.translate(0, -labelData.totalBounds.height() + mLetterDescent +
+                                     mLetterCapHeight); // shifts origin to true top of capital (or number) characters
+
+    if (labelData.side == asLeft || labelData.side == asRight) // anchor is centered vertically
+        labelData.transform.translate(0, -mLetterCapHeight / 2.0);
+    else if (labelData.side == asTop || labelData.side == asBottom) // anchor is centered horizontally
+        labelData.transform.translate(-labelData.totalBounds.width() / 2.0, 0);
+
+    if (labelData.side == asTopRight || labelData.side == asRight ||
+        labelData.side == asBottomRight) // anchor is at right
+        labelData.transform.translate(-labelData.totalBounds.width(), 0);
+    if (labelData.side == asBottomLeft || labelData.side == asBottom ||
+        labelData.side == asBottomRight) // anchor is at bottom (no elseif!)
+        labelData.transform.translate(0, -mLetterCapHeight);
 }
 
 /*! \internal
@@ -524,101 +522,96 @@ void QCPLabelPainterPrivate::getMaxTickLabelSize(const QFont &font, const QStrin
 }
 */
 
-QCPLabelPainterPrivate::CachedLabel *QCPLabelPainterPrivate::createCachedLabel(const LabelData &labelData) const
-{
-  CachedLabel *result = new CachedLabel;
-  
-  // allocate pixmap with the correct size and pixel ratio:
-  if (!qFuzzyCompare(1.0, mParentPlot->bufferDevicePixelRatio()))
-  {
-    result->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
+QCPLabelPainterPrivate::CachedLabel *QCPLabelPainterPrivate::createCachedLabel(const LabelData &labelData) const {
+    CachedLabel *result = new CachedLabel;
+
+    // allocate pixmap with the correct size and pixel ratio:
+    if (!qFuzzyCompare(1.0, mParentPlot->bufferDevicePixelRatio())) {
+        result->pixmap = QPixmap(labelData.rotatedTotalBounds.size() * mParentPlot->bufferDevicePixelRatio());
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
 #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
+        result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
 #  else
-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
+        result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
 #  endif
 #endif
-  } else
-    result->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
-  result->pixmap.fill(Qt::transparent);
-  
-  // draw the label into the pixmap
-  // offset is between label anchor and topleft of cache pixmap, so pixmap can be drawn at pos+offset to make the label anchor appear at pos.
-  // We use rotatedTotalBounds.topLeft() because rotatedTotalBounds is in a coordinate system where the label anchor is at (0, 0)
-  result->offset = labelData.rotatedTotalBounds.topLeft();
-  QCPPainter cachePainter(&result->pixmap);
-  drawText(&cachePainter, -result->offset, labelData);
-  return result;
+    } else
+        result->pixmap = QPixmap(labelData.rotatedTotalBounds.size());
+    result->pixmap.fill(Qt::transparent);
+
+    // draw the label into the pixmap
+    // offset is between label anchor and topleft of cache pixmap, so pixmap can be drawn at pos+offset to make the label anchor appear at pos.
+    // We use rotatedTotalBounds.topLeft() because rotatedTotalBounds is in a coordinate system where the label anchor is at (0, 0)
+    result->offset = labelData.rotatedTotalBounds.topLeft();
+    QCPPainter cachePainter(&result->pixmap);
+    drawText(&cachePainter, -result->offset, labelData);
+    return result;
 }
 
-QByteArray QCPLabelPainterPrivate::cacheKey(const QString &text, const QColor &color, double rotation, AnchorSide side) const
-{
-  return text.toUtf8()+
-      QByteArray::number(color.red()+256*color.green()+65536*color.blue(), 36)+
-      QByteArray::number(color.alpha()+256*(int)side, 36)+
-      QByteArray::number((int)(rotation*100)%36000, 36);
+QByteArray
+QCPLabelPainterPrivate::cacheKey(const QString &text, const QColor &color, double rotation, AnchorSide side) const {
+    return text.toUtf8() +
+           QByteArray::number(color.red() + 256 * color.green() + 65536 * color.blue(), 36) +
+           QByteArray::number(color.alpha() + 256 * (int) side, 36) +
+           QByteArray::number((int) (rotation * 100) % 36000, 36);
 }
 
-QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::skewedAnchorSide(const QPointF &tickPos, double sideExpandHorz, double sideExpandVert) const
-{
-  QCPVector2D anchorNormal = QCPVector2D(tickPos-mAnchorReference);
-  if (mAnchorReferenceType == artTangent)
-    anchorNormal = anchorNormal.perpendicular();
-  const double radius = anchorNormal.length();
-  const double sideHorz = sideExpandHorz*radius;
-  const double sideVert = sideExpandVert*radius;
-  if (anchorNormal.x() > sideHorz)
-  {
-    if (anchorNormal.y() > sideVert) return asTopLeft;
-    else if (anchorNormal.y() < -sideVert) return asBottomLeft;
-    else return asLeft;
-  } else if (anchorNormal.x() < -sideHorz)
-  {
-    if (anchorNormal.y() > sideVert) return asTopRight;
-    else if (anchorNormal.y() < -sideVert) return asBottomRight;
-    else return asRight;
-  } else
-  {
-    if (anchorNormal.y() > 0) return asTop;
-    else return asBottom;
-  }
-  return asBottom; // should never be reached
-}
-
-QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::rotationCorrectedSide(AnchorSide side, double rotation) const
-{
-  AnchorSide result = side;
-  const bool rotateClockwise = rotation > 0;
-  if (!qFuzzyIsNull(rotation))
-  {
-    if (!qFuzzyCompare(qAbs(rotation), 90)) // avoid graphical collision with anchor tangent (e.g. axis line) when rotating, so change anchor side appropriately:
-    {
-      if (side == asTop) result = rotateClockwise ? asLeft : asRight;
-      else if (side == asBottom) result = rotateClockwise ? asRight : asLeft;
-      else if (side == asTopLeft) result = rotateClockwise ? asLeft : asTop;
-      else if (side == asTopRight) result = rotateClockwise ? asTop : asRight;
-      else if (side == asBottomLeft) result = rotateClockwise ? asBottom : asLeft;
-      else if (side == asBottomRight) result = rotateClockwise ? asRight : asBottom;
-    } else // for full rotation by +/-90 degrees, other sides are more appropriate for centering on anchor:
-    {
-      if (side == asLeft) result = rotateClockwise ? asBottom : asTop;
-      else if (side == asRight) result = rotateClockwise ? asTop : asBottom;
-      else if (side == asTop) result = rotateClockwise ? asLeft : asRight;
-      else if (side == asBottom) result = rotateClockwise ? asRight : asLeft;
-      else if (side == asTopLeft) result = rotateClockwise ? asBottomLeft : asTopRight;
-      else if (side == asTopRight) result = rotateClockwise ? asTopLeft : asBottomRight;
-      else if (side == asBottomLeft) result = rotateClockwise ? asBottomRight : asTopLeft;
-      else if (side == asBottomRight) result = rotateClockwise ? asTopRight : asBottomLeft;
+QCPLabelPainterPrivate::AnchorSide
+QCPLabelPainterPrivate::skewedAnchorSide(const QPointF &tickPos, double sideExpandHorz, double sideExpandVert) const {
+    QCPVector2D anchorNormal = QCPVector2D(tickPos - mAnchorReference);
+    if (mAnchorReferenceType == artTangent)
+        anchorNormal = anchorNormal.perpendicular();
+    const double radius = anchorNormal.length();
+    const double sideHorz = sideExpandHorz * radius;
+    const double sideVert = sideExpandVert * radius;
+    if (anchorNormal.x() > sideHorz) {
+        if (anchorNormal.y() > sideVert) return asTopLeft;
+        else if (anchorNormal.y() < -sideVert) return asBottomLeft;
+        else return asLeft;
+    } else if (anchorNormal.x() < -sideHorz) {
+        if (anchorNormal.y() > sideVert) return asTopRight;
+        else if (anchorNormal.y() < -sideVert) return asBottomRight;
+        else return asRight;
+    } else {
+        if (anchorNormal.y() > 0) return asTop;
+        else return asBottom;
     }
-  }
-  return result;
+    return asBottom; // should never be reached
 }
 
-void QCPLabelPainterPrivate::analyzeFontMetrics()
-{
-  const QFontMetrics fm(mFont);
-  mLetterCapHeight = fm.tightBoundingRect(QLatin1String("8")).height(); // this method is slow, that's why we query it only upon font change
-  mLetterDescent = fm.descent();
+QCPLabelPainterPrivate::AnchorSide
+QCPLabelPainterPrivate::rotationCorrectedSide(AnchorSide side, double rotation) const {
+    AnchorSide result = side;
+    const bool rotateClockwise = rotation > 0;
+    if (!qFuzzyIsNull(rotation)) {
+        if (!qFuzzyCompare(qAbs(rotation),
+                           90)) // avoid graphical collision with anchor tangent (e.g. axis line) when rotating, so change anchor side appropriately:
+        {
+            if (side == asTop) result = rotateClockwise ? asLeft : asRight;
+            else if (side == asBottom) result = rotateClockwise ? asRight : asLeft;
+            else if (side == asTopLeft) result = rotateClockwise ? asLeft : asTop;
+            else if (side == asTopRight) result = rotateClockwise ? asTop : asRight;
+            else if (side == asBottomLeft) result = rotateClockwise ? asBottom : asLeft;
+            else if (side == asBottomRight) result = rotateClockwise ? asRight : asBottom;
+        } else // for full rotation by +/-90 degrees, other sides are more appropriate for centering on anchor:
+        {
+            if (side == asLeft) result = rotateClockwise ? asBottom : asTop;
+            else if (side == asRight) result = rotateClockwise ? asTop : asBottom;
+            else if (side == asTop) result = rotateClockwise ? asLeft : asRight;
+            else if (side == asBottom) result = rotateClockwise ? asRight : asLeft;
+            else if (side == asTopLeft) result = rotateClockwise ? asBottomLeft : asTopRight;
+            else if (side == asTopRight) result = rotateClockwise ? asTopLeft : asBottomRight;
+            else if (side == asBottomLeft) result = rotateClockwise ? asBottomRight : asTopLeft;
+            else if (side == asBottomRight) result = rotateClockwise ? asTopRight : asBottomLeft;
+        }
+    }
+    return result;
+}
+
+void QCPLabelPainterPrivate::analyzeFontMetrics() {
+    const QFontMetrics fm(mFont);
+    mLetterCapHeight = fm.tightBoundingRect(
+            QLatin1String("8")).height(); // this method is slow, that's why we query it only upon font change
+    mLetterDescent = fm.descent();
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_CORE_H
@@ -30,12 +30,11 @@
 #include "axis/range.h"
 #include "axis/axis.h"
 #include "paintbuffer.h"
+#include "plottable.h"
 
 class QCPPainter;
 
 class QCPLayer;
-
-class QCPAbstractPlottable;
 
 class QCPAbstractItem;
 
@@ -63,10 +62,10 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-    Defines how a layer should be inserted relative to an other layer.
+      Defines how a layer should be inserted relative to an other layer.
 
-    \see addLayer, moveLayer
-  */
+      \see addLayer, moveLayer
+    */
     enum LayerInsertMode {
         limBelow  ///< Layer is inserted below other layer
         , limAbove ///< Layer is inserted above other layer
@@ -74,10 +73,10 @@ public:
     Q_ENUMS(LayerInsertMode)
 
     /*!
-    Defines with what timing the QCustomPlot surface is refreshed after a replot.
+      Defines with what timing the QCustomPlot surface is refreshed after a replot.
 
-    \see replot
-  */
+      \see replot
+    */
     enum RefreshPriority {
         rpImmediateRefresh ///< Replots immediately and repaints the widget immediately by calling QWidget::repaint() after the replot
         ,
@@ -89,9 +88,9 @@ public:
     };
     Q_ENUMS(RefreshPriority)
 
-    explicit QCustomPlot(QWidget *parent = 0);
+    explicit QCustomPlot(QWidget *parent = nullptr);
 
-    virtual ~QCustomPlot();
+    virtual ~QCustomPlot() Q_DECL_OVERRIDE;
 
     // getters:
     QRect viewport() const { return mViewport; }
@@ -189,7 +188,10 @@ public:
 
     QList<QCPAbstractPlottable *> selectedPlottables() const;
 
-    QCPAbstractPlottable *plottableAt(const QPointF &pos, bool onlySelectable = false) const;
+    template<class PlottableType>
+    PlottableType *plottableAt(const QPointF &pos, bool onlySelectable = false, int *dataIndex = nullptr) const;
+
+    QCPAbstractPlottable *plottableAt(const QPointF &pos, bool onlySelectable = false, int *dataIndex = nullptr) const;
 
     bool hasPlottable(QCPAbstractPlottable *plottable) const;
 
@@ -198,7 +200,7 @@ public:
 
     QCPGraph *graph() const;
 
-    QCPGraph *addGraph(QCPAxis *keyAxis = 0, QCPAxis *valueAxis = 0);
+    QCPGraph *addGraph(QCPAxis *keyAxis = nullptr, QCPAxis *valueAxis = nullptr);
 
     bool removeGraph(QCPGraph *graph);
 
@@ -225,6 +227,9 @@ public:
 
     QList<QCPAbstractItem *> selectedItems() const;
 
+    template<class ItemType>
+    ItemType *itemAt(const QPointF &pos, bool onlySelectable = false) const;
+
     QCPAbstractItem *itemAt(const QPointF &pos, bool onlySelectable = false) const;
 
     bool hasItem(QCPAbstractItem *item) const;
@@ -242,7 +247,7 @@ public:
 
     int layerCount() const;
 
-    bool addLayer(const QString &name, QCPLayer *otherLayer = 0, LayerInsertMode insertMode = limAbove);
+    bool addLayer(const QString &name, QCPLayer *otherLayer = nullptr, LayerInsertMode insertMode = limAbove);
 
     bool removeLayer(QCPLayer *layer);
 
@@ -267,26 +272,30 @@ public:
 
     Q_SLOT void deselectAll();
 
-    bool savePdf(const QString &fileName, int width = 0, int height = 0, QCP::ExportPen exportPen = QCP::epAllowCosmetic,
-                 const QString &pdfCreator = QString(), const QString &pdfTitle = QString());
+    bool
+    savePdf(const QString &fileName, int width = 0, int height = 0, QCP::ExportPen exportPen = QCP::epAllowCosmetic,
+            const QString &pdfCreator = QString(), const QString &pdfTitle = QString());
 
-    bool savePng(const QString &fileName, int width = 0, int height = 0, double scale = 1.0, int quality = -1, int resolution = 96,
-                 QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
+    bool savePng(const QString &fileName, int width = 0, int height = 0, double scale = 1.0, int quality = -1,
+                 int resolution = 96, QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
 
-    bool saveJpg(const QString &fileName, int width = 0, int height = 0, double scale = 1.0, int quality = -1, int resolution = 96,
-                 QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
+    bool saveJpg(const QString &fileName, int width = 0, int height = 0, double scale = 1.0, int quality = -1,
+                 int resolution = 96, QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
 
     bool saveBmp(const QString &fileName, int width = 0, int height = 0, double scale = 1.0, int resolution = 96,
                  QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
 
-    bool saveRastered(const QString &fileName, int width, int height, double scale, const char *format, int quality = -1, int resolution = 96,
-                      QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
+    bool
+    saveRastered(const QString &fileName, int width, int height, double scale, const char *format, int quality = -1,
+                 int resolution = 96, QCP::ResolutionUnit resolutionUnit = QCP::ruDotsPerInch);
 
     QPixmap toPixmap(int width = 0, int height = 0, double scale = 1.0);
 
     void toPainter(QCPPainter *painter, int width = 0, int height = 0);
 
     Q_SLOT void replot(QCustomPlot::RefreshPriority refreshPriority = QCustomPlot::rpRefreshHint);
+
+    double replotTime(bool average = false) const;
 
     QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
     QCPLegend *legend;
@@ -322,6 +331,8 @@ signals:
     void selectionChangedByUser();
 
     void beforeReplot();
+
+    void afterLayout();
 
     void afterReplot();
 
@@ -361,6 +372,7 @@ protected:
     QVariant mMouseSignalLayerableDetails;
     bool mReplotting;
     bool mReplotQueued;
+    double mReplotTime, mReplotTimeAverage;
     int mOpenGlMultisamples;
     QCP::AntialiasedElements mOpenGlAntialiasedElementsBackup;
     bool mOpenGlCacheLabelsBackup;
@@ -413,9 +425,10 @@ protected:
 
     void updateLayerIndices() const;
 
-    QCPLayerable *layerableAt(const QPointF &pos, bool onlySelectable, QVariant *selectionDetails = 0) const;
+    QCPLayerable *layerableAt(const QPointF &pos, bool onlySelectable, QVariant *selectionDetails = nullptr) const;
 
-    QList<QCPLayerable *> layerableListAt(const QPointF &pos, bool onlySelectable, QList<QVariant> *selectionDetails = 0) const;
+    QList<QCPLayerable *>
+    layerableListAt(const QPointF &pos, bool onlySelectable, QList<QVariant> *selectionDetails = nullptr) const;
 
     void drawBackground(QCPPainter *painter);
 
@@ -447,5 +460,96 @@ protected:
 Q_DECLARE_METATYPE(QCustomPlot::LayerInsertMode)
 
 Q_DECLARE_METATYPE(QCustomPlot::RefreshPriority)
+
+
+// implementation of template functions:
+
+/*!
+  Returns the plottable at the pixel position \a pos. The plottable type (a QCPAbstractPlottable
+  subclass) that shall be taken into consideration can be specified via the template parameter.
+
+  Plottables that only consist of single lines (like graphs) have a tolerance band around them, see
+  \ref setSelectionTolerance. If multiple plottables come into consideration, the one closest to \a
+  pos is returned.
+  
+  If \a onlySelectable is true, only plottables that are selectable
+  (QCPAbstractPlottable::setSelectable) are considered.
+  
+  if \a dataIndex is non-null, it is set to the index of the plottable's data point that is closest
+  to \a pos.
+
+  If there is no plottable of the specified type at \a pos, returns \c nullptr.
+  
+  \see itemAt, layoutElementAt
+*/
+template<class PlottableType>
+PlottableType *QCustomPlot::plottableAt(const QPointF &pos, bool onlySelectable, int *dataIndex) const {
+    PlottableType *resultPlottable = 0;
+    QVariant resultDetails;
+    double resultDistance = mSelectionTolerance; // only regard clicks with distances smaller than mSelectionTolerance as selections, so initialize with that value
+
+            foreach (QCPAbstractPlottable *plottable, mPlottables) {
+            PlottableType *currentPlottable = qobject_cast<PlottableType *>(plottable);
+            if (!currentPlottable || (onlySelectable &&
+                                      !currentPlottable->selectable())) // we could have also passed onlySelectable to the selectTest function, but checking here is faster, because we have access to QCPAbstractPlottable::selectable
+                continue;
+            if (currentPlottable->clipRect().contains(
+                    pos.toPoint())) // only consider clicks where the plottable is actually visible
+            {
+                QVariant details;
+                double currentDistance = currentPlottable->selectTest(pos, false, dataIndex ? &details : nullptr);
+                if (currentDistance >= 0 && currentDistance < resultDistance) {
+                    resultPlottable = currentPlottable;
+                    resultDetails = details;
+                    resultDistance = currentDistance;
+                }
+            }
+        }
+
+    if (resultPlottable && dataIndex) {
+        QCPDataSelection sel = resultDetails.value<QCPDataSelection>();
+        if (!sel.isEmpty())
+            *dataIndex = sel.dataRange(0).begin();
+    }
+    return resultPlottable;
+}
+
+/*!
+  Returns the item at the pixel position \a pos. The item type (a QCPAbstractItem subclass) that shall be
+  taken into consideration can be specified via the template parameter. Items that only consist of single
+  lines (e.g. \ref QCPItemLine or \ref QCPItemCurve) have a tolerance band around them, see \ref
+  setSelectionTolerance. If multiple items come into consideration, the one closest to \a pos is returned.
+  
+  If \a onlySelectable is true, only items that are selectable (QCPAbstractItem::setSelectable) are
+  considered.
+  
+  If there is no item at \a pos, returns \c nullptr.
+  
+  \see plottableAt, layoutElementAt
+*/
+template<class ItemType>
+ItemType *QCustomPlot::itemAt(const QPointF &pos, bool onlySelectable) const {
+    ItemType *resultItem = 0;
+    double resultDistance = mSelectionTolerance; // only regard clicks with distances smaller than mSelectionTolerance as selections, so initialize with that value
+
+            foreach (QCPAbstractItem *item, mItems) {
+            ItemType *currentItem = qobject_cast<ItemType *>(item);
+            if (!currentItem || (onlySelectable &&
+                                 !currentItem->selectable())) // we could have also passed onlySelectable to the selectTest function, but checking here is faster, because we have access to QCPAbstractItem::selectable
+                continue;
+            if (!currentItem->clipToAxisRect() || currentItem->clipRect().contains(
+                    pos.toPoint())) // only consider clicks inside axis cliprect of the item if actually clipped to it
+            {
+                double currentDistance = currentItem->selectTest(pos, false);
+                if (currentDistance >= 0 && currentDistance < resultDistance) {
+                    resultItem = currentItem;
+                    resultDistance = currentDistance;
+                }
+            }
+        }
+
+    return resultItem;
+}
+
 
 #endif // QCP_CORE_H

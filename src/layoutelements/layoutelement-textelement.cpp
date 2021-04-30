@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "layoutelement-textelement.h"
@@ -76,7 +76,7 @@
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot) :
         QCPLayoutElement(parentPlot),
         mText(),
-        mTextFlags(Qt::AlignCenter | Qt::TextWordWrap),
+        mTextFlags(Qt::AlignCenter),
         mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
         mTextColor(Qt::black),
         mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
@@ -99,7 +99,7 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot) :
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text) :
         QCPLayoutElement(parentPlot),
         mText(text),
-        mTextFlags(Qt::AlignCenter | Qt::TextWordWrap),
+        mTextFlags(Qt::AlignCenter),
         mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
         mTextColor(Qt::black),
         mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
@@ -122,13 +122,16 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text) :
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, double pointSize) :
         QCPLayoutElement(parentPlot),
         mText(text),
-        mTextFlags(Qt::AlignCenter | Qt::TextWordWrap),
-        mFont(QFont(QLatin1String("sans serif"), pointSize)), // will be taken from parentPlot if available, see below
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(QLatin1String("sans serif"),
+                    int(pointSize))), // will be taken from parentPlot if available, see below
         mTextColor(Qt::black),
-        mSelectedFont(QFont(QLatin1String("sans serif"), pointSize)), // will be taken from parentPlot if available, see below
+        mSelectedFont(QFont(QLatin1String("sans serif"),
+                            int(pointSize))), // will be taken from parentPlot if available, see below
         mSelectedTextColor(Qt::blue),
         mSelectable(false),
         mSelected(false) {
+    mFont.setPointSizeF(pointSize); // set here again as floating point, because constructor above only takes integer
     if (parentPlot) {
         mFont = parentPlot->font();
         mFont.setPointSizeF(pointSize);
@@ -144,16 +147,18 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, dou
 
   The initial text is set to \a text with \a pointSize and the specified \a fontFamily.
 */
-QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QString &fontFamily, double pointSize) :
+QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QString &fontFamily,
+                               double pointSize) :
         QCPLayoutElement(parentPlot),
         mText(text),
-        mTextFlags(Qt::AlignCenter | Qt::TextWordWrap),
-        mFont(QFont(fontFamily, pointSize)),
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(fontFamily, int(pointSize))),
         mTextColor(Qt::black),
-        mSelectedFont(QFont(fontFamily, pointSize)),
+        mSelectedFont(QFont(fontFamily, int(pointSize))),
         mSelectedTextColor(Qt::blue),
         mSelectable(false),
         mSelected(false) {
+    mFont.setPointSizeF(pointSize); // set here again as floating point, because constructor above only takes integer
     setMargins(QMargins(2, 2, 2, 2));
 }
 
@@ -166,7 +171,7 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, con
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QFont &font) :
         QCPLayoutElement(parentPlot),
         mText(text),
-        mTextFlags(Qt::AlignCenter | Qt::TextWordWrap),
+        mTextFlags(Qt::AlignCenter),
         mFont(font),
         mTextColor(Qt::black),
         mSelectedFont(font),
@@ -281,13 +286,13 @@ void QCPTextElement::applyDefaultAntialiasingHint(QCPPainter *painter) const {
 void QCPTextElement::draw(QCPPainter *painter) {
     painter->setFont(mainFont());
     painter->setPen(QPen(mainTextColor()));
-    painter->drawText(mRect, Qt::AlignCenter, mText, &mTextBoundingRect);
+    painter->drawText(mRect, mTextFlags, mText, &mTextBoundingRect);
 }
 
 /* inherits documentation from base class */
 QSize QCPTextElement::minimumOuterSizeHint() const {
     QFontMetrics metrics(mFont);
-    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
+    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, mText).size());
     result.rwidth() += mMargins.left() + mMargins.right();
     result.rheight() += mMargins.top() + mMargins.bottom();
     return result;
@@ -296,14 +301,15 @@ QSize QCPTextElement::minimumOuterSizeHint() const {
 /* inherits documentation from base class */
 QSize QCPTextElement::maximumOuterSizeHint() const {
     QFontMetrics metrics(mFont);
-    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
+    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, mText).size());
     result.setWidth(QWIDGETSIZE_MAX);
     result.rheight() += mMargins.top() + mMargins.bottom();
     return result;
 }
 
 /* inherits documentation from base class */
-void QCPTextElement::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+void
+QCPTextElement::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
     Q_UNUSED(event)
     Q_UNUSED(details)
     if (mSelectable) {

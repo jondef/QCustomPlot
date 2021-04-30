@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 /*! \file */
 #ifndef QCP_PLOTTABLE_GRAPH_H
@@ -61,12 +61,12 @@ Q_DECLARE_TYPEINFO(QCPGraphData, Q_PRIMITIVE_TYPE);
 
 
 /*! \typedef QCPGraphDataContainer
-
+  
   Container for storing \ref QCPGraphData points. The data is stored sorted by \a key.
-
+  
   This template instantiation is the container in which QCPGraph holds its data. For details about
   the generic container, see the documentation of the class template \ref QCPDataContainer.
-
+  
   \see QCPGraphData, QCPGraph::setData
 */
 typedef QCPDataContainer<QCPGraphData> QCPGraphDataContainer;
@@ -82,10 +82,10 @@ Q_OBJECT
     /// \endcond
 public:
     /*!
-    Defines how the graph's line is represented visually in the plot. The line is drawn with the
-    current pen of the graph (\ref setPen).
-    \see setLineStyle
-  */
+      Defines how the graph's line is represented visually in the plot. The line is drawn with the
+      current pen of the graph (\ref setPen).
+      \see setLineStyle
+    */
     enum LineStyle {
         lsNone        ///< data points are not connected with any lines (e.g. data only represented
         ///< with symbols according to the scatter style, see \ref setScatterStyle)
@@ -104,7 +104,7 @@ public:
 
     explicit QCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis);
 
-    virtual ~QCPGraph();
+    virtual ~QCPGraph() Q_DECL_OVERRIDE;
 
     // getters:
     QSharedPointer<QCPGraphDataContainer> data() const { return mDataContainer; }
@@ -140,12 +140,13 @@ public:
     void addData(double key, double value);
 
     // reimplemented virtual methods:
-    virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = 0) const Q_DECL_OVERRIDE;
+    virtual double
+    selectTest(const QPointF &pos, bool onlySelectable, QVariant *details = nullptr) const Q_DECL_OVERRIDE;
 
     virtual QCPRange getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const Q_DECL_OVERRIDE;
 
-    virtual QCPRange
-    getValueRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth, const QCPRange &inKeyRange = QCPRange()) const Q_DECL_OVERRIDE;
+    virtual QCPRange getValueRange(bool &foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth,
+                                   const QCPRange &inKeyRange = QCPRange()) const Q_DECL_OVERRIDE;
 
 protected:
     // property members:
@@ -163,17 +164,20 @@ protected:
     // introduced virtual methods:
     virtual void drawFill(QCPPainter *painter, QVector<QPointF> *lines) const;
 
-    virtual void drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const;
+    virtual void
+    drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const;
 
     virtual void drawLinePlot(QCPPainter *painter, const QVector<QPointF> &lines) const;
 
     virtual void drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &lines) const;
 
-    virtual void getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGraphDataContainer::const_iterator &begin,
-                                      const QCPGraphDataContainer::const_iterator &end) const;
+    virtual void
+    getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGraphDataContainer::const_iterator &begin,
+                         const QCPGraphDataContainer::const_iterator &end) const;
 
-    virtual void getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGraphDataContainer::const_iterator begin,
-                                         QCPGraphDataContainer::const_iterator end) const;
+    virtual void
+    getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGraphDataContainer::const_iterator begin,
+                            QCPGraphDataContainer::const_iterator end) const;
 
     // non-virtual methods:
     void getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin, QCPGraphDataContainer::const_iterator &end,
@@ -196,8 +200,8 @@ protected:
     QVector<QCPDataRange> getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const;
 
     QVector<QPair<QCPDataRange, QCPDataRange> >
-    getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPDataRange> otherSegments,
-                           const QVector<QPointF> *otherData) const;
+    getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData,
+                           QVector<QCPDataRange> otherSegments, const QVector<QPointF> *otherData) const;
 
     bool segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const;
 
@@ -205,8 +209,9 @@ protected:
 
     const QPolygonF getFillPolygon(const QVector<QPointF> *lineData, QCPDataRange segment) const;
 
-    const QPolygonF getChannelFillPolygon(const QVector<QPointF> *lineData, QCPDataRange thisSegment, const QVector<QPointF> *otherData,
-                                          QCPDataRange otherSegment) const;
+    const QPolygonF
+    getChannelFillPolygon(const QVector<QPointF> *thisData, QCPDataRange thisSegment, const QVector<QPointF> *otherData,
+                          QCPDataRange otherSegment) const;
 
     int findIndexBelowX(const QVector<QPointF> *data, double x) const;
 

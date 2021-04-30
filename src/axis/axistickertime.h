@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_AXISTICKERTIME_H
@@ -32,10 +32,10 @@ class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker {
 Q_GADGET
 public:
     /*!
-    Defines the logical units in which fractions of time spans can be expressed.
+      Defines the logical units in which fractions of time spans can be expressed.
 
-    \see setFieldWidth, setTimeFormat
-  */
+      \see setFieldWidth, setTimeFormat
+    */
     enum TimeUnit {
         tuMilliseconds ///< Milliseconds, one thousandth of a second (%%z in \ref setTimeFormat)
         , tuSeconds     ///< Seconds (%%s in \ref setTimeFormat)

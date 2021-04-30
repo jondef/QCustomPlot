@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "layoutelement-legend.h"
@@ -173,7 +173,8 @@ QRect QCPAbstractLegendItem::clipRect() const {
 }
 
 /* inherits documentation from base class */
-void QCPAbstractLegendItem::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+void QCPAbstractLegendItem::selectEvent(QMouseEvent *event, bool additive, const QVariant &details,
+                                        bool *selectionStateChanged) {
     Q_UNUSED(event)
     Q_UNUSED(details)
     if (mSelectable && mParentLegend->selectableParts().testFlag(QCPLegend::spItems)) {
@@ -272,13 +273,14 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter) {
     if (!mPlottable) return;
     painter->setFont(getFont());
     painter->setPen(QPen(getTextColor()));
-    QSizeF iconSize = mParentLegend->iconSize();
-    QRectF textRect = painter->fontMetrics().boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip, mPlottable->name());
-    QRectF iconRect(mRect.topLeft(), iconSize);
+    QSize iconSize = mParentLegend->iconSize();
+    QRect textRect = painter->fontMetrics().boundingRect(0, 0, 0, iconSize.height(), Qt::TextDontClip,
+                                                         mPlottable->name());
+    QRect iconRect(mRect.topLeft(), iconSize);
     int textHeight = qMax(textRect.height(),
                           iconSize.height());  // if text has smaller height than icon, center text vertically in icon height, else align tops
-    painter->drawText(mRect.x() + iconSize.width() + mParentLegend->iconTextPadding(), mRect.y(), textRect.width(), textHeight, Qt::TextDontClip,
-                      mPlottable->name());
+    painter->drawText(mRect.x() + iconSize.width() + mParentLegend->iconTextPadding(), mRect.y(), textRect.width(),
+                      textHeight, Qt::TextDontClip, mPlottable->name());
     // draw icon:
     painter->save();
     painter->setClipRect(iconRect, Qt::IntersectClip);
@@ -303,7 +305,7 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter) {
   \seebaseclassmethod
 */
 QSize QCPPlottableLegendItem::minimumOuterSizeHint() const {
-    if (!mPlottable) return QSize();
+    if (!mPlottable) return {};
     QSize result(0, 0);
     QRect textRect;
     QFontMetrics fontMetrics(getFont());
@@ -372,7 +374,8 @@ QSize QCPPlottableLegendItem::minimumOuterSizeHint() const {
   Note that by default, QCustomPlot already contains a legend ready to be used as \ref
   QCustomPlot::legend
 */
-QCPLegend::QCPLegend() {
+QCPLegend::QCPLegend() :
+        mIconTextPadding{} {
     setFillOrder(QCPLayoutGrid::foRowsFirst);
     setWrap(0);
 
@@ -545,12 +548,14 @@ void QCPLegend::setSelectedParts(const SelectableParts &selected) {
     mSelectedParts = this->selectedParts(); // update mSelectedParts in case item selection changed
 
     if (mSelectedParts != newSelected) {
-        if (!mSelectedParts.testFlag(spItems) && newSelected.testFlag(spItems)) // attempt to set spItems flag (can't do that)
+        if (!mSelectedParts.testFlag(spItems) &&
+            newSelected.testFlag(spItems)) // attempt to set spItems flag (can't do that)
         {
             qDebug() << Q_FUNC_INFO << "spItems flag can not be set, it can only be unset with this function";
             newSelected &= ~spItems;
         }
-        if (mSelectedParts.testFlag(spItems) && !newSelected.testFlag(spItems)) // spItems flag was unset, so clear item selection
+        if (mSelectedParts.testFlag(spItems) &&
+            !newSelected.testFlag(spItems)) // spItems flag was unset, so clear item selection
         {
             for (int i = 0; i < itemCount(); ++i) {
                 if (item(i))
@@ -622,7 +627,8 @@ void QCPLegend::setSelectedTextColor(const QColor &color) {
 }
 
 /*!
-  Returns the item with index \a i.
+  Returns the item with index \a i. If non-legend items were added to the legend, and the element
+  at the specified cell index is not a QCPAbstractLegendItem, returns \c nullptr.
 
   Note that the linear index depends on the current fill order (\ref setFillOrder).
 
@@ -634,7 +640,7 @@ QCPAbstractLegendItem *QCPLegend::item(int index) const {
 
 /*!
   Returns the QCPPlottableLegendItem which is associated with \a plottable (e.g. a \ref QCPGraph*).
-  If such an item isn't in the legend, returns 0.
+  If such an item isn't in the legend, returns \c nullptr.
   
   \see hasItemWithPlottable
 */
@@ -645,11 +651,13 @@ QCPPlottableLegendItem *QCPLegend::itemWithPlottable(const QCPAbstractPlottable 
                 return pli;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 /*!
-  Returns the number of items currently in the legend.
+  Returns the number of items currently in the legend. It is identical to the base class
+  QCPLayoutGrid::elementCount(), and unlike the other "item" interface methods of QCPLegend,
+  doesn't only address elements which can be cast to QCPAbstractLegendItem.
 
   Note that if empty cells are in the legend (e.g. by calling methods of the \ref QCPLayoutGrid
   base class which allows creating empty cells), they are included in the returned count.
@@ -743,8 +751,11 @@ bool QCPLegend::removeItem(QCPAbstractLegendItem *item) {
   Removes all items from the legend.
 */
 void QCPLegend::clearItems() {
-    for (int i = itemCount() - 1; i >= 0; --i)
-        removeItem(i);
+    for (int i = elementCount() - 1; i >= 0; --i) {
+        if (item(i))
+            removeAt(i); // don't use removeItem() because it would unnecessarily reorder the whole legend for each item
+    }
+    setFillOrder(fillOrder(), true); // get rid of empty cells by reordering once after all items are removed
 }
 
 /*!
