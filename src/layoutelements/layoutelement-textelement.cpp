@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "layoutelement-textelement.h"
@@ -74,22 +74,20 @@
   setText).
 */
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot) :
-  QCPLayoutElement(parentPlot),
-  mText(),
-  mTextFlags(Qt::AlignCenter|Qt::TextWordWrap),
-  mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
-  mTextColor(Qt::black),
-  mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
-  mSelectedTextColor(Qt::blue),
-  mSelectable(false),
-  mSelected(false)
-{
-  if (parentPlot)
-  {
-    mFont = parentPlot->font();
-    mSelectedFont = parentPlot->font();
-  }
-  setMargins(QMargins(2, 2, 2, 2));
+        QCPLayoutElement(parentPlot),
+        mText(),
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
+        mTextColor(Qt::black),
+        mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
+        mSelectedTextColor(Qt::blue),
+        mSelectable(false),
+        mSelected(false) {
+    if (parentPlot) {
+        mFont = parentPlot->font();
+        mSelectedFont = parentPlot->font();
+    }
+    setMargins(QMargins(2, 2, 2, 2));
 }
 
 /*! \overload
@@ -99,22 +97,20 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot) :
   The initial text is set to \a text.
 */
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text) :
-  QCPLayoutElement(parentPlot),
-  mText(text),
-  mTextFlags(Qt::AlignCenter|Qt::TextWordWrap),
-  mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
-  mTextColor(Qt::black),
-  mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
-  mSelectedTextColor(Qt::blue),
-  mSelectable(false),
-  mSelected(false)
-{
-  if (parentPlot)
-  {
-    mFont = parentPlot->font();
-    mSelectedFont = parentPlot->font();
-  }
-  setMargins(QMargins(2, 2, 2, 2));
+        QCPLayoutElement(parentPlot),
+        mText(text),
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
+        mTextColor(Qt::black),
+        mSelectedFont(QFont(QLatin1String("sans serif"), 12)), // will be taken from parentPlot if available, see below
+        mSelectedTextColor(Qt::blue),
+        mSelectable(false),
+        mSelected(false) {
+    if (parentPlot) {
+        mFont = parentPlot->font();
+        mSelectedFont = parentPlot->font();
+    }
+    setMargins(QMargins(2, 2, 2, 2));
 }
 
 /*! \overload
@@ -124,24 +120,25 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text) :
   The initial text is set to \a text with \a pointSize.
 */
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, double pointSize) :
-  QCPLayoutElement(parentPlot),
-  mText(text),
-  mTextFlags(Qt::AlignCenter|Qt::TextWordWrap),
-  mFont(QFont(QLatin1String("sans serif"), pointSize)), // will be taken from parentPlot if available, see below
-  mTextColor(Qt::black),
-  mSelectedFont(QFont(QLatin1String("sans serif"), pointSize)), // will be taken from parentPlot if available, see below
-  mSelectedTextColor(Qt::blue),
-  mSelectable(false),
-  mSelected(false)
-{
-  if (parentPlot)
-  {
-    mFont = parentPlot->font();
-    mFont.setPointSizeF(pointSize);
-    mSelectedFont = parentPlot->font();
-    mSelectedFont.setPointSizeF(pointSize);
-  }
-  setMargins(QMargins(2, 2, 2, 2));
+        QCPLayoutElement(parentPlot),
+        mText(text),
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(QLatin1String("sans serif"),
+                    int(pointSize))), // will be taken from parentPlot if available, see below
+        mTextColor(Qt::black),
+        mSelectedFont(QFont(QLatin1String("sans serif"),
+                            int(pointSize))), // will be taken from parentPlot if available, see below
+        mSelectedTextColor(Qt::blue),
+        mSelectable(false),
+        mSelected(false) {
+    mFont.setPointSizeF(pointSize); // set here again as floating point, because constructor above only takes integer
+    if (parentPlot) {
+        mFont = parentPlot->font();
+        mFont.setPointSizeF(pointSize);
+        mSelectedFont = parentPlot->font();
+        mSelectedFont.setPointSizeF(pointSize);
+    }
+    setMargins(QMargins(2, 2, 2, 2));
 }
 
 /*! \overload
@@ -150,18 +147,19 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, dou
 
   The initial text is set to \a text with \a pointSize and the specified \a fontFamily.
 */
-QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QString &fontFamily, double pointSize) :
-  QCPLayoutElement(parentPlot),
-  mText(text),
-  mTextFlags(Qt::AlignCenter|Qt::TextWordWrap),
-  mFont(QFont(fontFamily, pointSize)),
-  mTextColor(Qt::black),
-  mSelectedFont(QFont(fontFamily, pointSize)),
-  mSelectedTextColor(Qt::blue),
-  mSelectable(false),
-  mSelected(false)
-{
-  setMargins(QMargins(2, 2, 2, 2));
+QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QString &fontFamily,
+                               double pointSize) :
+        QCPLayoutElement(parentPlot),
+        mText(text),
+        mTextFlags(Qt::AlignCenter),
+        mFont(QFont(fontFamily, int(pointSize))),
+        mTextColor(Qt::black),
+        mSelectedFont(QFont(fontFamily, int(pointSize))),
+        mSelectedTextColor(Qt::blue),
+        mSelectable(false),
+        mSelected(false) {
+    mFont.setPointSizeF(pointSize); // set here again as floating point, because constructor above only takes integer
+    setMargins(QMargins(2, 2, 2, 2));
 }
 
 /*! \overload
@@ -171,17 +169,16 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, con
   The initial text is set to \a text with the specified \a font.
 */
 QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, const QFont &font) :
-  QCPLayoutElement(parentPlot),
-  mText(text),
-  mTextFlags(Qt::AlignCenter|Qt::TextWordWrap),
-  mFont(font),
-  mTextColor(Qt::black),
-  mSelectedFont(font),
-  mSelectedTextColor(Qt::blue),
-  mSelectable(false),
-  mSelected(false)
-{
-  setMargins(QMargins(2, 2, 2, 2));
+        QCPLayoutElement(parentPlot),
+        mText(text),
+        mTextFlags(Qt::AlignCenter),
+        mFont(font),
+        mTextColor(Qt::black),
+        mSelectedFont(font),
+        mSelectedTextColor(Qt::blue),
+        mSelectable(false),
+        mSelected(false) {
+    setMargins(QMargins(2, 2, 2, 2));
 }
 
 /*!
@@ -189,9 +186,8 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, con
   
   \see setFont, setTextColor, setTextFlags
 */
-void QCPTextElement::setText(const QString &text)
-{
-  mText = text;
+void QCPTextElement::setText(const QString &text) {
+    mText = text;
 }
 
 /*!
@@ -214,9 +210,8 @@ void QCPTextElement::setText(const QString &text)
   - Qt::TextWordWrap
   - Qt::TextIncludeTrailingSpaces
 */
-void QCPTextElement::setTextFlags(int flags)
-{
-  mTextFlags = flags;
+void QCPTextElement::setTextFlags(int flags) {
+    mTextFlags = flags;
 }
 
 /*!
@@ -224,9 +219,8 @@ void QCPTextElement::setTextFlags(int flags)
   
   \see setTextColor, setSelectedFont
 */
-void QCPTextElement::setFont(const QFont &font)
-{
-  mFont = font;
+void QCPTextElement::setFont(const QFont &font) {
+    mFont = font;
 }
 
 /*!
@@ -234,9 +228,8 @@ void QCPTextElement::setFont(const QFont &font)
   
   \see setFont, setSelectedTextColor
 */
-void QCPTextElement::setTextColor(const QColor &color)
-{
-  mTextColor = color;
+void QCPTextElement::setTextColor(const QColor &color) {
+    mTextColor = color;
 }
 
 /*!
@@ -244,9 +237,8 @@ void QCPTextElement::setTextColor(const QColor &color)
   
   \see setFont
 */
-void QCPTextElement::setSelectedFont(const QFont &font)
-{
-  mSelectedFont = font;
+void QCPTextElement::setSelectedFont(const QFont &font) {
+    mSelectedFont = font;
 }
 
 /*!
@@ -254,9 +246,8 @@ void QCPTextElement::setSelectedFont(const QFont &font)
   
   \see setTextColor
 */
-void QCPTextElement::setSelectedTextColor(const QColor &color)
-{
-  mSelectedTextColor = color;
+void QCPTextElement::setSelectedTextColor(const QColor &color) {
+    mSelectedTextColor = color;
 }
 
 /*!
@@ -265,13 +256,11 @@ void QCPTextElement::setSelectedTextColor(const QColor &color)
   Note that even when \a selectable is set to <tt>false</tt>, the selection state may be changed
   programmatically via \ref setSelected.
 */
-void QCPTextElement::setSelectable(bool selectable)
-{
-  if (mSelectable != selectable)
-  {
-    mSelectable = selectable;
-    emit selectableChanged(mSelectable);
-  }
+void QCPTextElement::setSelectable(bool selectable) {
+    if (mSelectable != selectable) {
+        mSelectable = selectable;
+        emit selectableChanged(mSelectable);
+    }
 }
 
 /*!
@@ -281,73 +270,64 @@ void QCPTextElement::setSelectable(bool selectable)
   Note that this function can change the selection state independently of the current \ref
   setSelectable state.
 */
-void QCPTextElement::setSelected(bool selected)
-{
-  if (mSelected != selected)
-  {
-    mSelected = selected;
-    emit selectionChanged(mSelected);
-  }
+void QCPTextElement::setSelected(bool selected) {
+    if (mSelected != selected) {
+        mSelected = selected;
+        emit selectionChanged(mSelected);
+    }
 }
 
 /* inherits documentation from base class */
-void QCPTextElement::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeOther);
+void QCPTextElement::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeOther);
 }
 
 /* inherits documentation from base class */
-void QCPTextElement::draw(QCPPainter *painter)
-{
-  painter->setFont(mainFont());
-  painter->setPen(QPen(mainTextColor()));
-  painter->drawText(mRect, Qt::AlignCenter, mText, &mTextBoundingRect);
+void QCPTextElement::draw(QCPPainter *painter) {
+    painter->setFont(mainFont());
+    painter->setPen(QPen(mainTextColor()));
+    painter->drawText(mRect, mTextFlags, mText, &mTextBoundingRect);
 }
 
 /* inherits documentation from base class */
-QSize QCPTextElement::minimumOuterSizeHint() const
-{
-  QFontMetrics metrics(mFont);
-  QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
-  result.rwidth() += mMargins.left()+mMargins.right();
-  result.rheight() += mMargins.top()+mMargins.bottom();
-  return result;
+QSize QCPTextElement::minimumOuterSizeHint() const {
+    QFontMetrics metrics(mFont);
+    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, mText).size());
+    result.rwidth() += mMargins.left() + mMargins.right();
+    result.rheight() += mMargins.top() + mMargins.bottom();
+    return result;
 }
 
 /* inherits documentation from base class */
-QSize QCPTextElement::maximumOuterSizeHint() const
-{
-  QFontMetrics metrics(mFont);
-  QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::AlignCenter, mText).size());
-  result.setWidth(QWIDGETSIZE_MAX);
-  result.rheight() += mMargins.top()+mMargins.bottom();
-  return result;
+QSize QCPTextElement::maximumOuterSizeHint() const {
+    QFontMetrics metrics(mFont);
+    QSize result(metrics.boundingRect(0, 0, 0, 0, Qt::TextDontClip, mText).size());
+    result.setWidth(QWIDGETSIZE_MAX);
+    result.rheight() += mMargins.top() + mMargins.bottom();
+    return result;
 }
 
 /* inherits documentation from base class */
-void QCPTextElement::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged)
-{
-  Q_UNUSED(event)
-  Q_UNUSED(details)
-  if (mSelectable)
-  {
-    bool selBefore = mSelected;
-    setSelected(additive ? !mSelected : true);
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelected != selBefore;
-  }
+void
+QCPTextElement::selectEvent(QMouseEvent *event, bool additive, const QVariant &details, bool *selectionStateChanged) {
+    Q_UNUSED(event)
+    Q_UNUSED(details)
+    if (mSelectable) {
+        bool selBefore = mSelected;
+        setSelected(additive ? !mSelected : true);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelected != selBefore;
+    }
 }
 
 /* inherits documentation from base class */
-void QCPTextElement::deselectEvent(bool *selectionStateChanged)
-{
-  if (mSelectable)
-  {
-    bool selBefore = mSelected;
-    setSelected(false);
-    if (selectionStateChanged)
-      *selectionStateChanged = mSelected != selBefore;
-  }
+void QCPTextElement::deselectEvent(bool *selectionStateChanged) {
+    if (mSelectable) {
+        bool selBefore = mSelected;
+        setSelected(false);
+        if (selectionStateChanged)
+            *selectionStateChanged = mSelected != selBefore;
+    }
 }
 
 /*!
@@ -360,16 +340,15 @@ void QCPTextElement::deselectEvent(bool *selectionStateChanged)
 
   \seebaseclassmethod
 */
-double QCPTextElement::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if (onlySelectable && !mSelectable)
-    return -1;
-  
-  if (mTextBoundingRect.contains(pos.toPoint()))
-    return mParentPlot->selectionTolerance()*0.99;
-  else
-    return -1;
+double QCPTextElement::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if (onlySelectable && !mSelectable)
+        return -1;
+
+    if (mTextBoundingRect.contains(pos.toPoint()))
+        return mParentPlot->selectionTolerance() * 0.99;
+    else
+        return -1;
 }
 
 /*!
@@ -378,10 +357,9 @@ double QCPTextElement::selectTest(const QPointF &pos, bool onlySelectable, QVari
 
   \seebaseclassmethod
 */
-void QCPTextElement::mousePressEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  event->accept();
+void QCPTextElement::mousePressEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    event->accept();
 }
 
 /*!
@@ -390,10 +368,9 @@ void QCPTextElement::mousePressEvent(QMouseEvent *event, const QVariant &details
 
   \seebaseclassmethod
 */
-void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
-{
-  if ((QPointF(event->pos())-startPos).manhattanLength() <= 3)
-    emit clicked(event);
+void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos) {
+    if ((QPointF(event->pos()) - startPos).manhattanLength() <= 3)
+            emit clicked(event);
 }
 
 /*!
@@ -401,10 +378,9 @@ void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startP
 
   \seebaseclassmethod
 */
-void QCPTextElement::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details)
-{
-  Q_UNUSED(details)
-  emit doubleClicked(event);
+void QCPTextElement::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details) {
+    Q_UNUSED(details)
+    emit doubleClicked(event);
 }
 
 /*! \internal
@@ -412,9 +388,8 @@ void QCPTextElement::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &d
   Returns the main font to be used. This is mSelectedFont if \ref setSelected is set to
   <tt>true</tt>, else mFont is returned.
 */
-QFont QCPTextElement::mainFont() const
-{
-  return mSelected ? mSelectedFont : mFont;
+QFont QCPTextElement::mainFont() const {
+    return mSelected ? mSelectedFont : mFont;
 }
 
 /*! \internal
@@ -422,8 +397,7 @@ QFont QCPTextElement::mainFont() const
   Returns the main color to be used. This is mSelectedTextColor if \ref setSelected is set to
   <tt>true</tt>, else mTextColor is returned.
 */
-QColor QCPTextElement::mainTextColor() const
-{
-  return mSelected ? mSelectedTextColor : mTextColor;
+QColor QCPTextElement::mainTextColor() const {
+    return mSelected ? mSelectedTextColor : mTextColor;
 }
 

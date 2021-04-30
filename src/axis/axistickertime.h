@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_AXISTICKERTIME_H
@@ -28,50 +28,55 @@
 
 #include "axisticker.h"
 
-class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker
-{
-  Q_GADGET
+class QCP_LIB_DECL QCPAxisTickerTime : public QCPAxisTicker {
+Q_GADGET
 public:
-  /*!
-    Defines the logical units in which fractions of time spans can be expressed.
-    
-    \see setFieldWidth, setTimeFormat
-  */
-  enum TimeUnit { tuMilliseconds ///< Milliseconds, one thousandth of a second (%%z in \ref setTimeFormat)
-                  ,tuSeconds     ///< Seconds (%%s in \ref setTimeFormat)
-                  ,tuMinutes     ///< Minutes (%%m in \ref setTimeFormat)
-                  ,tuHours       ///< Hours (%%h in \ref setTimeFormat)
-                  ,tuDays        ///< Days (%%d in \ref setTimeFormat)
-                };
-  Q_ENUMS(TimeUnit)
-  
-  QCPAxisTickerTime();
+    /*!
+      Defines the logical units in which fractions of time spans can be expressed.
 
-  // getters:
-  QString timeFormat() const { return mTimeFormat; }
-  int fieldWidth(TimeUnit unit) const { return mFieldWidth.value(unit); }
-  
-  // setters:
-  void setTimeFormat(const QString &format);
-  void setFieldWidth(TimeUnit unit, int width);
-  
+      \see setFieldWidth, setTimeFormat
+    */
+    enum TimeUnit {
+        tuMilliseconds ///< Milliseconds, one thousandth of a second (%%z in \ref setTimeFormat)
+        , tuSeconds     ///< Seconds (%%s in \ref setTimeFormat)
+        , tuMinutes     ///< Minutes (%%m in \ref setTimeFormat)
+        , tuHours       ///< Hours (%%h in \ref setTimeFormat)
+        , tuDays        ///< Days (%%d in \ref setTimeFormat)
+    };
+    Q_ENUMS(TimeUnit)
+
+    QCPAxisTickerTime();
+
+    // getters:
+    QString timeFormat() const { return mTimeFormat; }
+
+    int fieldWidth(TimeUnit unit) const { return mFieldWidth.value(unit); }
+
+    // setters:
+    void setTimeFormat(const QString &format);
+
+    void setFieldWidth(TimeUnit unit, int width);
+
 protected:
-  // property members:
-  QString mTimeFormat;
-  QHash<TimeUnit, int> mFieldWidth;
-  
-  // non-property members:
-  TimeUnit mSmallestUnit, mBiggestUnit;
-  QHash<TimeUnit, QString> mFormatPattern;
-  
-  // reimplemented virtual methods:
-  virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
-  virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
-  virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
-  
-  // non-virtual methods:
-  void replaceUnit(QString &text, TimeUnit unit, int value) const;
+    // property members:
+    QString mTimeFormat;
+    QHash<TimeUnit, int> mFieldWidth;
+
+    // non-property members:
+    TimeUnit mSmallestUnit, mBiggestUnit;
+    QHash<TimeUnit, QString> mFormatPattern;
+
+    // reimplemented virtual methods:
+    virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
+
+    virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
+
+    virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
+
+    // non-virtual methods:
+    void replaceUnit(QString &text, TimeUnit unit, int value) const;
 };
+
 Q_DECLARE_METATYPE(QCPAxisTickerTime::TimeUnit)
 
 #endif // QCP_AXISTICKERTIME_H

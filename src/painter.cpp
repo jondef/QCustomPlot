@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "painter.h"
@@ -46,12 +46,10 @@
   Creates a new QCPPainter instance and sets default values
 */
 QCPPainter::QCPPainter() :
-  QPainter(),
-  mModes(pmDefault),
-  mIsAntialiasing(false)
-{
-  // don't setRenderHint(QPainter::NonCosmeticDefautPen) here, because painter isn't active yet and
-  // a call to begin() will follow
+        mModes(pmDefault),
+        mIsAntialiasing(false) {
+    // don't setRenderHint(QPainter::NonCosmeticDefautPen) here, because painter isn't active yet and
+    // a call to begin() will follow
 }
 
 /*!
@@ -61,13 +59,12 @@ QCPPainter::QCPPainter() :
   Like \ref begin, this method sets QPainter::NonCosmeticDefaultPen in Qt versions before Qt5.
 */
 QCPPainter::QCPPainter(QPaintDevice *device) :
-  QPainter(device),
-  mModes(pmDefault),
-  mIsAntialiasing(false)
-{
+        QPainter(device),
+        mModes(pmDefault),
+        mIsAntialiasing(false) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) // before Qt5, default pens used to be cosmetic if NonCosmeticDefaultPen flag isn't set. So we set it to get consistency across Qt versions.
-  if (isActive())
-    setRenderHint(QPainter::NonCosmeticDefaultPen);
+    if (isActive())
+      setRenderHint(QPainter::NonCosmeticDefaultPen);
 #endif
 }
 
@@ -77,11 +74,10 @@ QCPPainter::QCPPainter(QPaintDevice *device) :
   
   \note this function hides the non-virtual base class implementation.
 */
-void QCPPainter::setPen(const QPen &pen)
-{
-  QPainter::setPen(pen);
-  if (mModes.testFlag(pmNonCosmetic))
-    makeNonCosmetic();
+void QCPPainter::setPen(const QPen &pen) {
+    QPainter::setPen(pen);
+    if (mModes.testFlag(pmNonCosmetic))
+        makeNonCosmetic();
 }
 
 /*! \overload
@@ -91,11 +87,10 @@ void QCPPainter::setPen(const QPen &pen)
   
   \note this function hides the non-virtual base class implementation.
 */
-void QCPPainter::setPen(const QColor &color)
-{
-  QPainter::setPen(color);
-  if (mModes.testFlag(pmNonCosmetic))
-    makeNonCosmetic();
+void QCPPainter::setPen(const QColor &color) {
+    QPainter::setPen(color);
+    if (mModes.testFlag(pmNonCosmetic))
+        makeNonCosmetic();
 }
 
 /*! \overload
@@ -105,11 +100,10 @@ void QCPPainter::setPen(const QColor &color)
   
   \note this function hides the non-virtual base class implementation.
 */
-void QCPPainter::setPen(Qt::PenStyle penStyle)
-{
-  QPainter::setPen(penStyle);
-  if (mModes.testFlag(pmNonCosmetic))
-    makeNonCosmetic();
+void QCPPainter::setPen(Qt::PenStyle penStyle) {
+    QPainter::setPen(penStyle);
+    if (mModes.testFlag(pmNonCosmetic))
+        makeNonCosmetic();
 }
 
 /*! \overload
@@ -120,12 +114,11 @@ void QCPPainter::setPen(Qt::PenStyle penStyle)
   
   \note this function hides the non-virtual base class implementation.
 */
-void QCPPainter::drawLine(const QLineF &line)
-{
-  if (mIsAntialiasing || mModes.testFlag(pmVectorized))
-    QPainter::drawLine(line);
-  else
-    QPainter::drawLine(line.toLine());
+void QCPPainter::drawLine(const QLineF &line) {
+    if (mIsAntialiasing || mModes.testFlag(pmVectorized))
+        QPainter::drawLine(line);
+    else
+        QPainter::drawLine(line.toLine());
 }
 
 /*!
@@ -134,29 +127,26 @@ void QCPPainter::drawLine(const QLineF &line)
   antialiased and non-antialiased painting (Since Qt < 5.0 uses slightly different coordinate systems for
   AA/Non-AA painting).
 */
-void QCPPainter::setAntialiasing(bool enabled)
-{
-  setRenderHint(QPainter::Antialiasing, enabled);
-  if (mIsAntialiasing != enabled)
-  {
-    mIsAntialiasing = enabled;
-    if (!mModes.testFlag(pmVectorized)) // antialiasing half-pixel shift only needed for rasterized outputs
-    {
-      if (mIsAntialiasing)
-        translate(0.5, 0.5);
-      else
-        translate(-0.5, -0.5);
+void QCPPainter::setAntialiasing(bool enabled) {
+    setRenderHint(QPainter::Antialiasing, enabled);
+    if (mIsAntialiasing != enabled) {
+        mIsAntialiasing = enabled;
+        if (!mModes.testFlag(pmVectorized)) // antialiasing half-pixel shift only needed for rasterized outputs
+        {
+            if (mIsAntialiasing)
+                translate(0.5, 0.5);
+            else
+                translate(-0.5, -0.5);
+        }
     }
-  }
 }
 
 /*!
   Sets the mode of the painter. This controls whether the painter shall adjust its
   fixes/workarounds optimized for certain output devices.
 */
-void QCPPainter::setModes(QCPPainter::PainterModes modes)
-{
-  mModes = modes;
+void QCPPainter::setModes(QCPPainter::PainterModes modes) {
+    mModes = modes;
 }
 
 /*!
@@ -170,14 +160,13 @@ void QCPPainter::setModes(QCPPainter::PainterModes modes)
   
   \note this function hides the non-virtual base class implementation.
 */
-bool QCPPainter::begin(QPaintDevice *device)
-{
-  bool result = QPainter::begin(device);
+bool QCPPainter::begin(QPaintDevice *device) {
+    bool result = QPainter::begin(device);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) // before Qt5, default pens used to be cosmetic if NonCosmeticDefaultPen flag isn't set. So we set it to get consistency across Qt versions.
-  if (result)
-    setRenderHint(QPainter::NonCosmeticDefaultPen);
+    if (result)
+      setRenderHint(QPainter::NonCosmeticDefaultPen);
 #endif
-  return result;
+    return result;
 }
 
 /*! \overload
@@ -185,12 +174,11 @@ bool QCPPainter::begin(QPaintDevice *device)
   Sets the mode of the painter. This controls whether the painter shall adjust its
   fixes/workarounds optimized for certain output devices.
 */
-void QCPPainter::setMode(QCPPainter::PainterMode mode, bool enabled)
-{
-  if (!enabled && mModes.testFlag(mode))
-    mModes &= ~mode;
-  else if (enabled && !mModes.testFlag(mode))
-    mModes |= mode;
+void QCPPainter::setMode(QCPPainter::PainterMode mode, bool enabled) {
+    if (!enabled && mModes.testFlag(mode))
+        mModes &= ~mode;
+    else if (enabled && !mModes.testFlag(mode))
+        mModes |= mode;
 }
 
 /*!
@@ -201,10 +189,9 @@ void QCPPainter::setMode(QCPPainter::PainterMode mode, bool enabled)
   
   \see restore
 */
-void QCPPainter::save()
-{
-  mAntialiasingStack.push(mIsAntialiasing);
-  QPainter::save();
+void QCPPainter::save() {
+    mAntialiasingStack.push(mIsAntialiasing);
+    QPainter::save();
 }
 
 /*!
@@ -215,26 +202,23 @@ void QCPPainter::save()
   
   \see save
 */
-void QCPPainter::restore()
-{
-  if (!mAntialiasingStack.isEmpty())
-    mIsAntialiasing = mAntialiasingStack.pop();
-  else
-    qDebug() << Q_FUNC_INFO << "Unbalanced save/restore";
-  QPainter::restore();
+void QCPPainter::restore() {
+    if (!mAntialiasingStack.isEmpty())
+        mIsAntialiasing = mAntialiasingStack.pop();
+    else
+        qDebug() << Q_FUNC_INFO << "Unbalanced save/restore";
+    QPainter::restore();
 }
 
 /*!
   Changes the pen width to 1 if it currently is 0. This function is called in the \ref setPen
   overrides when the \ref pmNonCosmetic mode is set.
 */
-void QCPPainter::makeNonCosmetic()
-{
-  if (qFuzzyIsNull(pen().widthF()))
-  {
-    QPen p = pen();
-    p.setWidth(1);
-    QPainter::setPen(p);
-  }
+void QCPPainter::makeNonCosmetic() {
+    if (qFuzzyIsNull(pen().widthF())) {
+        QPen p = pen();
+        p.setWidth(1);
+        QPainter::setPen(p);
+    }
 }
 

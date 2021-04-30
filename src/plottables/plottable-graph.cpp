@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-graph.h"
@@ -105,18 +105,16 @@
   Constructs a data point with key and value set to zero.
 */
 QCPGraphData::QCPGraphData() :
-  key(0),
-  value(0)
-{
+        key(0),
+        value(0) {
 }
 
 /*!
   Constructs a data point with the specified \a key and \a value.
 */
 QCPGraphData::QCPGraphData(double key, double value) :
-  key(key),
-  value(value)
-{
+        key(key),
+        value(value) {
 }
 
 
@@ -186,22 +184,23 @@ QCPGraphData::QCPGraphData(double key, double value) :
   To directly create a graph inside a plot, you can also use the simpler QCustomPlot::addGraph function.
 */
 QCPGraph::QCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis) :
-  QCPAbstractPlottable1D<QCPGraphData>(keyAxis, valueAxis)
-{
-  // special handling for QCPGraphs to maintain the simple graph interface:
-  mParentPlot->registerGraph(this);
+        QCPAbstractPlottable1D<QCPGraphData>(keyAxis, valueAxis),
+        mLineStyle{},
+        mScatterSkip{},
+        mAdaptiveSampling{} {
+    // special handling for QCPGraphs to maintain the simple graph interface:
+    mParentPlot->registerGraph(this);
 
-  setPen(QPen(Qt::blue, 0));
-  setBrush(Qt::NoBrush);
-  
-  setLineStyle(lsLine);
-  setScatterSkip(0);
-  setChannelFillGraph(0);
-  setAdaptiveSampling(true);
+    setPen(QPen(Qt::blue, 0));
+    setBrush(Qt::NoBrush);
+
+    setLineStyle(lsLine);
+    setScatterSkip(0);
+    setChannelFillGraph(nullptr);
+    setAdaptiveSampling(true);
 }
 
-QCPGraph::~QCPGraph()
-{
+QCPGraph::~QCPGraph() {
 }
 
 /*! \overload
@@ -219,9 +218,8 @@ QCPGraph::~QCPGraph()
   
   \see addData
 */
-void QCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
-{
-  mDataContainer = data;
+void QCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data) {
+    mDataContainer = data;
 }
 
 /*! \overload
@@ -235,10 +233,9 @@ void QCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
   
   \see addData
 */
-void QCPGraph::setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
-{
-  mDataContainer->clear();
-  addData(keys, values, alreadySorted);
+void QCPGraph::setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted) {
+    mDataContainer->clear();
+    addData(keys, values, alreadySorted);
 }
 
 /*!
@@ -247,9 +244,8 @@ void QCPGraph::setData(const QVector<double> &keys, const QVector<double> &value
   
   \see setScatterStyle
 */
-void QCPGraph::setLineStyle(LineStyle ls)
-{
-  mLineStyle = ls;
+void QCPGraph::setLineStyle(LineStyle ls) {
+    mLineStyle = ls;
 }
 
 /*!
@@ -258,9 +254,8 @@ void QCPGraph::setLineStyle(LineStyle ls)
   
   \see QCPScatterStyle, setLineStyle
 */
-void QCPGraph::setScatterStyle(const QCPScatterStyle &style)
-{
-  mScatterStyle = style;
+void QCPGraph::setScatterStyle(const QCPScatterStyle &style) {
+    mScatterStyle = style;
 }
 
 /*!
@@ -274,9 +269,8 @@ void QCPGraph::setScatterStyle(const QCPScatterStyle &style)
 
   \see setScatterStyle
 */
-void QCPGraph::setScatterSkip(int skip)
-{
-  mScatterSkip = qMax(0, skip);
+void QCPGraph::setScatterSkip(int skip) {
+    mScatterSkip = qMax(0, skip);
 }
 
 /*!
@@ -288,24 +282,21 @@ void QCPGraph::setScatterSkip(int skip)
 
   \see setBrush
 */
-void QCPGraph::setChannelFillGraph(QCPGraph *targetGraph)
-{
-  // prevent setting channel target to this graph itself:
-  if (targetGraph == this)
-  {
-    qDebug() << Q_FUNC_INFO << "targetGraph is this graph itself";
-    mChannelFillGraph = 0;
-    return;
-  }
-  // prevent setting channel target to a graph not in the plot:
-  if (targetGraph && targetGraph->mParentPlot != mParentPlot)
-  {
-    qDebug() << Q_FUNC_INFO << "targetGraph not in same plot";
-    mChannelFillGraph = 0;
-    return;
-  }
-  
-  mChannelFillGraph = targetGraph;
+void QCPGraph::setChannelFillGraph(QCPGraph *targetGraph) {
+    // prevent setting channel target to this graph itself:
+    if (targetGraph == this) {
+        qDebug() << Q_FUNC_INFO << "targetGraph is this graph itself";
+        mChannelFillGraph = nullptr;
+        return;
+    }
+    // prevent setting channel target to a graph not in the plot:
+    if (targetGraph && targetGraph->mParentPlot != mParentPlot) {
+        qDebug() << Q_FUNC_INFO << "targetGraph not in same plot";
+        mChannelFillGraph = nullptr;
+        return;
+    }
+
+    mChannelFillGraph = targetGraph;
 }
 
 /*!
@@ -339,9 +330,8 @@ void QCPGraph::setChannelFillGraph(QCPGraph *targetGraph)
   enabled to false before issuing a command like \ref QCustomPlot::savePng, and setting \a enabled
   back to true afterwards.
 */
-void QCPGraph::setAdaptiveSampling(bool enabled)
-{
-  mAdaptiveSampling = enabled;
+void QCPGraph::setAdaptiveSampling(bool enabled) {
+    mAdaptiveSampling = enabled;
 }
 
 /*! \overload
@@ -356,23 +346,21 @@ void QCPGraph::setAdaptiveSampling(bool enabled)
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
-{
-  if (keys.size() != values.size())
-    qDebug() << Q_FUNC_INFO << "keys and values have different sizes:" << keys.size() << values.size();
-  const int n = qMin(keys.size(), values.size());
-  QVector<QCPGraphData> tempData(n);
-  QVector<QCPGraphData>::iterator it = tempData.begin();
-  const QVector<QCPGraphData>::iterator itEnd = tempData.end();
-  int i = 0;
-  while (it != itEnd)
-  {
-    it->key = keys[i];
-    it->value = values[i];
-    ++it;
-    ++i;
-  }
-  mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
+void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted) {
+    if (keys.size() != values.size())
+        qDebug() << Q_FUNC_INFO << "keys and values have different sizes:" << keys.size() << values.size();
+    const int n = qMin(keys.size(), values.size());
+    QVector<QCPGraphData> tempData(n);
+    QVector<QCPGraphData>::iterator it = tempData.begin();
+    const QVector<QCPGraphData>::iterator itEnd = tempData.end();
+    int i = 0;
+    while (it != itEnd) {
+        it->key = keys[i];
+        it->value = values[i];
+        ++it;
+        ++i;
+    }
+    mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
 }
 
 /*! \overload
@@ -382,9 +370,8 @@ void QCPGraph::addData(const QVector<double> &keys, const QVector<double> &value
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPGraph::addData(double key, double value)
-{
-  mDataContainer->add(QCPGraphData(key, value));
+void QCPGraph::addData(double key, double value) {
+    mDataContainer->add(QCPGraphData(key, value));
 }
 
 /*!
@@ -395,145 +382,141 @@ void QCPGraph::addData(double key, double value)
   
   \seebaseclassmethod \ref QCPAbstractPlottable::selectTest
 */
-double QCPGraph::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
-    return -1;
-  if (!mKeyAxis || !mValueAxis)
-    return -1;
-  
-  if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()))
-  {
-    QCPGraphDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
-    double result = pointDistance(pos, closestDataPoint);
-    if (details)
-    {
-      int pointIndex = closestDataPoint-mDataContainer->constBegin();
-      details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex+1)));
-    }
-    return result;
-  } else
-    return -1;
-}
+double QCPGraph::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+        return -1;
+    if (!mKeyAxis || !mValueAxis)
+        return -1;
 
-/* inherits documentation from base class */
-QCPRange QCPGraph::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const
-{
-  return mDataContainer->keyRange(foundRange, inSignDomain);
-}
-
-/* inherits documentation from base class */
-QCPRange QCPGraph::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const
-{
-  return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
-}
-
-/* inherits documentation from base class */
-void QCPGraph::draw(QCPPainter *painter)
-{
-  if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  if (mKeyAxis.data()->range().size() <= 0 || mDataContainer->isEmpty()) return;
-  if (mLineStyle == lsNone && mScatterStyle.isNone()) return;
-  
-  QVector<QPointF> lines, scatters; // line and (if necessary) scatter pixel coordinates will be stored here while iterating over segments
-  
-  // loop over and draw segments of unselected/selected data:
-  QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
-  getDataSegments(selectedSegments, unselectedSegments);
-  allSegments << unselectedSegments << selectedSegments;
-  for (int i=0; i<allSegments.size(); ++i)
-  {
-    bool isSelectedSegment = i >= unselectedSegments.size();
-    // get line pixel points appropriate to line style:
-    QCPDataRange lineDataRange = isSelectedSegment ? allSegments.at(i) : allSegments.at(i).adjusted(-1, 1); // unselected segments extend lines to bordering selected data point (safe to exceed total data bounds in first/last segment, getLines takes care)
-    getLines(&lines, lineDataRange);
-    
-    // check data validity if flag set:
-#ifdef QCUSTOMPLOT_CHECK_DATA
-    QCPGraphDataContainer::const_iterator it;
-    for (it = mDataContainer->constBegin(); it != mDataContainer->constEnd(); ++it)
-    {
-      if (QCP::isInvalidData(it->key, it->value))
-        qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "invalid." << "Plottable name:" << name();
-    }
-#endif
-    
-    // draw fill of graph:
-    if (isSelectedSegment && mSelectionDecorator)
-      mSelectionDecorator->applyBrush(painter);
-    else
-      painter->setBrush(mBrush);
-    painter->setPen(Qt::NoPen);
-    drawFill(painter, &lines);
-    
-    // draw line:
-    if (mLineStyle != lsNone)
-    {
-      if (isSelectedSegment && mSelectionDecorator)
-        mSelectionDecorator->applyPen(painter);
-      else
-        painter->setPen(mPen);
-      painter->setBrush(Qt::NoBrush);
-      if (mLineStyle == lsImpulse)
-        drawImpulsePlot(painter, lines);
-      else
-        drawLinePlot(painter, lines); // also step plots can be drawn as a line plot
-    }
-    
-    // draw scatters:
-    QCPScatterStyle finalScatterStyle = mScatterStyle;
-    if (isSelectedSegment && mSelectionDecorator)
-      finalScatterStyle = mSelectionDecorator->getFinalScatterStyle(mScatterStyle);
-    if (!finalScatterStyle.isNone())
-    {
-      getScatters(&scatters, allSegments.at(i));
-      drawScatterPlot(painter, scatters, finalScatterStyle);
-    }
-  }
-  
-  // draw other selection decoration that isn't just line/scatter pens and brushes:
-  if (mSelectionDecorator)
-    mSelectionDecorator->drawDecoration(painter, selection());
-}
-
-/* inherits documentation from base class */
-void QCPGraph::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
-{
-  // draw fill:
-  if (mBrush.style() != Qt::NoBrush)
-  {
-    applyFillAntialiasingHint(painter);
-    painter->fillRect(QRectF(rect.left(), rect.top()+rect.height()/2.0, rect.width(), rect.height()/3.0), mBrush);
-  }
-  // draw line vertically centered:
-  if (mLineStyle != lsNone)
-  {
-    applyDefaultAntialiasingHint(painter);
-    painter->setPen(mPen);
-    painter->drawLine(QLineF(rect.left(), rect.top()+rect.height()/2.0, rect.right()+5, rect.top()+rect.height()/2.0)); // +5 on x2 else last segment is missing from dashed/dotted pens
-  }
-  // draw scatter symbol:
-  if (!mScatterStyle.isNone())
-  {
-    applyScattersAntialiasingHint(painter);
-    // scale scatter pixmap if it's too large to fit in legend icon rect:
-    if (mScatterStyle.shape() == QCPScatterStyle::ssPixmap && (mScatterStyle.pixmap().size().width() > rect.width() || mScatterStyle.pixmap().size().height() > rect.height()))
-    {
-      QCPScatterStyle scaledStyle(mScatterStyle);
-      scaledStyle.setPixmap(scaledStyle.pixmap().scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-      scaledStyle.applyTo(painter, mPen);
-      scaledStyle.drawShape(painter, QRectF(rect).center());
+    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
+        QCPGraphDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
+        double result = pointDistance(pos, closestDataPoint);
+        if (details) {
+            int pointIndex = int(closestDataPoint - mDataContainer->constBegin());
+            details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
+        }
+        return result;
     } else
-    {
-      mScatterStyle.applyTo(painter, mPen);
-      mScatterStyle.drawShape(painter, QRectF(rect).center());
+        return -1;
+}
+
+/* inherits documentation from base class */
+QCPRange QCPGraph::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const {
+    return mDataContainer->keyRange(foundRange, inSignDomain);
+}
+
+/* inherits documentation from base class */
+QCPRange QCPGraph::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
+    return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
+}
+
+/* inherits documentation from base class */
+void QCPGraph::draw(QCPPainter *painter) {
+    if (!mKeyAxis || !mValueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
     }
-  }
+    if (mKeyAxis.data()->range().size() <= 0 || mDataContainer->isEmpty()) return;
+    if (mLineStyle == lsNone && mScatterStyle.isNone()) return;
+
+    QVector<QPointF> lines, scatters; // line and (if necessary) scatter pixel coordinates will be stored here while iterating over segments
+
+    // loop over and draw segments of unselected/selected data:
+    QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
+    getDataSegments(selectedSegments, unselectedSegments);
+    allSegments << unselectedSegments << selectedSegments;
+    for (int i = 0; i < allSegments.size(); ++i) {
+        bool isSelectedSegment = i >= unselectedSegments.size();
+        // get line pixel points appropriate to line style:
+        QCPDataRange lineDataRange = isSelectedSegment ? allSegments.at(i) : allSegments.at(i).adjusted(-1,
+                                                                                                        1); // unselected segments extend lines to bordering selected data point (safe to exceed total data bounds in first/last segment, getLines takes care)
+        getLines(&lines, lineDataRange);
+
+        // check data validity if flag set:
+#ifdef QCUSTOMPLOT_CHECK_DATA
+        QCPGraphDataContainer::const_iterator it;
+        for (it = mDataContainer->constBegin(); it != mDataContainer->constEnd(); ++it)
+        {
+          if (QCP::isInvalidData(it->key, it->value))
+            qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "invalid." << "Plottable name:" << name();
+        }
+#endif
+
+        // draw fill of graph:
+        if (isSelectedSegment && mSelectionDecorator)
+            mSelectionDecorator->applyBrush(painter);
+        else
+            painter->setBrush(mBrush);
+        painter->setPen(Qt::NoPen);
+        drawFill(painter, &lines);
+
+        // draw line:
+        if (mLineStyle != lsNone) {
+            if (isSelectedSegment && mSelectionDecorator)
+                mSelectionDecorator->applyPen(painter);
+            else
+                painter->setPen(mPen);
+            painter->setBrush(Qt::NoBrush);
+            if (mLineStyle == lsImpulse)
+                drawImpulsePlot(painter, lines);
+            else
+                drawLinePlot(painter, lines); // also step plots can be drawn as a line plot
+        }
+
+        // draw scatters:
+        QCPScatterStyle finalScatterStyle = mScatterStyle;
+        if (isSelectedSegment && mSelectionDecorator)
+            finalScatterStyle = mSelectionDecorator->getFinalScatterStyle(mScatterStyle);
+        if (!finalScatterStyle.isNone()) {
+            getScatters(&scatters, allSegments.at(i));
+            drawScatterPlot(painter, scatters, finalScatterStyle);
+        }
+    }
+
+    // draw other selection decoration that isn't just line/scatter pens and brushes:
+    if (mSelectionDecorator)
+        mSelectionDecorator->drawDecoration(painter, selection());
+}
+
+/* inherits documentation from base class */
+void QCPGraph::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {
+    // draw fill:
+    if (mBrush.style() != Qt::NoBrush) {
+        applyFillAntialiasingHint(painter);
+        painter->fillRect(QRectF(rect.left(), rect.top() + rect.height() / 2.0, rect.width(), rect.height() / 3.0),
+                          mBrush);
+    }
+    // draw line vertically centered:
+    if (mLineStyle != lsNone) {
+        applyDefaultAntialiasingHint(painter);
+        painter->setPen(mPen);
+        painter->drawLine(QLineF(rect.left(), rect.top() + rect.height() / 2.0, rect.right() + 5, rect.top() +
+                                                                                                  rect.height() /
+                                                                                                  2.0)); // +5 on x2 else last segment is missing from dashed/dotted pens
+    }
+    // draw scatter symbol:
+    if (!mScatterStyle.isNone()) {
+        applyScattersAntialiasingHint(painter);
+        // scale scatter pixmap if it's too large to fit in legend icon rect:
+        if (mScatterStyle.shape() == QCPScatterStyle::ssPixmap &&
+            (mScatterStyle.pixmap().size().width() > rect.width() ||
+             mScatterStyle.pixmap().size().height() > rect.height())) {
+            QCPScatterStyle scaledStyle(mScatterStyle);
+            scaledStyle.setPixmap(
+                    scaledStyle.pixmap().scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            scaledStyle.applyTo(painter, mPen);
+            scaledStyle.drawShape(painter, QRectF(rect).center());
+        } else {
+            mScatterStyle.applyTo(painter, mPen);
+            mScatterStyle.drawShape(painter, QRectF(rect).center());
+        }
+    }
 }
 
 /*! \internal
 
-  This method retrieves an optimized set of data points via \ref getOptimizedLineData, an branches
+  This method retrieves an optimized set of data points via \ref getOptimizedLineData, and branches
   out to the line style specific functions such as \ref dataToLines, \ref dataToStepLeftLines, etc.
   according to the line style of the graph.
 
@@ -551,33 +534,43 @@ void QCPGraph::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
 
   \see getScatters
 */
-void QCPGraph::getLines(QVector<QPointF> *lines, const QCPDataRange &dataRange) const
-{
-  if (!lines) return;
-  QCPGraphDataContainer::const_iterator begin, end;
-  getVisibleDataBounds(begin, end, dataRange);
-  if (begin == end)
-  {
-    lines->clear();
-    return;
-  }
-  
-  QVector<QCPGraphData> lineData;
-  if (mLineStyle != lsNone)
-    getOptimizedLineData(&lineData, begin, end);
-  
-  if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() == Qt::Vertical)) // make sure key pixels are sorted ascending in lineData (significantly simplifies following processing)
-    std::reverse(lineData.begin(), lineData.end());
+void QCPGraph::getLines(QVector<QPointF> *lines, const QCPDataRange &dataRange) const {
+    if (!lines) return;
+    QCPGraphDataContainer::const_iterator begin, end;
+    getVisibleDataBounds(begin, end, dataRange);
+    if (begin == end) {
+        lines->clear();
+        return;
+    }
 
-  switch (mLineStyle)
-  {
-    case lsNone: lines->clear(); break;
-    case lsLine: *lines = dataToLines(lineData); break;
-    case lsStepLeft: *lines = dataToStepLeftLines(lineData); break;
-    case lsStepRight: *lines = dataToStepRightLines(lineData); break;
-    case lsStepCenter: *lines = dataToStepCenterLines(lineData); break;
-    case lsImpulse: *lines = dataToImpulseLines(lineData); break;
-  }
+    QVector<QCPGraphData> lineData;
+    if (mLineStyle != lsNone)
+        getOptimizedLineData(&lineData, begin, end);
+
+    if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() ==
+                                      Qt::Vertical)) // make sure key pixels are sorted ascending in lineData (significantly simplifies following processing)
+        std::reverse(lineData.begin(), lineData.end());
+
+    switch (mLineStyle) {
+        case lsNone:
+            lines->clear();
+            break;
+        case lsLine:
+            *lines = dataToLines(lineData);
+            break;
+        case lsStepLeft:
+            *lines = dataToStepLeftLines(lineData);
+            break;
+        case lsStepRight:
+            *lines = dataToStepRightLines(lineData);
+            break;
+        case lsStepCenter:
+            *lines = dataToStepCenterLines(lineData);
+            break;
+        case lsImpulse:
+            *lines = dataToImpulseLines(lineData);
+            break;
+    }
 }
 
 /*! \internal
@@ -592,49 +585,46 @@ void QCPGraph::getLines(QVector<QPointF> *lines, const QCPDataRange &dataRange) 
   function to check for valid indices in \a dataRange, e.g. when extending ranges coming from \ref
   getDataSegments.
 */
-void QCPGraph::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataRange) const
-{
-  if (!scatters) return;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; scatters->clear(); return; }
-  
-  QCPGraphDataContainer::const_iterator begin, end;
-  getVisibleDataBounds(begin, end, dataRange);
-  if (begin == end)
-  {
-    scatters->clear();
-    return;
-  }
-  
-  QVector<QCPGraphData> data;
-  getOptimizedScatterData(&data, begin, end);
-  
-  if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() == Qt::Vertical)) // make sure key pixels are sorted ascending in data (significantly simplifies following processing)
-    std::reverse(data.begin(), data.end());
-  
-  scatters->resize(data.size());
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    for (int i=0; i<data.size(); ++i)
-    {
-      if (!qIsNaN(data.at(i).value))
-      {
-        (*scatters)[i].setX(valueAxis->coordToPixel(data.at(i).value));
-        (*scatters)[i].setY(keyAxis->coordToPixel(data.at(i).key));
-      }
+void QCPGraph::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataRange) const {
+    if (!scatters) return;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        scatters->clear();
+        return;
     }
-  } else
-  {
-    for (int i=0; i<data.size(); ++i)
-    {
-      if (!qIsNaN(data.at(i).value))
-      {
-        (*scatters)[i].setX(keyAxis->coordToPixel(data.at(i).key));
-        (*scatters)[i].setY(valueAxis->coordToPixel(data.at(i).value));
-      }
+
+    QCPGraphDataContainer::const_iterator begin, end;
+    getVisibleDataBounds(begin, end, dataRange);
+    if (begin == end) {
+        scatters->clear();
+        return;
     }
-  }
+
+    QVector<QCPGraphData> data;
+    getOptimizedScatterData(&data, begin, end);
+
+    if (mKeyAxis->rangeReversed() != (mKeyAxis->orientation() ==
+                                      Qt::Vertical)) // make sure key pixels are sorted ascending in data (significantly simplifies following processing)
+        std::reverse(data.begin(), data.end());
+
+    scatters->resize(data.size());
+    if (keyAxis->orientation() == Qt::Vertical) {
+        for (int i = 0; i < data.size(); ++i) {
+            if (!qIsNaN(data.at(i).value)) {
+                (*scatters)[i].setX(valueAxis->coordToPixel(data.at(i).value));
+                (*scatters)[i].setY(keyAxis->coordToPixel(data.at(i).key));
+            }
+        }
+    } else {
+        for (int i = 0; i < data.size(); ++i) {
+            if (!qIsNaN(data.at(i).value)) {
+                (*scatters)[i].setX(keyAxis->coordToPixel(data.at(i).key));
+                (*scatters)[i].setY(valueAxis->coordToPixel(data.at(i).value));
+            }
+        }
+    }
 }
 
 /*! \internal
@@ -647,32 +637,31 @@ void QCPGraph::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataR
 
   \see dataToStepLeftLines, dataToStepRightLines, dataToStepCenterLines, dataToImpulseLines, getLines, drawLinePlot
 */
-QVector<QPointF> QCPGraph::dataToLines(const QVector<QCPGraphData> &data) const
-{
-  QVector<QPointF> result;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
+QVector<QPointF> QCPGraph::dataToLines(const QVector<QCPGraphData> &data) const {
+    QVector<QPointF> result;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return result;
+    }
 
-  result.resize(data.size());
-  
-  // transform data points to pixels:
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    for (int i=0; i<data.size(); ++i)
+    result.resize(data.size());
+
+    // transform data points to pixels:
+    if (keyAxis->orientation() == Qt::Vertical) {
+        for (int i = 0; i < data.size(); ++i) {
+            result[i].setX(valueAxis->coordToPixel(data.at(i).value));
+            result[i].setY(keyAxis->coordToPixel(data.at(i).key));
+        }
+    } else // key axis is horizontal
     {
-      result[i].setX(valueAxis->coordToPixel(data.at(i).value));
-      result[i].setY(keyAxis->coordToPixel(data.at(i).key));
+        for (int i = 0; i < data.size(); ++i) {
+            result[i].setX(keyAxis->coordToPixel(data.at(i).key));
+            result[i].setY(valueAxis->coordToPixel(data.at(i).value));
+        }
     }
-  } else // key axis is horizontal
-  {
-    for (int i=0; i<data.size(); ++i)
-    {
-      result[i].setX(keyAxis->coordToPixel(data.at(i).key));
-      result[i].setY(valueAxis->coordToPixel(data.at(i).value));
-    }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -685,42 +674,41 @@ QVector<QPointF> QCPGraph::dataToLines(const QVector<QCPGraphData> &data) const
 
   \see dataToLines, dataToStepRightLines, dataToStepCenterLines, dataToImpulseLines, getLines, drawLinePlot
 */
-QVector<QPointF> QCPGraph::dataToStepLeftLines(const QVector<QCPGraphData> &data) const
-{
-  QVector<QPointF> result;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
-  
-  result.resize(data.size()*2);
-  
-  // calculate steps from data and transform to pixel coordinates:
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    double lastValue = valueAxis->coordToPixel(data.first().value);
-    for (int i=0; i<data.size(); ++i)
-    {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(lastValue);
-      result[i*2+0].setY(key);
-      lastValue = valueAxis->coordToPixel(data.at(i).value);
-      result[i*2+1].setX(lastValue);
-      result[i*2+1].setY(key);
+QVector<QPointF> QCPGraph::dataToStepLeftLines(const QVector<QCPGraphData> &data) const {
+    QVector<QPointF> result;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return result;
     }
-  } else // key axis is horizontal
-  {
-    double lastValue = valueAxis->coordToPixel(data.first().value);
-    for (int i=0; i<data.size(); ++i)
+
+    result.resize(data.size() * 2);
+
+    // calculate steps from data and transform to pixel coordinates:
+    if (keyAxis->orientation() == Qt::Vertical) {
+        double lastValue = valueAxis->coordToPixel(data.first().value);
+        for (int i = 0; i < data.size(); ++i) {
+            const double key = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(lastValue);
+            result[i * 2 + 0].setY(key);
+            lastValue = valueAxis->coordToPixel(data.at(i).value);
+            result[i * 2 + 1].setX(lastValue);
+            result[i * 2 + 1].setY(key);
+        }
+    } else // key axis is horizontal
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(key);
-      result[i*2+0].setY(lastValue);
-      lastValue = valueAxis->coordToPixel(data.at(i).value);
-      result[i*2+1].setX(key);
-      result[i*2+1].setY(lastValue);
+        double lastValue = valueAxis->coordToPixel(data.first().value);
+        for (int i = 0; i < data.size(); ++i) {
+            const double key = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(key);
+            result[i * 2 + 0].setY(lastValue);
+            lastValue = valueAxis->coordToPixel(data.at(i).value);
+            result[i * 2 + 1].setX(key);
+            result[i * 2 + 1].setY(lastValue);
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -733,42 +721,41 @@ QVector<QPointF> QCPGraph::dataToStepLeftLines(const QVector<QCPGraphData> &data
 
   \see dataToLines, dataToStepLeftLines, dataToStepCenterLines, dataToImpulseLines, getLines, drawLinePlot
 */
-QVector<QPointF> QCPGraph::dataToStepRightLines(const QVector<QCPGraphData> &data) const
-{
-  QVector<QPointF> result;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
-  
-  result.resize(data.size()*2);
-  
-  // calculate steps from data and transform to pixel coordinates:
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    double lastKey = keyAxis->coordToPixel(data.first().key);
-    for (int i=0; i<data.size(); ++i)
-    {
-      const double value = valueAxis->coordToPixel(data.at(i).value);
-      result[i*2+0].setX(value);
-      result[i*2+0].setY(lastKey);
-      lastKey = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+1].setX(value);
-      result[i*2+1].setY(lastKey);
+QVector<QPointF> QCPGraph::dataToStepRightLines(const QVector<QCPGraphData> &data) const {
+    QVector<QPointF> result;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return result;
     }
-  } else // key axis is horizontal
-  {
-    double lastKey = keyAxis->coordToPixel(data.first().key);
-    for (int i=0; i<data.size(); ++i)
+
+    result.resize(data.size() * 2);
+
+    // calculate steps from data and transform to pixel coordinates:
+    if (keyAxis->orientation() == Qt::Vertical) {
+        double lastKey = keyAxis->coordToPixel(data.first().key);
+        for (int i = 0; i < data.size(); ++i) {
+            const double value = valueAxis->coordToPixel(data.at(i).value);
+            result[i * 2 + 0].setX(value);
+            result[i * 2 + 0].setY(lastKey);
+            lastKey = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 1].setX(value);
+            result[i * 2 + 1].setY(lastKey);
+        }
+    } else // key axis is horizontal
     {
-      const double value = valueAxis->coordToPixel(data.at(i).value);
-      result[i*2+0].setX(lastKey);
-      result[i*2+0].setY(value);
-      lastKey = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+1].setX(lastKey);
-      result[i*2+1].setY(value);
+        double lastKey = keyAxis->coordToPixel(data.first().key);
+        for (int i = 0; i < data.size(); ++i) {
+            const double value = valueAxis->coordToPixel(data.at(i).value);
+            result[i * 2 + 0].setX(lastKey);
+            result[i * 2 + 0].setY(value);
+            lastKey = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 1].setX(lastKey);
+            result[i * 2 + 1].setY(value);
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -781,54 +768,53 @@ QVector<QPointF> QCPGraph::dataToStepRightLines(const QVector<QCPGraphData> &dat
 
   \see dataToLines, dataToStepLeftLines, dataToStepRightLines, dataToImpulseLines, getLines, drawLinePlot
 */
-QVector<QPointF> QCPGraph::dataToStepCenterLines(const QVector<QCPGraphData> &data) const
-{
-  QVector<QPointF> result;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
-  
-  result.resize(data.size()*2);
-  
-  // calculate steps from data and transform to pixel coordinates:
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    double lastKey = keyAxis->coordToPixel(data.first().key);
-    double lastValue = valueAxis->coordToPixel(data.first().value);
-    result[0].setX(lastValue);
-    result[0].setY(lastKey);
-    for (int i=1; i<data.size(); ++i)
-    {
-      const double key = (keyAxis->coordToPixel(data.at(i).key)+lastKey)*0.5;
-      result[i*2-1].setX(lastValue);
-      result[i*2-1].setY(key);
-      lastValue = valueAxis->coordToPixel(data.at(i).value);
-      lastKey = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(lastValue);
-      result[i*2+0].setY(key);
+QVector<QPointF> QCPGraph::dataToStepCenterLines(const QVector<QCPGraphData> &data) const {
+    QVector<QPointF> result;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return result;
     }
-    result[data.size()*2-1].setX(lastValue);
-    result[data.size()*2-1].setY(lastKey);
-  } else // key axis is horizontal
-  {
-    double lastKey = keyAxis->coordToPixel(data.first().key);
-    double lastValue = valueAxis->coordToPixel(data.first().value);
-    result[0].setX(lastKey);
-    result[0].setY(lastValue);
-    for (int i=1; i<data.size(); ++i)
+
+    result.resize(data.size() * 2);
+
+    // calculate steps from data and transform to pixel coordinates:
+    if (keyAxis->orientation() == Qt::Vertical) {
+        double lastKey = keyAxis->coordToPixel(data.first().key);
+        double lastValue = valueAxis->coordToPixel(data.first().value);
+        result[0].setX(lastValue);
+        result[0].setY(lastKey);
+        for (int i = 1; i < data.size(); ++i) {
+            const double key = (keyAxis->coordToPixel(data.at(i).key) + lastKey) * 0.5;
+            result[i * 2 - 1].setX(lastValue);
+            result[i * 2 - 1].setY(key);
+            lastValue = valueAxis->coordToPixel(data.at(i).value);
+            lastKey = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(lastValue);
+            result[i * 2 + 0].setY(key);
+        }
+        result[data.size() * 2 - 1].setX(lastValue);
+        result[data.size() * 2 - 1].setY(lastKey);
+    } else // key axis is horizontal
     {
-      const double key = (keyAxis->coordToPixel(data.at(i).key)+lastKey)*0.5;
-      result[i*2-1].setX(key);
-      result[i*2-1].setY(lastValue);
-      lastValue = valueAxis->coordToPixel(data.at(i).value);
-      lastKey = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(key);
-      result[i*2+0].setY(lastValue);
+        double lastKey = keyAxis->coordToPixel(data.first().key);
+        double lastValue = valueAxis->coordToPixel(data.first().value);
+        result[0].setX(lastKey);
+        result[0].setY(lastValue);
+        for (int i = 1; i < data.size(); ++i) {
+            const double key = (keyAxis->coordToPixel(data.at(i).key) + lastKey) * 0.5;
+            result[i * 2 - 1].setX(key);
+            result[i * 2 - 1].setY(lastValue);
+            lastValue = valueAxis->coordToPixel(data.at(i).value);
+            lastKey = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(key);
+            result[i * 2 + 0].setY(lastValue);
+        }
+        result[data.size() * 2 - 1].setX(lastKey);
+        result[data.size() * 2 - 1].setY(lastValue);
     }
-    result[data.size()*2-1].setX(lastKey);
-    result[data.size()*2-1].setY(lastValue);
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -841,38 +827,37 @@ QVector<QPointF> QCPGraph::dataToStepCenterLines(const QVector<QCPGraphData> &da
 
   \see dataToLines, dataToStepLeftLines, dataToStepRightLines, dataToStepCenterLines, getLines, drawImpulsePlot
 */
-QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data) const
-{
-  QVector<QPointF> result;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return result; }
-  
-  result.resize(data.size()*2);
-  
-  // transform data points to pixels:
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    for (int i=0; i<data.size(); ++i)
-    {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(valueAxis->coordToPixel(0));
-      result[i*2+0].setY(key);
-      result[i*2+1].setX(valueAxis->coordToPixel(data.at(i).value));
-      result[i*2+1].setY(key);
+QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data) const {
+    QVector<QPointF> result;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return result;
     }
-  } else // key axis is horizontal
-  {
-    for (int i=0; i<data.size(); ++i)
+
+    result.resize(data.size() * 2);
+
+    // transform data points to pixels:
+    if (keyAxis->orientation() == Qt::Vertical) {
+        for (int i = 0; i < data.size(); ++i) {
+            const double key = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(valueAxis->coordToPixel(0));
+            result[i * 2 + 0].setY(key);
+            result[i * 2 + 1].setX(valueAxis->coordToPixel(data.at(i).value));
+            result[i * 2 + 1].setY(key);
+        }
+    } else // key axis is horizontal
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(key);
-      result[i*2+0].setY(valueAxis->coordToPixel(0));
-      result[i*2+1].setX(key);
-      result[i*2+1].setY(valueAxis->coordToPixel(data.at(i).value));
+        for (int i = 0; i < data.size(); ++i) {
+            const double key = keyAxis->coordToPixel(data.at(i).key);
+            result[i * 2 + 0].setX(key);
+            result[i * 2 + 0].setY(valueAxis->coordToPixel(0));
+            result[i * 2 + 1].setX(key);
+            result[i * 2 + 1].setY(valueAxis->coordToPixel(data.at(i).value));
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -892,31 +877,30 @@ QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data)
 
   \see drawLinePlot, drawImpulsePlot, drawScatterPlot
 */
-void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const
-{
-  if (mLineStyle == lsImpulse) return; // fill doesn't make sense for impulse plot
-  if (painter->brush().style() == Qt::NoBrush || painter->brush().color().alpha() == 0) return;
-  
-  applyFillAntialiasingHint(painter);
-  QVector<QCPDataRange> segments = getNonNanSegments(lines, keyAxis()->orientation());
-  if (!mChannelFillGraph)
-  {
-    // draw base fill under graph, fill goes all the way to the zero-value-line:
-    for (int i=0; i<segments.size(); ++i)
-      painter->drawPolygon(getFillPolygon(lines, segments.at(i)));
-  } else
-  {
-    // draw fill between this graph and mChannelFillGraph:
-    QVector<QPointF> otherLines;
-    mChannelFillGraph->getLines(&otherLines, QCPDataRange(0, mChannelFillGraph->dataCount()));
-    if (!otherLines.isEmpty())
-    {
-      QVector<QCPDataRange> otherSegments = getNonNanSegments(&otherLines, mChannelFillGraph->keyAxis()->orientation());
-      QVector<QPair<QCPDataRange, QCPDataRange> > segmentPairs = getOverlappingSegments(segments, lines, otherSegments, &otherLines);
-      for (int i=0; i<segmentPairs.size(); ++i)
-        painter->drawPolygon(getChannelFillPolygon(lines, segmentPairs.at(i).first, &otherLines, segmentPairs.at(i).second));
+void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const {
+    if (mLineStyle == lsImpulse) return; // fill doesn't make sense for impulse plot
+    if (painter->brush().style() == Qt::NoBrush || painter->brush().color().alpha() == 0) return;
+
+    applyFillAntialiasingHint(painter);
+    const QVector<QCPDataRange> segments = getNonNanSegments(lines, keyAxis()->orientation());
+    if (!mChannelFillGraph) {
+        // draw base fill under graph, fill goes all the way to the zero-value-line:
+                foreach (QCPDataRange segment, segments)painter->drawPolygon(getFillPolygon(lines, segment));
+    } else {
+        // draw fill between this graph and mChannelFillGraph:
+        QVector<QPointF> otherLines;
+        mChannelFillGraph->getLines(&otherLines, QCPDataRange(0, mChannelFillGraph->dataCount()));
+        if (!otherLines.isEmpty()) {
+            QVector<QCPDataRange> otherSegments = getNonNanSegments(&otherLines,
+                                                                    mChannelFillGraph->keyAxis()->orientation());
+            QVector<QPair<QCPDataRange, QCPDataRange> > segmentPairs = getOverlappingSegments(segments, lines,
+                                                                                              otherSegments,
+                                                                                              &otherLines);
+            for (int i = 0; i < segmentPairs.size(); ++i)
+                painter->drawPolygon(
+                        getChannelFillPolygon(lines, segmentPairs.at(i).first, &otherLines, segmentPairs.at(i).second));
+        }
     }
-  }
 }
 
 /*! \internal
@@ -926,12 +910,11 @@ void QCPGraph::drawFill(QCPPainter *painter, QVector<QPointF> *lines) const
 
   \see drawLinePlot, drawImpulsePlot
 */
-void QCPGraph::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const
-{
-  applyScattersAntialiasingHint(painter);
-  style.applyTo(painter, mPen);
-  for (int i=0; i<scatters.size(); ++i)
-    style.drawShape(painter, scatters.at(i).x(), scatters.at(i).y());
+void
+QCPGraph::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scatters, const QCPScatterStyle &style) const {
+    applyScattersAntialiasingHint(painter);
+    style.applyTo(painter, mPen);
+            foreach (const QPointF &scatter, scatters)style.drawShape(painter, scatter.x(), scatter.y());
 }
 
 /*!  \internal
@@ -940,13 +923,11 @@ void QCPGraph::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &scat
   
   \see drawScatterPlot, drawImpulsePlot, QCPAbstractPlottable1D::drawPolyline
 */
-void QCPGraph::drawLinePlot(QCPPainter *painter, const QVector<QPointF> &lines) const
-{
-  if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0)
-  {
-    applyDefaultAntialiasingHint(painter);
-    drawPolyline(painter, lines);
-  }
+void QCPGraph::drawLinePlot(QCPPainter *painter, const QVector<QPointF> &lines) const {
+    if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0) {
+        applyDefaultAntialiasingHint(painter);
+        drawPolyline(painter, lines);
+    }
 }
 
 /*! \internal
@@ -957,18 +938,16 @@ void QCPGraph::drawLinePlot(QCPPainter *painter, const QVector<QPointF> &lines) 
 
   \see drawLinePlot, drawScatterPlot
 */
-void QCPGraph::drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &lines) const
-{
-  if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0)
-  {
-    applyDefaultAntialiasingHint(painter);
-    QPen oldPen = painter->pen();
-    QPen newPen = painter->pen();
-    newPen.setCapStyle(Qt::FlatCap); // so impulse line doesn't reach beyond zero-line
-    painter->setPen(newPen);
-    painter->drawLines(lines);
-    painter->setPen(oldPen);
-  }
+void QCPGraph::drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &lines) const {
+    if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0) {
+        applyDefaultAntialiasingHint(painter);
+        QPen oldPen = painter->pen();
+        QPen newPen = painter->pen();
+        newPen.setCapStyle(Qt::FlatCap); // so impulse line doesn't reach beyond zero-line
+        painter->setPen(newPen);
+        painter->drawLines(lines);
+        painter->setPen(oldPen);
+    }
 }
 
 /*! \internal
@@ -983,84 +962,97 @@ void QCPGraph::drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &line
 
   \see getOptimizedScatterData
 */
-void QCPGraph::getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGraphDataContainer::const_iterator &begin, const QCPGraphDataContainer::const_iterator &end) const
-{
-  if (!lineData) return;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  if (begin == end) return;
-  
-  int dataCount = end-begin;
-  int maxCount = (std::numeric_limits<int>::max)();
-  if (mAdaptiveSampling)
-  {
-    double keyPixelSpan = qAbs(keyAxis->coordToPixel(begin->key)-keyAxis->coordToPixel((end-1)->key));
-    if (2*keyPixelSpan+2 < static_cast<double>((std::numeric_limits<int>::max)()))
-      maxCount = 2*keyPixelSpan+2;
-  }
-  
-  if (mAdaptiveSampling && dataCount >= maxCount) // use adaptive sampling only if there are at least two points per pixel on average
-  {
-    QCPGraphDataContainer::const_iterator it = begin;
-    double minValue = it->value;
-    double maxValue = it->value;
-    QCPGraphDataContainer::const_iterator currentIntervalFirstPoint = it;
-    int reversedFactor = keyAxis->pixelOrientation(); // is used to calculate keyEpsilon pixel into the correct direction
-    int reversedRound = reversedFactor==-1 ? 1 : 0; // is used to switch between floor (normal) and ceil (reversed) rounding of currentIntervalStartKey
-    double currentIntervalStartKey = keyAxis->pixelToCoord((int)(keyAxis->coordToPixel(begin->key)+reversedRound));
-    double lastIntervalEndKey = currentIntervalStartKey;
-    double keyEpsilon = qAbs(currentIntervalStartKey-keyAxis->pixelToCoord(keyAxis->coordToPixel(currentIntervalStartKey)+1.0*reversedFactor)); // interval of one pixel on screen when mapped to plot key coordinates
-    bool keyEpsilonVariable = keyAxis->scaleType() == QCPAxis::stLogarithmic; // indicates whether keyEpsilon needs to be updated after every interval (for log axes)
-    int intervalDataCount = 1;
-    ++it; // advance iterator to second data point because adaptive sampling works in 1 point retrospect
-    while (it != end)
+void QCPGraph::getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGraphDataContainer::const_iterator &begin,
+                                    const QCPGraphDataContainer::const_iterator &end) const {
+    if (!lineData) return;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
+    }
+    if (begin == end) return;
+
+    int dataCount = int(end - begin);
+    int maxCount = (std::numeric_limits<int>::max)();
+    if (mAdaptiveSampling) {
+        double keyPixelSpan = qAbs(keyAxis->coordToPixel(begin->key) - keyAxis->coordToPixel((end - 1)->key));
+        if (2 * keyPixelSpan + 2 < static_cast<double>((std::numeric_limits<int>::max)()))
+            maxCount = int(2 * keyPixelSpan + 2);
+    }
+
+    if (mAdaptiveSampling &&
+        dataCount >= maxCount) // use adaptive sampling only if there are at least two points per pixel on average
     {
-      if (it->key < currentIntervalStartKey+keyEpsilon) // data point is still within same pixel, so skip it and expand value span of this cluster if necessary
-      {
-        if (it->value < minValue)
-          minValue = it->value;
-        else if (it->value > maxValue)
-          maxValue = it->value;
-        ++intervalDataCount;
-      } else // new pixel interval started
-      {
+        QCPGraphDataContainer::const_iterator it = begin;
+        double minValue = it->value;
+        double maxValue = it->value;
+        QCPGraphDataContainer::const_iterator currentIntervalFirstPoint = it;
+        int reversedFactor = keyAxis->pixelOrientation(); // is used to calculate keyEpsilon pixel into the correct direction
+        int reversedRound = reversedFactor == -1 ? 1
+                                                 : 0; // is used to switch between floor (normal) and ceil (reversed) rounding of currentIntervalStartKey
+        double currentIntervalStartKey = keyAxis->pixelToCoord(int(keyAxis->coordToPixel(begin->key) + reversedRound));
+        double lastIntervalEndKey = currentIntervalStartKey;
+        double keyEpsilon = qAbs(currentIntervalStartKey - keyAxis->pixelToCoord(
+                keyAxis->coordToPixel(currentIntervalStartKey) +
+                1.0 * reversedFactor)); // interval of one pixel on screen when mapped to plot key coordinates
+        bool keyEpsilonVariable = keyAxis->scaleType() ==
+                                  QCPAxis::stLogarithmic; // indicates whether keyEpsilon needs to be updated after every interval (for log axes)
+        int intervalDataCount = 1;
+        ++it; // advance iterator to second data point because adaptive sampling works in 1 point retrospect
+        while (it != end) {
+            if (it->key < currentIntervalStartKey +
+                          keyEpsilon) // data point is still within same pixel, so skip it and expand value span of this cluster if necessary
+            {
+                if (it->value < minValue)
+                    minValue = it->value;
+                else if (it->value > maxValue)
+                    maxValue = it->value;
+                ++intervalDataCount;
+            } else // new pixel interval started
+            {
+                if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them to a cluster
+                {
+                    if (lastIntervalEndKey < currentIntervalStartKey -
+                                             keyEpsilon) // last point is further away, so first point of this cluster must be at a real data point
+                        lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.2,
+                                                      currentIntervalFirstPoint->value));
+                    lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.25, minValue));
+                    lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.75, maxValue));
+                    if (it->key > currentIntervalStartKey + keyEpsilon *
+                                                            2) // new pixel started further away from previous cluster, so make sure the last point of the cluster is at a real data point
+                        lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.8, (it - 1)->value));
+                } else
+                    lineData->append(QCPGraphData(currentIntervalFirstPoint->key, currentIntervalFirstPoint->value));
+                lastIntervalEndKey = (it - 1)->key;
+                minValue = it->value;
+                maxValue = it->value;
+                currentIntervalFirstPoint = it;
+                currentIntervalStartKey = keyAxis->pixelToCoord(int(keyAxis->coordToPixel(it->key) + reversedRound));
+                if (keyEpsilonVariable)
+                    keyEpsilon = qAbs(currentIntervalStartKey - keyAxis->pixelToCoord(
+                            keyAxis->coordToPixel(currentIntervalStartKey) + 1.0 * reversedFactor));
+                intervalDataCount = 1;
+            }
+            ++it;
+        }
+        // handle last interval:
         if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them to a cluster
         {
-          if (lastIntervalEndKey < currentIntervalStartKey-keyEpsilon) // last point is further away, so first point of this cluster must be at a real data point
-            lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.2, currentIntervalFirstPoint->value));
-          lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.25, minValue));
-          lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.75, maxValue));
-          if (it->key > currentIntervalStartKey+keyEpsilon*2) // new pixel started further away from previous cluster, so make sure the last point of the cluster is at a real data point
-            lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.8, (it-1)->value));
+            if (lastIntervalEndKey < currentIntervalStartKey -
+                                     keyEpsilon) // last point wasn't a cluster, so first point of this cluster must be at a real data point
+                lineData->append(
+                        QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.2, currentIntervalFirstPoint->value));
+            lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.25, minValue));
+            lineData->append(QCPGraphData(currentIntervalStartKey + keyEpsilon * 0.75, maxValue));
         } else
-          lineData->append(QCPGraphData(currentIntervalFirstPoint->key, currentIntervalFirstPoint->value));
-        lastIntervalEndKey = (it-1)->key;
-        minValue = it->value;
-        maxValue = it->value;
-        currentIntervalFirstPoint = it;
-        currentIntervalStartKey = keyAxis->pixelToCoord((int)(keyAxis->coordToPixel(it->key)+reversedRound));
-        if (keyEpsilonVariable)
-          keyEpsilon = qAbs(currentIntervalStartKey-keyAxis->pixelToCoord(keyAxis->coordToPixel(currentIntervalStartKey)+1.0*reversedFactor));
-        intervalDataCount = 1;
-      }
-      ++it;
-    }
-    // handle last interval:
-    if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them to a cluster
+            lineData->append(QCPGraphData(currentIntervalFirstPoint->key, currentIntervalFirstPoint->value));
+
+    } else // don't use adaptive sampling algorithm, transfer points one-to-one from the data container into the output
     {
-      if (lastIntervalEndKey < currentIntervalStartKey-keyEpsilon) // last point wasn't a cluster, so first point of this cluster must be at a real data point
-        lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.2, currentIntervalFirstPoint->value));
-      lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.25, minValue));
-      lineData->append(QCPGraphData(currentIntervalStartKey+keyEpsilon*0.75, maxValue));
-    } else
-      lineData->append(QCPGraphData(currentIntervalFirstPoint->key, currentIntervalFirstPoint->value));
-    
-  } else // don't use adaptive sampling algorithm, transfer points one-to-one from the data container into the output
-  {
-    lineData->resize(dataCount);
-    std::copy(begin, end, lineData->begin());
-  }
+        lineData->resize(dataCount);
+        std::copy(begin, end, lineData->begin());
+    }
 }
 
 /*! \internal
@@ -1075,176 +1067,177 @@ void QCPGraph::getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGr
 
   \see getOptimizedLineData
 */
-void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGraphDataContainer::const_iterator begin, QCPGraphDataContainer::const_iterator end) const
-{
-  if (!scatterData) return;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  
-  const int scatterModulo = mScatterSkip+1;
-  const bool doScatterSkip = mScatterSkip > 0;
-  int beginIndex = begin-mDataContainer->constBegin();
-  int endIndex = end-mDataContainer->constBegin();
-  while (doScatterSkip && begin != end && beginIndex % scatterModulo != 0) // advance begin iterator to first non-skipped scatter
-  {
-    ++beginIndex;
-    ++begin;
-  }
-  if (begin == end) return;
-  int dataCount = end-begin;
-  int maxCount = (std::numeric_limits<int>::max)();
-  if (mAdaptiveSampling)
-  {
-    int keyPixelSpan = qAbs(keyAxis->coordToPixel(begin->key)-keyAxis->coordToPixel((end-1)->key));
-    maxCount = 2*keyPixelSpan+2;
-  }
-  
-  if (mAdaptiveSampling && dataCount >= maxCount) // use adaptive sampling only if there are at least two points per pixel on average
-  {
-    double valueMaxRange = valueAxis->range().upper;
-    double valueMinRange = valueAxis->range().lower;
-    QCPGraphDataContainer::const_iterator it = begin;
-    int itIndex = beginIndex;
-    double minValue = it->value;
-    double maxValue = it->value;
-    QCPGraphDataContainer::const_iterator minValueIt = it;
-    QCPGraphDataContainer::const_iterator maxValueIt = it;
-    QCPGraphDataContainer::const_iterator currentIntervalStart = it;
-    int reversedFactor = keyAxis->pixelOrientation(); // is used to calculate keyEpsilon pixel into the correct direction
-    int reversedRound = reversedFactor==-1 ? 1 : 0; // is used to switch between floor (normal) and ceil (reversed) rounding of currentIntervalStartKey
-    double currentIntervalStartKey = keyAxis->pixelToCoord((int)(keyAxis->coordToPixel(begin->key)+reversedRound));
-    double keyEpsilon = qAbs(currentIntervalStartKey-keyAxis->pixelToCoord(keyAxis->coordToPixel(currentIntervalStartKey)+1.0*reversedFactor)); // interval of one pixel on screen when mapped to plot key coordinates
-    bool keyEpsilonVariable = keyAxis->scaleType() == QCPAxis::stLogarithmic; // indicates whether keyEpsilon needs to be updated after every interval (for log axes)
-    int intervalDataCount = 1;
-    // advance iterator to second (non-skipped) data point because adaptive sampling works in 1 point retrospect:
-    if (!doScatterSkip)
-      ++it;
-    else
-    {
-      itIndex += scatterModulo;
-      if (itIndex < endIndex) // make sure we didn't jump over end
-        it += scatterModulo;
-      else
-      {
-        it = end;
-        itIndex = endIndex;
-      }
+void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGraphDataContainer::const_iterator begin,
+                                       QCPGraphDataContainer::const_iterator end) const {
+    if (!scatterData) return;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
     }
-    // main loop over data points:
-    while (it != end)
+
+    const int scatterModulo = mScatterSkip + 1;
+    const bool doScatterSkip = mScatterSkip > 0;
+    int beginIndex = int(begin - mDataContainer->constBegin());
+    int endIndex = int(end - mDataContainer->constBegin());
+    while (doScatterSkip && begin != end &&
+           beginIndex % scatterModulo != 0) // advance begin iterator to first non-skipped scatter
     {
-      if (it->key < currentIntervalStartKey+keyEpsilon) // data point is still within same pixel, so skip it and expand value span of this pixel if necessary
-      {
-        if (it->value < minValue && it->value > valueMinRange && it->value < valueMaxRange)
-        {
-          minValue = it->value;
-          minValueIt = it;
-        } else if (it->value > maxValue && it->value > valueMinRange && it->value < valueMaxRange)
-        {
-          maxValue = it->value;
-          maxValueIt = it;
+        ++beginIndex;
+        ++begin;
+    }
+    if (begin == end) return;
+    int dataCount = int(end - begin);
+    int maxCount = (std::numeric_limits<int>::max)();
+    if (mAdaptiveSampling) {
+        int keyPixelSpan = int(qAbs(keyAxis->coordToPixel(begin->key) - keyAxis->coordToPixel((end - 1)->key)));
+        maxCount = 2 * keyPixelSpan + 2;
+    }
+
+    if (mAdaptiveSampling &&
+        dataCount >= maxCount) // use adaptive sampling only if there are at least two points per pixel on average
+    {
+        double valueMaxRange = valueAxis->range().upper;
+        double valueMinRange = valueAxis->range().lower;
+        QCPGraphDataContainer::const_iterator it = begin;
+        int itIndex = int(beginIndex);
+        double minValue = it->value;
+        double maxValue = it->value;
+        QCPGraphDataContainer::const_iterator minValueIt = it;
+        QCPGraphDataContainer::const_iterator maxValueIt = it;
+        QCPGraphDataContainer::const_iterator currentIntervalStart = it;
+        int reversedFactor = keyAxis->pixelOrientation(); // is used to calculate keyEpsilon pixel into the correct direction
+        int reversedRound = reversedFactor == -1 ? 1
+                                                 : 0; // is used to switch between floor (normal) and ceil (reversed) rounding of currentIntervalStartKey
+        double currentIntervalStartKey = keyAxis->pixelToCoord(int(keyAxis->coordToPixel(begin->key) + reversedRound));
+        double keyEpsilon = qAbs(currentIntervalStartKey - keyAxis->pixelToCoord(
+                keyAxis->coordToPixel(currentIntervalStartKey) +
+                1.0 * reversedFactor)); // interval of one pixel on screen when mapped to plot key coordinates
+        bool keyEpsilonVariable = keyAxis->scaleType() ==
+                                  QCPAxis::stLogarithmic; // indicates whether keyEpsilon needs to be updated after every interval (for log axes)
+        int intervalDataCount = 1;
+        // advance iterator to second (non-skipped) data point because adaptive sampling works in 1 point retrospect:
+        if (!doScatterSkip)
+            ++it;
+        else {
+            itIndex += scatterModulo;
+            if (itIndex < endIndex) // make sure we didn't jump over end
+                it += scatterModulo;
+            else {
+                it = end;
+                itIndex = endIndex;
+            }
         }
-        ++intervalDataCount;
-      } else // new pixel started
-      {
+        // main loop over data points:
+        while (it != end) {
+            if (it->key < currentIntervalStartKey +
+                          keyEpsilon) // data point is still within same pixel, so skip it and expand value span of this pixel if necessary
+            {
+                if (it->value < minValue && it->value > valueMinRange && it->value < valueMaxRange) {
+                    minValue = it->value;
+                    minValueIt = it;
+                } else if (it->value > maxValue && it->value > valueMinRange && it->value < valueMaxRange) {
+                    maxValue = it->value;
+                    maxValueIt = it;
+                }
+                ++intervalDataCount;
+            } else // new pixel started
+            {
+                if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them
+                {
+                    // determine value pixel span and add as many points in interval to maintain certain vertical data density (this is specific to scatter plot):
+                    double valuePixelSpan = qAbs(valueAxis->coordToPixel(minValue) - valueAxis->coordToPixel(maxValue));
+                    int dataModulo = qMax(1, qRound(intervalDataCount / (valuePixelSpan /
+                                                                         4.0))); // approximately every 4 value pixels one data point on average
+                    QCPGraphDataContainer::const_iterator intervalIt = currentIntervalStart;
+                    int c = 0;
+                    while (intervalIt != it) {
+                        if ((c % dataModulo == 0 || intervalIt == minValueIt || intervalIt == maxValueIt) &&
+                            intervalIt->value > valueMinRange && intervalIt->value < valueMaxRange)
+                            scatterData->append(*intervalIt);
+                        ++c;
+                        if (!doScatterSkip)
+                            ++intervalIt;
+                        else
+                            intervalIt += scatterModulo; // since we know indices of "currentIntervalStart", "intervalIt" and "it" are multiples of scatterModulo, we can't accidentally jump over "it" here
+                    }
+                } else if (currentIntervalStart->value > valueMinRange && currentIntervalStart->value < valueMaxRange)
+                    scatterData->append(*currentIntervalStart);
+                minValue = it->value;
+                maxValue = it->value;
+                currentIntervalStart = it;
+                currentIntervalStartKey = keyAxis->pixelToCoord(int(keyAxis->coordToPixel(it->key) + reversedRound));
+                if (keyEpsilonVariable)
+                    keyEpsilon = qAbs(currentIntervalStartKey - keyAxis->pixelToCoord(
+                            keyAxis->coordToPixel(currentIntervalStartKey) + 1.0 * reversedFactor));
+                intervalDataCount = 1;
+            }
+            // advance to next data point:
+            if (!doScatterSkip)
+                ++it;
+            else {
+                itIndex += scatterModulo;
+                if (itIndex < endIndex) // make sure we didn't jump over end
+                    it += scatterModulo;
+                else {
+                    it = end;
+                    itIndex = endIndex;
+                }
+            }
+        }
+        // handle last interval:
         if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them
         {
-          // determine value pixel span and add as many points in interval to maintain certain vertical data density (this is specific to scatter plot):
-          double valuePixelSpan = qAbs(valueAxis->coordToPixel(minValue)-valueAxis->coordToPixel(maxValue));
-          int dataModulo = qMax(1, qRound(intervalDataCount/(valuePixelSpan/4.0))); // approximately every 4 value pixels one data point on average
-          QCPGraphDataContainer::const_iterator intervalIt = currentIntervalStart;
-          int c = 0;
-          while (intervalIt != it)
-          {
-            if ((c % dataModulo == 0 || intervalIt == minValueIt || intervalIt == maxValueIt) && intervalIt->value > valueMinRange && intervalIt->value < valueMaxRange)
-              scatterData->append(*intervalIt);
-            ++c;
-            if (!doScatterSkip)
-              ++intervalIt;
-            else
-              intervalIt += scatterModulo; // since we know indices of "currentIntervalStart", "intervalIt" and "it" are multiples of scatterModulo, we can't accidentally jump over "it" here
-          }
+            // determine value pixel span and add as many points in interval to maintain certain vertical data density (this is specific to scatter plot):
+            double valuePixelSpan = qAbs(valueAxis->coordToPixel(minValue) - valueAxis->coordToPixel(maxValue));
+            int dataModulo = qMax(1, qRound(intervalDataCount / (valuePixelSpan /
+                                                                 4.0))); // approximately every 4 value pixels one data point on average
+            QCPGraphDataContainer::const_iterator intervalIt = currentIntervalStart;
+            int intervalItIndex = int(intervalIt - mDataContainer->constBegin());
+            int c = 0;
+            while (intervalIt != it) {
+                if ((c % dataModulo == 0 || intervalIt == minValueIt || intervalIt == maxValueIt) &&
+                    intervalIt->value > valueMinRange && intervalIt->value < valueMaxRange)
+                    scatterData->append(*intervalIt);
+                ++c;
+                if (!doScatterSkip)
+                    ++intervalIt;
+                else // here we can't guarantee that adding scatterModulo doesn't exceed "it" (because "it" is equal to "end" here, and "end" isn't scatterModulo-aligned), so check via index comparison:
+                {
+                    intervalItIndex += scatterModulo;
+                    if (intervalItIndex < itIndex)
+                        intervalIt += scatterModulo;
+                    else {
+                        intervalIt = it;
+                        intervalItIndex = itIndex;
+                    }
+                }
+            }
         } else if (currentIntervalStart->value > valueMinRange && currentIntervalStart->value < valueMaxRange)
-          scatterData->append(*currentIntervalStart);
-        minValue = it->value;
-        maxValue = it->value;
-        currentIntervalStart = it;
-        currentIntervalStartKey = keyAxis->pixelToCoord((int)(keyAxis->coordToPixel(it->key)+reversedRound));
-        if (keyEpsilonVariable)
-          keyEpsilon = qAbs(currentIntervalStartKey-keyAxis->pixelToCoord(keyAxis->coordToPixel(currentIntervalStartKey)+1.0*reversedFactor));
-        intervalDataCount = 1;
-      }
-      // advance to next data point:
-      if (!doScatterSkip)
-        ++it;
-      else
-      {
-        itIndex += scatterModulo;
-        if (itIndex < endIndex) // make sure we didn't jump over end
-          it += scatterModulo;
-        else
-        {
-          it = end;
-          itIndex = endIndex;
-        }
-      }
-    }
-    // handle last interval:
-    if (intervalDataCount >= 2) // last pixel had multiple data points, consolidate them
+            scatterData->append(*currentIntervalStart);
+
+    } else // don't use adaptive sampling algorithm, transfer points one-to-one from the data container into the output
     {
-      // determine value pixel span and add as many points in interval to maintain certain vertical data density (this is specific to scatter plot):
-      double valuePixelSpan = qAbs(valueAxis->coordToPixel(minValue)-valueAxis->coordToPixel(maxValue));
-      int dataModulo = qMax(1, qRound(intervalDataCount/(valuePixelSpan/4.0))); // approximately every 4 value pixels one data point on average
-      QCPGraphDataContainer::const_iterator intervalIt = currentIntervalStart;
-      int intervalItIndex = intervalIt-mDataContainer->constBegin();
-      int c = 0;
-      while (intervalIt != it)
-      {
-        if ((c % dataModulo == 0 || intervalIt == minValueIt || intervalIt == maxValueIt) && intervalIt->value > valueMinRange && intervalIt->value < valueMaxRange)
-          scatterData->append(*intervalIt);
-        ++c;
-        if (!doScatterSkip)
-          ++intervalIt;
-        else // here we can't guarantee that adding scatterModulo doesn't exceed "it" (because "it" is equal to "end" here, and "end" isn't scatterModulo-aligned), so check via index comparison:
-        {
-          intervalItIndex += scatterModulo;
-          if (intervalItIndex < itIndex)
-            intervalIt += scatterModulo;
-          else
-          {
-            intervalIt = it;
-            intervalItIndex = itIndex;
-          }
+        QCPGraphDataContainer::const_iterator it = begin;
+        int itIndex = beginIndex;
+        scatterData->reserve(dataCount);
+        while (it != end) {
+            scatterData->append(*it);
+            // advance to next data point:
+            if (!doScatterSkip)
+                ++it;
+            else {
+                itIndex += scatterModulo;
+                if (itIndex < endIndex)
+                    it += scatterModulo;
+                else {
+                    it = end;
+                    itIndex = endIndex;
+                }
+            }
         }
-      }
-    } else if (currentIntervalStart->value > valueMinRange && currentIntervalStart->value < valueMaxRange)
-      scatterData->append(*currentIntervalStart);
-    
-  } else // don't use adaptive sampling algorithm, transfer points one-to-one from the data container into the output
-  {
-    QCPGraphDataContainer::const_iterator it = begin;
-    int itIndex = beginIndex;
-    scatterData->reserve(dataCount);
-    while (it != end)
-    {
-      scatterData->append(*it);
-      // advance to next data point:
-      if (!doScatterSkip)
-        ++it;
-      else
-      {
-        itIndex += scatterModulo;
-        if (itIndex < endIndex)
-          it += scatterModulo;
-        else
-        {
-          it = end;
-          itIndex = endIndex;
-        }
-      }
     }
-  }
 }
 
 /*!
@@ -1256,23 +1249,26 @@ void QCPGraph::getOptimizedScatterData(QVector<QCPGraphData> *scatterData, QCPGr
   indicate a range that contains one additional data point to the left and right of the visible
   axis range.
 */
-void QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin, QCPGraphDataContainer::const_iterator &end, const QCPDataRange &rangeRestriction) const
-{
-  if (rangeRestriction.isEmpty())
-  {
-    end = mDataContainer->constEnd();
-    begin = end;
-  } else
-  {
-    QCPAxis *keyAxis = mKeyAxis.data();
-    QCPAxis *valueAxis = mValueAxis.data();
-    if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-    // get visible data range:
-    begin = mDataContainer->findBegin(keyAxis->range().lower);
-    end = mDataContainer->findEnd(keyAxis->range().upper);
-    // limit lower/upperEnd to rangeRestriction:
-    mDataContainer->limitIteratorsToDataRange(begin, end, rangeRestriction); // this also ensures rangeRestriction outside data bounds doesn't break anything
-  }
+void
+QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin, QCPGraphDataContainer::const_iterator &end,
+                               const QCPDataRange &rangeRestriction) const {
+    if (rangeRestriction.isEmpty()) {
+        end = mDataContainer->constEnd();
+        begin = end;
+    } else {
+        QCPAxis *keyAxis = mKeyAxis.data();
+        QCPAxis *valueAxis = mValueAxis.data();
+        if (!keyAxis || !valueAxis) {
+            qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+            return;
+        }
+        // get visible data range:
+        begin = mDataContainer->findBegin(keyAxis->range().lower);
+        end = mDataContainer->findEnd(keyAxis->range().upper);
+        // limit lower/upperEnd to rangeRestriction:
+        mDataContainer->limitIteratorsToDataRange(begin, end,
+                                                  rangeRestriction); // this also ensures rangeRestriction outside data bounds doesn't break anything
+    }
 }
 
 /*!  \internal
@@ -1286,44 +1282,41 @@ void QCPGraph::getVisibleDataBounds(QCPGraphDataContainer::const_iterator &begin
   
   \see getOverlappingSegments, drawFill
 */
-QVector<QCPDataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const
-{
-  QVector<QCPDataRange> result;
-  const int n = lineData->size();
-  
-  QCPDataRange currentSegment(-1, -1);
-  int i = 0;
-  
-  if (keyOrientation == Qt::Horizontal)
-  {
-    while (i < n)
+QVector<QCPDataRange>
+QCPGraph::getNonNanSegments(const QVector<QPointF> *lineData, Qt::Orientation keyOrientation) const {
+    QVector<QCPDataRange> result;
+    const int n = lineData->size();
+
+    QCPDataRange currentSegment(-1, -1);
+    int i = 0;
+
+    if (keyOrientation == Qt::Horizontal) {
+        while (i < n) {
+            while (i < n && qIsNaN(lineData->at(i).y())) // seek next non-NaN data point
+                ++i;
+            if (i == n)
+                break;
+            currentSegment.setBegin(i++);
+            while (i < n && !qIsNaN(lineData->at(i).y())) // seek next NaN data point or end of data
+                ++i;
+            currentSegment.setEnd(i++);
+            result.append(currentSegment);
+        }
+    } else // keyOrientation == Qt::Vertical
     {
-      while (i < n && qIsNaN(lineData->at(i).y())) // seek next non-NaN data point
-        ++i;
-      if (i == n)
-        break;
-      currentSegment.setBegin(i++);
-      while (i < n && !qIsNaN(lineData->at(i).y())) // seek next NaN data point or end of data
-        ++i;
-      currentSegment.setEnd(i++);
-      result.append(currentSegment);
+        while (i < n) {
+            while (i < n && qIsNaN(lineData->at(i).x())) // seek next non-NaN data point
+                ++i;
+            if (i == n)
+                break;
+            currentSegment.setBegin(i++);
+            while (i < n && !qIsNaN(lineData->at(i).x())) // seek next NaN data point or end of data
+                ++i;
+            currentSegment.setEnd(i++);
+            result.append(currentSegment);
+        }
     }
-  } else // keyOrientation == Qt::Vertical
-  {
-    while (i < n)
-    {
-      while (i < n && qIsNaN(lineData->at(i).x())) // seek next non-NaN data point
-        ++i;
-      if (i == n)
-        break;
-      currentSegment.setBegin(i++);
-      while (i < n && !qIsNaN(lineData->at(i).x())) // seek next NaN data point or end of data
-        ++i;
-      currentSegment.setEnd(i++);
-      result.append(currentSegment);
-    }
-  }
-  return result;
+    return result;
 }
 
 /*!  \internal
@@ -1344,53 +1337,52 @@ QVector<QCPDataRange> QCPGraph::getNonNanSegments(const QVector<QPointF> *lineDa
   
   \see getNonNanSegments, segmentsIntersect, drawFill, getChannelFillPolygon
 */
-QVector<QPair<QCPDataRange, QCPDataRange> > QCPGraph::getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData, QVector<QCPDataRange> otherSegments, const QVector<QPointF> *otherData) const
-{
-  QVector<QPair<QCPDataRange, QCPDataRange> > result;
-  if (thisData->isEmpty() || otherData->isEmpty() || thisSegments.isEmpty() || otherSegments.isEmpty())
+QVector<QPair<QCPDataRange, QCPDataRange> >
+QCPGraph::getOverlappingSegments(QVector<QCPDataRange> thisSegments, const QVector<QPointF> *thisData,
+                                 QVector<QCPDataRange> otherSegments, const QVector<QPointF> *otherData) const {
+    QVector<QPair<QCPDataRange, QCPDataRange> > result;
+    if (thisData->isEmpty() || otherData->isEmpty() || thisSegments.isEmpty() || otherSegments.isEmpty())
+        return result;
+
+    int thisIndex = 0;
+    int otherIndex = 0;
+    const bool verticalKey = mKeyAxis->orientation() == Qt::Vertical;
+    while (thisIndex < thisSegments.size() && otherIndex < otherSegments.size()) {
+        if (thisSegments.at(thisIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
+        {
+            ++thisIndex;
+            continue;
+        }
+        if (otherSegments.at(otherIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
+        {
+            ++otherIndex;
+            continue;
+        }
+        double thisLower, thisUpper, otherLower, otherUpper;
+        if (!verticalKey) {
+            thisLower = thisData->at(thisSegments.at(thisIndex).begin()).x();
+            thisUpper = thisData->at(thisSegments.at(thisIndex).end() - 1).x();
+            otherLower = otherData->at(otherSegments.at(otherIndex).begin()).x();
+            otherUpper = otherData->at(otherSegments.at(otherIndex).end() - 1).x();
+        } else {
+            thisLower = thisData->at(thisSegments.at(thisIndex).begin()).y();
+            thisUpper = thisData->at(thisSegments.at(thisIndex).end() - 1).y();
+            otherLower = otherData->at(otherSegments.at(otherIndex).begin()).y();
+            otherUpper = otherData->at(otherSegments.at(otherIndex).end() - 1).y();
+        }
+
+        int bPrecedence;
+        if (segmentsIntersect(thisLower, thisUpper, otherLower, otherUpper, bPrecedence))
+            result.append(QPair<QCPDataRange, QCPDataRange>(thisSegments.at(thisIndex), otherSegments.at(otherIndex)));
+
+        if (bPrecedence <=
+            0) // otherSegment doesn't reach as far as thisSegment, so continue with next otherSegment, keeping current thisSegment
+            ++otherIndex;
+        else // otherSegment reaches further than thisSegment, so continue with next thisSegment, keeping current otherSegment
+            ++thisIndex;
+    }
+
     return result;
-  
-  int thisIndex = 0;
-  int otherIndex = 0;
-  const bool verticalKey = mKeyAxis->orientation() == Qt::Vertical;
-  while (thisIndex < thisSegments.size() && otherIndex < otherSegments.size())
-  {
-    if (thisSegments.at(thisIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
-    {
-      ++thisIndex;
-      continue;
-    }
-    if (otherSegments.at(otherIndex).size() < 2) // segments with fewer than two points won't have a fill anyhow
-    {
-      ++otherIndex;
-      continue;
-    }
-    double thisLower, thisUpper, otherLower, otherUpper;
-    if (!verticalKey)
-    {
-      thisLower = thisData->at(thisSegments.at(thisIndex).begin()).x();
-      thisUpper = thisData->at(thisSegments.at(thisIndex).end()-1).x();
-      otherLower = otherData->at(otherSegments.at(otherIndex).begin()).x();
-      otherUpper = otherData->at(otherSegments.at(otherIndex).end()-1).x();
-    } else
-    {
-      thisLower = thisData->at(thisSegments.at(thisIndex).begin()).y();
-      thisUpper = thisData->at(thisSegments.at(thisIndex).end()-1).y();
-      otherLower = otherData->at(otherSegments.at(otherIndex).begin()).y();
-      otherUpper = otherData->at(otherSegments.at(otherIndex).end()-1).y();
-    }
-    
-    int bPrecedence;
-    if (segmentsIntersect(thisLower, thisUpper, otherLower, otherUpper, bPrecedence))
-      result.append(QPair<QCPDataRange, QCPDataRange>(thisSegments.at(thisIndex), otherSegments.at(otherIndex)));
-    
-    if (bPrecedence <= 0) // otherSegment doesn't reach as far as thisSegment, so continue with next otherSegment, keeping current thisSegment
-      ++otherIndex;
-    else // otherSegment reaches further than thisSegment, so continue with next thisSegment, keeping current otherSegment
-      ++thisIndex;
-  }
-  
-  return result;
 }
 
 /*!  \internal
@@ -1407,26 +1399,22 @@ QVector<QPair<QCPDataRange, QCPDataRange> > QCPGraph::getOverlappingSegments(QVe
   
   \see getOverlappingSegments
 */
-bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const
-{
-  bPrecedence = 0;
-  if (aLower > bUpper)
-  {
-    bPrecedence = -1;
-    return false;
-  } else if (bLower > aUpper)
-  {
-    bPrecedence = 1;
-    return false;
-  } else
-  {
-    if (aUpper > bUpper)
-      bPrecedence = -1;
-    else if (aUpper < bUpper)
-      bPrecedence = 1;
-    
-    return true;
-  }
+bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, double bUpper, int &bPrecedence) const {
+    bPrecedence = 0;
+    if (aLower > bUpper) {
+        bPrecedence = -1;
+        return false;
+    } else if (bLower > aUpper) {
+        bPrecedence = 1;
+        return false;
+    } else {
+        if (aUpper > bUpper)
+            bPrecedence = -1;
+        else if (aUpper < bUpper)
+            bPrecedence = 1;
+
+        return true;
+    }
 }
 
 /*! \internal
@@ -1440,47 +1428,47 @@ bool QCPGraph::segmentsIntersect(double aLower, double aUpper, double bLower, do
   the key axis of this graph is horizontal or vertical, \a matchingDataPoint will provide the x or
   y value of the returned point, respectively.
 */
-QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
-{
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return QPointF(); }
-  
-  QPointF result;
-  if (valueAxis->scaleType() == QCPAxis::stLinear)
-  {
-    if (keyAxis->orientation() == Qt::Horizontal)
-    {
-      result.setX(matchingDataPoint.x());
-      result.setY(valueAxis->coordToPixel(0));
-    } else // keyAxis->orientation() == Qt::Vertical
-    {
-      result.setX(valueAxis->coordToPixel(0));
-      result.setY(matchingDataPoint.y());
+QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const {
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return {};
     }
-  } else // valueAxis->mScaleType == QCPAxis::stLogarithmic
-  {
-    // In logarithmic scaling we can't just draw to value 0 so we just fill all the way
-    // to the axis which is in the direction towards 0
-    if (keyAxis->orientation() == Qt::Vertical)
+
+    QPointF result;
+    if (valueAxis->scaleType() == QCPAxis::stLinear) {
+        if (keyAxis->orientation() == Qt::Horizontal) {
+            result.setX(matchingDataPoint.x());
+            result.setY(valueAxis->coordToPixel(0));
+        } else // keyAxis->orientation() == Qt::Vertical
+        {
+            result.setX(valueAxis->coordToPixel(0));
+            result.setY(matchingDataPoint.y());
+        }
+    } else // valueAxis->mScaleType == QCPAxis::stLogarithmic
     {
-      if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
-          (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        result.setX(keyAxis->axisRect()->right());
-      else
-        result.setX(keyAxis->axisRect()->left());
-      result.setY(matchingDataPoint.y());
-    } else if (keyAxis->axisType() == QCPAxis::atTop || keyAxis->axisType() == QCPAxis::atBottom)
-    {
-      result.setX(matchingDataPoint.x());
-      if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
-          (valueAxis->range().upper > 0 && valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
-        result.setY(keyAxis->axisRect()->top());
-      else
-        result.setY(keyAxis->axisRect()->bottom());
+        // In logarithmic scaling we can't just draw to value 0 so we just fill all the way
+        // to the axis which is in the direction towards 0
+        if (keyAxis->orientation() == Qt::Vertical) {
+            if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
+                (valueAxis->range().upper > 0 &&
+                 valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
+                result.setX(keyAxis->axisRect()->right());
+            else
+                result.setX(keyAxis->axisRect()->left());
+            result.setY(matchingDataPoint.y());
+        } else if (keyAxis->axisType() == QCPAxis::atTop || keyAxis->axisType() == QCPAxis::atBottom) {
+            result.setX(matchingDataPoint.x());
+            if ((valueAxis->range().upper < 0 && !valueAxis->rangeReversed()) ||
+                (valueAxis->range().upper > 0 &&
+                 valueAxis->rangeReversed())) // if range is negative, zero is on opposite side of key axis
+                result.setY(keyAxis->axisRect()->top());
+            else
+                result.setY(keyAxis->axisRect()->bottom());
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -1499,17 +1487,16 @@ QPointF QCPGraph::getFillBasePoint(QPointF matchingDataPoint) const
   
   \see drawFill, getNonNanSegments
 */
-const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, QCPDataRange segment) const
-{
-  if (segment.size() < 2)
-    return QPolygonF();
-  QPolygonF result(segment.size()+2);
-  
-  result[0] = getFillBasePoint(lineData->at(segment.begin()));
-  std::copy(lineData->constBegin()+segment.begin(), lineData->constBegin()+segment.end(), result.begin()+1);
-  result[result.size()-1] = getFillBasePoint(lineData->at(segment.end()-1));
-  
-  return result;
+const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, QCPDataRange segment) const {
+    if (segment.size() < 2)
+        return QPolygonF();
+    QPolygonF result(segment.size() + 2);
+
+    result[0] = getFillBasePoint(lineData->at(segment.begin()));
+    std::copy(lineData->constBegin() + segment.begin(), lineData->constBegin() + segment.end(), result.begin() + 1);
+    result[result.size() - 1] = getFillBasePoint(lineData->at(segment.end() - 1));
+
+    return result;
 }
 
 /*! \internal
@@ -1530,103 +1517,117 @@ const QPolygonF QCPGraph::getFillPolygon(const QVector<QPointF> *lineData, QCPDa
   
   \see drawFill, getOverlappingSegments, getNonNanSegments
 */
-const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, QCPDataRange thisSegment, const QVector<QPointF> *otherData, QCPDataRange otherSegment) const
-{
-  if (!mChannelFillGraph)
-    return QPolygonF();
-  
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return QPolygonF(); }
-  if (!mChannelFillGraph.data()->mKeyAxis) { qDebug() << Q_FUNC_INFO << "channel fill target key axis invalid"; return QPolygonF(); }
-  
-  if (mChannelFillGraph.data()->mKeyAxis.data()->orientation() != keyAxis->orientation())
-    return QPolygonF(); // don't have same axis orientation, can't fill that (Note: if keyAxis fits, valueAxis will fit too, because it's always orthogonal to keyAxis)
-  
-  if (thisData->isEmpty()) return QPolygonF();
-  QVector<QPointF> thisSegmentData(thisSegment.size());
-  QVector<QPointF> otherSegmentData(otherSegment.size());
-  std::copy(thisData->constBegin()+thisSegment.begin(), thisData->constBegin()+thisSegment.end(), thisSegmentData.begin());
-  std::copy(otherData->constBegin()+otherSegment.begin(), otherData->constBegin()+otherSegment.end(), otherSegmentData.begin());
-  // pointers to be able to swap them, depending which data range needs cropping:
-  QVector<QPointF> *staticData = &thisSegmentData;
-  QVector<QPointF> *croppedData = &otherSegmentData;
-  
-  // crop both vectors to ranges in which the keys overlap (which coord is key, depends on axisType):
-  if (keyAxis->orientation() == Qt::Horizontal)
-  {
-    // x is key
-    // crop lower bound:
-    if (staticData->first().x() < croppedData->first().x()) // other one must be cropped
-      qSwap(staticData, croppedData);
-    const int lowBound = findIndexBelowX(croppedData, staticData->first().x());
-    if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
-    croppedData->remove(0, lowBound);
-    // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
-    if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
-    double slope;
-    if (!qFuzzyCompare(croppedData->at(1).x(), croppedData->at(0).x()))
-      slope = (croppedData->at(1).y()-croppedData->at(0).y())/(croppedData->at(1).x()-croppedData->at(0).x());
-    else
-      slope = 0;
-    (*croppedData)[0].setY(croppedData->at(0).y()+slope*(staticData->first().x()-croppedData->at(0).x()));
-    (*croppedData)[0].setX(staticData->first().x());
-    
-    // crop upper bound:
-    if (staticData->last().x() > croppedData->last().x()) // other one must be cropped
-      qSwap(staticData, croppedData);
-    int highBound = findIndexAboveX(croppedData, staticData->last().x());
-    if (highBound == -1) return QPolygonF(); // key ranges have no overlap
-    croppedData->remove(highBound+1, croppedData->size()-(highBound+1));
-    // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
-    if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
-    const int li = croppedData->size()-1; // last index
-    if (!qFuzzyCompare(croppedData->at(li).x(), croppedData->at(li-1).x()))
-      slope = (croppedData->at(li).y()-croppedData->at(li-1).y())/(croppedData->at(li).x()-croppedData->at(li-1).x());
-    else
-      slope = 0;
-    (*croppedData)[li].setY(croppedData->at(li-1).y()+slope*(staticData->last().x()-croppedData->at(li-1).x()));
-    (*croppedData)[li].setX(staticData->last().x());
-  } else // mKeyAxis->orientation() == Qt::Vertical
-  {
-    // y is key
-    // crop lower bound:
-    if (staticData->first().y() < croppedData->first().y()) // other one must be cropped
-      qSwap(staticData, croppedData);
-    int lowBound = findIndexBelowY(croppedData, staticData->first().y());
-    if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
-    croppedData->remove(0, lowBound);
-    // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
-    if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
-    double slope;
-    if (!qFuzzyCompare(croppedData->at(1).y(), croppedData->at(0).y())) // avoid division by zero in step plots
-      slope = (croppedData->at(1).x()-croppedData->at(0).x())/(croppedData->at(1).y()-croppedData->at(0).y());
-    else
-      slope = 0;
-    (*croppedData)[0].setX(croppedData->at(0).x()+slope*(staticData->first().y()-croppedData->at(0).y()));
-    (*croppedData)[0].setY(staticData->first().y());
-    
-    // crop upper bound:
-    if (staticData->last().y() > croppedData->last().y()) // other one must be cropped
-      qSwap(staticData, croppedData);
-    int highBound = findIndexAboveY(croppedData, staticData->last().y());
-    if (highBound == -1) return QPolygonF(); // key ranges have no overlap
-    croppedData->remove(highBound+1, croppedData->size()-(highBound+1));
-    // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
-    if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
-    int li = croppedData->size()-1; // last index
-    if (!qFuzzyCompare(croppedData->at(li).y(), croppedData->at(li-1).y())) // avoid division by zero in step plots
-      slope = (croppedData->at(li).x()-croppedData->at(li-1).x())/(croppedData->at(li).y()-croppedData->at(li-1).y());
-    else
-      slope = 0;
-    (*croppedData)[li].setX(croppedData->at(li-1).x()+slope*(staticData->last().y()-croppedData->at(li-1).y()));
-    (*croppedData)[li].setY(staticData->last().y());
-  }
-  
-  // return joined:
-  for (int i=otherSegmentData.size()-1; i>=0; --i) // insert reversed, otherwise the polygon will be twisted
-    thisSegmentData << otherSegmentData.at(i);
-  return QPolygonF(thisSegmentData);
+const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData, QCPDataRange thisSegment,
+                                                const QVector<QPointF> *otherData, QCPDataRange otherSegment) const {
+    if (!mChannelFillGraph)
+        return QPolygonF();
+
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return QPolygonF();
+    }
+    if (!mChannelFillGraph.data()->mKeyAxis) {
+        qDebug() << Q_FUNC_INFO << "channel fill target key axis invalid";
+        return QPolygonF();
+    }
+
+    if (mChannelFillGraph.data()->mKeyAxis.data()->orientation() != keyAxis->orientation())
+        return QPolygonF(); // don't have same axis orientation, can't fill that (Note: if keyAxis fits, valueAxis will fit too, because it's always orthogonal to keyAxis)
+
+    if (thisData->isEmpty()) return QPolygonF();
+    QVector<QPointF> thisSegmentData(thisSegment.size());
+    QVector<QPointF> otherSegmentData(otherSegment.size());
+    std::copy(thisData->constBegin() + thisSegment.begin(), thisData->constBegin() + thisSegment.end(),
+              thisSegmentData.begin());
+    std::copy(otherData->constBegin() + otherSegment.begin(), otherData->constBegin() + otherSegment.end(),
+              otherSegmentData.begin());
+    // pointers to be able to swap them, depending which data range needs cropping:
+    QVector<QPointF> *staticData = &thisSegmentData;
+    QVector<QPointF> *croppedData = &otherSegmentData;
+
+    // crop both vectors to ranges in which the keys overlap (which coord is key, depends on axisType):
+    if (keyAxis->orientation() == Qt::Horizontal) {
+        // x is key
+        // crop lower bound:
+        if (staticData->first().x() < croppedData->first().x()) // other one must be cropped
+            qSwap(staticData, croppedData);
+        const int lowBound = findIndexBelowX(croppedData, staticData->first().x());
+        if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
+        croppedData->remove(0, lowBound);
+        // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
+        if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
+        double slope;
+        if (!qFuzzyCompare(croppedData->at(1).x(), croppedData->at(0).x()))
+            slope = (croppedData->at(1).y() - croppedData->at(0).y()) /
+                    (croppedData->at(1).x() - croppedData->at(0).x());
+        else
+            slope = 0;
+        (*croppedData)[0].setY(croppedData->at(0).y() + slope * (staticData->first().x() - croppedData->at(0).x()));
+        (*croppedData)[0].setX(staticData->first().x());
+
+        // crop upper bound:
+        if (staticData->last().x() > croppedData->last().x()) // other one must be cropped
+            qSwap(staticData, croppedData);
+        int highBound = findIndexAboveX(croppedData, staticData->last().x());
+        if (highBound == -1) return QPolygonF(); // key ranges have no overlap
+        croppedData->remove(highBound + 1, croppedData->size() - (highBound + 1));
+        // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
+        if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
+        const int li = croppedData->size() - 1; // last index
+        if (!qFuzzyCompare(croppedData->at(li).x(), croppedData->at(li - 1).x()))
+            slope = (croppedData->at(li).y() - croppedData->at(li - 1).y()) /
+                    (croppedData->at(li).x() - croppedData->at(li - 1).x());
+        else
+            slope = 0;
+        (*croppedData)[li].setY(
+                croppedData->at(li - 1).y() + slope * (staticData->last().x() - croppedData->at(li - 1).x()));
+        (*croppedData)[li].setX(staticData->last().x());
+    } else // mKeyAxis->orientation() == Qt::Vertical
+    {
+        // y is key
+        // crop lower bound:
+        if (staticData->first().y() < croppedData->first().y()) // other one must be cropped
+            qSwap(staticData, croppedData);
+        int lowBound = findIndexBelowY(croppedData, staticData->first().y());
+        if (lowBound == -1) return QPolygonF(); // key ranges have no overlap
+        croppedData->remove(0, lowBound);
+        // set lowest point of cropped data to fit exactly key position of first static data point via linear interpolation:
+        if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
+        double slope;
+        if (!qFuzzyCompare(croppedData->at(1).y(), croppedData->at(0).y())) // avoid division by zero in step plots
+            slope = (croppedData->at(1).x() - croppedData->at(0).x()) /
+                    (croppedData->at(1).y() - croppedData->at(0).y());
+        else
+            slope = 0;
+        (*croppedData)[0].setX(croppedData->at(0).x() + slope * (staticData->first().y() - croppedData->at(0).y()));
+        (*croppedData)[0].setY(staticData->first().y());
+
+        // crop upper bound:
+        if (staticData->last().y() > croppedData->last().y()) // other one must be cropped
+            qSwap(staticData, croppedData);
+        int highBound = findIndexAboveY(croppedData, staticData->last().y());
+        if (highBound == -1) return QPolygonF(); // key ranges have no overlap
+        croppedData->remove(highBound + 1, croppedData->size() - (highBound + 1));
+        // set highest point of cropped data to fit exactly key position of last static data point via linear interpolation:
+        if (croppedData->size() < 2) return QPolygonF(); // need at least two points for interpolation
+        int li = croppedData->size() - 1; // last index
+        if (!qFuzzyCompare(croppedData->at(li).y(),
+                           croppedData->at(li - 1).y())) // avoid division by zero in step plots
+            slope = (croppedData->at(li).x() - croppedData->at(li - 1).x()) /
+                    (croppedData->at(li).y() - croppedData->at(li - 1).y());
+        else
+            slope = 0;
+        (*croppedData)[li].setX(
+                croppedData->at(li - 1).x() + slope * (staticData->last().y() - croppedData->at(li - 1).y()));
+        (*croppedData)[li].setY(staticData->last().y());
+    }
+
+    // return joined:
+    for (int i = otherSegmentData.size() - 1; i >= 0; --i) // insert reversed, otherwise the polygon will be twisted
+        thisSegmentData << otherSegmentData.at(i);
+    return QPolygonF(thisSegmentData);
 }
 
 /*! \internal
@@ -1637,19 +1638,16 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
-int QCPGraph::findIndexAboveX(const QVector<QPointF> *data, double x) const
-{
-  for (int i=data->size()-1; i>=0; --i)
-  {
-    if (data->at(i).x() < x)
-    {
-      if (i<data->size()-1)
-        return i+1;
-      else
-        return data->size()-1;
+int QCPGraph::findIndexAboveX(const QVector<QPointF> *data, double x) const {
+    for (int i = data->size() - 1; i >= 0; --i) {
+        if (data->at(i).x() < x) {
+            if (i < data->size() - 1)
+                return i + 1;
+            else
+                return data->size() - 1;
+        }
     }
-  }
-  return -1;
+    return -1;
 }
 
 /*! \internal
@@ -1660,19 +1658,16 @@ int QCPGraph::findIndexAboveX(const QVector<QPointF> *data, double x) const
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
-int QCPGraph::findIndexBelowX(const QVector<QPointF> *data, double x) const
-{
-  for (int i=0; i<data->size(); ++i)
-  {
-    if (data->at(i).x() > x)
-    {
-      if (i>0)
-        return i-1;
-      else
-        return 0;
+int QCPGraph::findIndexBelowX(const QVector<QPointF> *data, double x) const {
+    for (int i = 0; i < data->size(); ++i) {
+        if (data->at(i).x() > x) {
+            if (i > 0)
+                return i - 1;
+            else
+                return 0;
+        }
     }
-  }
-  return -1;
+    return -1;
 }
 
 /*! \internal
@@ -1683,19 +1678,16 @@ int QCPGraph::findIndexBelowX(const QVector<QPointF> *data, double x) const
   
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
-int QCPGraph::findIndexAboveY(const QVector<QPointF> *data, double y) const
-{
-  for (int i=data->size()-1; i>=0; --i)
-  {
-    if (data->at(i).y() < y)
-    {
-      if (i<data->size()-1)
-        return i+1;
-      else
-        return data->size()-1;
+int QCPGraph::findIndexAboveY(const QVector<QPointF> *data, double y) const {
+    for (int i = data->size() - 1; i >= 0; --i) {
+        if (data->at(i).y() < y) {
+            if (i < data->size() - 1)
+                return i + 1;
+            else
+                return data->size() - 1;
+        }
     }
-  }
-  return -1;
+    return -1;
 }
 
 /*! \internal
@@ -1709,52 +1701,50 @@ int QCPGraph::findIndexAboveY(const QVector<QPointF> *data, double y) const
   If either the graph has no data or if the line style is \ref lsNone and the scatter style's shape
   is \ref QCPScatterStyle::ssNone (i.e. there is no visual representation of the graph), returns -1.0.
 */
-double QCPGraph::pointDistance(const QPointF &pixelPoint, QCPGraphDataContainer::const_iterator &closestData) const
-{
-  closestData = mDataContainer->constEnd();
-  if (mDataContainer->isEmpty())
-    return -1.0;
-  if (mLineStyle == lsNone && mScatterStyle.isNone())
-    return -1.0;
-  
-  // calculate minimum distances to graph data points and find closestData iterator:
-  double minDistSqr = (std::numeric_limits<double>::max)();
-  // determine which key range comes into question, taking selection tolerance around pos into account:
-  double posKeyMin, posKeyMax, dummy;
-  pixelsToCoords(pixelPoint-QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMin, dummy);
-  pixelsToCoords(pixelPoint+QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()), posKeyMax, dummy);
-  if (posKeyMin > posKeyMax)
-    qSwap(posKeyMin, posKeyMax);
-  // iterate over found data points and then choose the one with the shortest distance to pos:
-  QCPGraphDataContainer::const_iterator begin = mDataContainer->findBegin(posKeyMin, true);
-  QCPGraphDataContainer::const_iterator end = mDataContainer->findEnd(posKeyMax, true);
-  for (QCPGraphDataContainer::const_iterator it=begin; it!=end; ++it)
-  {
-    const double currentDistSqr = QCPVector2D(coordsToPixels(it->key, it->value)-pixelPoint).lengthSquared();
-    if (currentDistSqr < minDistSqr)
-    {
-      minDistSqr = currentDistSqr;
-      closestData = it;
+double QCPGraph::pointDistance(const QPointF &pixelPoint, QCPGraphDataContainer::const_iterator &closestData) const {
+    closestData = mDataContainer->constEnd();
+    if (mDataContainer->isEmpty())
+        return -1.0;
+    if (mLineStyle == lsNone && mScatterStyle.isNone())
+        return -1.0;
+
+    // calculate minimum distances to graph data points and find closestData iterator:
+    double minDistSqr = (std::numeric_limits<double>::max)();
+    // determine which key range comes into question, taking selection tolerance around pos into account:
+    double posKeyMin, posKeyMax, dummy;
+    pixelsToCoords(pixelPoint - QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()),
+                   posKeyMin, dummy);
+    pixelsToCoords(pixelPoint + QPointF(mParentPlot->selectionTolerance(), mParentPlot->selectionTolerance()),
+                   posKeyMax, dummy);
+    if (posKeyMin > posKeyMax)
+        qSwap(posKeyMin, posKeyMax);
+    // iterate over found data points and then choose the one with the shortest distance to pos:
+    QCPGraphDataContainer::const_iterator begin = mDataContainer->findBegin(posKeyMin, true);
+    QCPGraphDataContainer::const_iterator end = mDataContainer->findEnd(posKeyMax, true);
+    for (QCPGraphDataContainer::const_iterator it = begin; it != end; ++it) {
+        const double currentDistSqr = QCPVector2D(coordsToPixels(it->key, it->value) - pixelPoint).lengthSquared();
+        if (currentDistSqr < minDistSqr) {
+            minDistSqr = currentDistSqr;
+            closestData = it;
+        }
     }
-  }
-    
-  // calculate distance to graph line if there is one (if so, will probably be smaller than distance to closest data point):
-  if (mLineStyle != lsNone)
-  {
-    // line displayed, calculate distance to line segments:
-    QVector<QPointF> lineData;
-    getLines(&lineData, QCPDataRange(0, dataCount()));
-    QCPVector2D p(pixelPoint);
-    const int step = mLineStyle==lsImpulse ? 2 : 1; // impulse plot differs from other line styles in that the lineData points are only pairwise connected
-    for (int i=0; i<lineData.size()-1; i+=step)
-    {
-      const double currentDistSqr = p.distanceSquaredToLine(lineData.at(i), lineData.at(i+1));
-      if (currentDistSqr < minDistSqr)
-        minDistSqr = currentDistSqr;
+
+    // calculate distance to graph line if there is one (if so, will probably be smaller than distance to closest data point):
+    if (mLineStyle != lsNone) {
+        // line displayed, calculate distance to line segments:
+        QVector<QPointF> lineData;
+        getLines(&lineData, QCPDataRange(0, dataCount())); // don't limit data range further since with sharp data spikes, line segments may be closer to test point than segments with closer key coordinate
+        QCPVector2D p(pixelPoint);
+        const int step = mLineStyle == lsImpulse ? 2
+                                                 : 1; // impulse plot differs from other line styles in that the lineData points are only pairwise connected
+        for (int i = 0; i < lineData.size() - 1; i += step) {
+            const double currentDistSqr = p.distanceSquaredToLine(lineData.at(i), lineData.at(i + 1));
+            if (currentDistSqr < minDistSqr)
+                minDistSqr = currentDistSqr;
+        }
     }
-  }
-  
-  return qSqrt(minDistSqr);
+
+    return qSqrt(minDistSqr);
 }
 
 /*! \internal
@@ -1765,17 +1755,14 @@ double QCPGraph::pointDistance(const QPointF &pixelPoint, QCPGraphDataContainer:
 
   Used to calculate the channel fill polygon, see \ref getChannelFillPolygon.
 */
-int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const
-{
-  for (int i=0; i<data->size(); ++i)
-  {
-    if (data->at(i).y() > y)
-    {
-      if (i>0)
-        return i-1;
-      else
-        return 0;
+int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const {
+    for (int i = 0; i < data->size(); ++i) {
+        if (data->at(i).y() > y) {
+            if (i > 0)
+                return i - 1;
+            else
+                return 0;
+        }
     }
-  }
-  return -1;
+    return -1;
 }

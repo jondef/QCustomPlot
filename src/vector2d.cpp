@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "vector2d.h"
@@ -68,6 +68,13 @@
   \see length
 */
 
+/*! \fn double QCPVector2D::angle() const
+  
+  Returns the angle of the vector in radians. The angle is measured between the positive x line and
+  the vector, counter-clockwise in a mathematical coordinate system (y axis upwards positive). In
+  screen/widget coordinates where the y axis is inverted, the angle appears clockwise.
+*/
+
 /*! \fn QPoint QCPVector2D::toPoint() const
   
   Returns a QPoint which has the x and y coordinates of this vector, truncating any floating point
@@ -105,9 +112,8 @@
   Creates a QCPVector2D object and initializes the x and y coordinates to 0.
 */
 QCPVector2D::QCPVector2D() :
-  mX(0),
-  mY(0)
-{
+        mX(0),
+        mY(0) {
 }
 
 /*!
@@ -115,9 +121,8 @@ QCPVector2D::QCPVector2D() :
   values.
 */
 QCPVector2D::QCPVector2D(double x, double y) :
-  mX(x),
-  mY(y)
-{
+        mX(x),
+        mY(y) {
 }
 
 /*!
@@ -125,9 +130,8 @@ QCPVector2D::QCPVector2D(double x, double y) :
   the specified \a point.
 */
 QCPVector2D::QCPVector2D(const QPoint &point) :
-  mX(point.x()),
-  mY(point.y())
-{
+        mX(point.x()),
+        mY(point.y()) {
 }
 
 /*!
@@ -135,33 +139,35 @@ QCPVector2D::QCPVector2D(const QPoint &point) :
   the specified \a point.
 */
 QCPVector2D::QCPVector2D(const QPointF &point) :
-  mX(point.x()),
-  mY(point.y())
-{
+        mX(point.x()),
+        mY(point.y()) {
 }
 
 /*!
   Normalizes this vector. After this operation, the length of the vector is equal to 1.
   
+  If the vector has both entries set to zero, this method does nothing.
+  
   \see normalized, length, lengthSquared
 */
-void QCPVector2D::normalize()
-{
-  double len = length();
-  mX /= len;
-  mY /= len;
+void QCPVector2D::normalize() {
+    if (mX == 0.0 && mY == 0.0) return;
+    const double lenInv = 1.0 / length();
+    mX *= lenInv;
+    mY *= lenInv;
 }
 
 /*!
   Returns a normalized version of this vector. The length of the returned vector is equal to 1.
   
+  If the vector has both entries set to zero, this method returns the vector unmodified.
+  
   \see normalize, length, lengthSquared
 */
-QCPVector2D QCPVector2D::normalized() const
-{
-  QCPVector2D result(mX, mY);
-  result.normalize();
-  return result;
+QCPVector2D QCPVector2D::normalized() const {
+    if (mX == 0.0 && mY == 0.0) return *this;
+    const double lenInv = 1.0 / length();
+    return QCPVector2D(mX * lenInv, mY * lenInv);
 }
 
 /*! \overload
@@ -171,21 +177,19 @@ QCPVector2D QCPVector2D::normalized() const
   
   \see distanceToStraightLine
 */
-double QCPVector2D::distanceSquaredToLine(const QCPVector2D &start, const QCPVector2D &end) const
-{
-  QCPVector2D v(end-start);
-  double vLengthSqr = v.lengthSquared();
-  if (!qFuzzyIsNull(vLengthSqr))
-  {
-    double mu = v.dot(*this-start)/vLengthSqr;
-    if (mu < 0)
-      return (*this-start).lengthSquared();
-    else if (mu > 1)
-      return (*this-end).lengthSquared();
-    else
-      return ((start + mu*v)-*this).lengthSquared();
-  } else
-    return (*this-start).lengthSquared();
+double QCPVector2D::distanceSquaredToLine(const QCPVector2D &start, const QCPVector2D &end) const {
+    const QCPVector2D v(end - start);
+    const double vLengthSqr = v.lengthSquared();
+    if (!qFuzzyIsNull(vLengthSqr)) {
+        const double mu = v.dot(*this - start) / vLengthSqr;
+        if (mu < 0)
+            return (*this - start).lengthSquared();
+        else if (mu > 1)
+            return (*this - end).lengthSquared();
+        else
+            return ((start + mu * v) - *this).lengthSquared();
+    } else
+        return (*this - start).lengthSquared();
 }
 
 /*! \overload
@@ -195,9 +199,8 @@ double QCPVector2D::distanceSquaredToLine(const QCPVector2D &start, const QCPVec
   
   \see distanceToStraightLine
 */
-double QCPVector2D::distanceSquaredToLine(const QLineF &line) const
-{
-  return distanceSquaredToLine(QCPVector2D(line.p1()), QCPVector2D(line.p2()));
+double QCPVector2D::distanceSquaredToLine(const QLineF &line) const {
+    return distanceSquaredToLine(QCPVector2D(line.p1()), QCPVector2D(line.p2()));
 }
 
 /*!
@@ -206,50 +209,45 @@ double QCPVector2D::distanceSquaredToLine(const QLineF &line) const
   
   \see distanceSquaredToLine
 */
-double QCPVector2D::distanceToStraightLine(const QCPVector2D &base, const QCPVector2D &direction) const
-{
-  return qAbs((*this-base).dot(direction.perpendicular()))/direction.length();
+double QCPVector2D::distanceToStraightLine(const QCPVector2D &base, const QCPVector2D &direction) const {
+    return qAbs((*this - base).dot(direction.perpendicular())) / direction.length();
 }
 
 /*!
   Scales this vector by the given \a factor, i.e. the x and y components are multiplied by \a
   factor.
 */
-QCPVector2D &QCPVector2D::operator*=(double factor)
-{
-  mX *= factor;
-  mY *= factor;
-  return *this;
+QCPVector2D &QCPVector2D::operator*=(double factor) {
+    mX *= factor;
+    mY *= factor;
+    return *this;
 }
 
 /*!
   Scales this vector by the given \a divisor, i.e. the x and y components are divided by \a
   divisor.
 */
-QCPVector2D &QCPVector2D::operator/=(double divisor)
-{
-  mX /= divisor;
-  mY /= divisor;
-  return *this;
+QCPVector2D &QCPVector2D::operator/=(double divisor) {
+    mX /= divisor;
+    mY /= divisor;
+    return *this;
 }
 
 /*!
   Adds the given \a vector to this vector component-wise.
 */
-QCPVector2D &QCPVector2D::operator+=(const QCPVector2D &vector)
-{
-  mX += vector.mX;
-  mY += vector.mY;
-  return *this;
+QCPVector2D &QCPVector2D::operator+=(const QCPVector2D &vector) {
+    mX += vector.mX;
+    mY += vector.mY;
+    return *this;
 }
 
 /*!
   subtracts the given \a vector from this vector component-wise.
 */
-QCPVector2D &QCPVector2D::operator-=(const QCPVector2D &vector)
-{
-  mX -= vector.mX;
-  mY -= vector.mY;
-  return *this;
+QCPVector2D &QCPVector2D::operator-=(const QCPVector2D &vector) {
+    mX -= vector.mX;
+    mY -= vector.mY;
+    return *this;
 }
 

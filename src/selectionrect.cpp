@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "selectionrect.h"
@@ -85,8 +85,8 @@
 
 /*! \fn void QCPSelectionRect::canceled(const QRect &rect, QInputEvent *event);
   
-  This signal is emitted when the selection interaction was cancelled. Note that \a event is 0 if
-  the selection interaction was cancelled programmatically, by a call to \ref cancel.
+  This signal is emitted when the selection interaction was cancelled. Note that \a event is \c
+  nullptr if the selection interaction was cancelled programmatically, by a call to \ref cancel.
   
   The user may cancel the selection interaction by pressing the escape key. In this case, \a event
   holds the respective input event.
@@ -112,35 +112,30 @@
   QCustomPlot widget.
 */
 QCPSelectionRect::QCPSelectionRect(QCustomPlot *parentPlot) :
-  QCPLayerable(parentPlot),
-  mPen(QBrush(Qt::gray), 0, Qt::DashLine),
-  mBrush(Qt::NoBrush),
-  mActive(false)
-{
+        QCPLayerable(parentPlot),
+        mPen(QBrush(Qt::gray), 0, Qt::DashLine),
+        mBrush(Qt::NoBrush),
+        mActive(false) {
 }
 
-QCPSelectionRect::~QCPSelectionRect()
-{
-  cancel();
+QCPSelectionRect::~QCPSelectionRect() {
+    cancel();
 }
 
 /*!
   A convenience function which returns the coordinate range of the provided \a axis, that this
   selection rect currently encompasses.
 */
-QCPRange QCPSelectionRect::range(const QCPAxis *axis) const
-{
-  if (axis)
-  {
-    if (axis->orientation() == Qt::Horizontal)
-      return QCPRange(axis->pixelToCoord(mRect.left()), axis->pixelToCoord(mRect.left()+mRect.width()));
-    else
-      return QCPRange(axis->pixelToCoord(mRect.top()+mRect.height()), axis->pixelToCoord(mRect.top()));
-  } else
-  {
-    qDebug() << Q_FUNC_INFO << "called with axis zero";
-    return QCPRange();
-  }
+QCPRange QCPSelectionRect::range(const QCPAxis *axis) const {
+    if (axis) {
+        if (axis->orientation() == Qt::Horizontal)
+            return {axis->pixelToCoord(mRect.left()), axis->pixelToCoord(mRect.left() + mRect.width())};
+        else
+            return {axis->pixelToCoord(mRect.top() + mRect.height()), axis->pixelToCoord(mRect.top())};
+    } else {
+        qDebug() << Q_FUNC_INFO << "called with axis zero";
+        return {};
+    }
 }
 
 /*!
@@ -148,9 +143,8 @@ QCPRange QCPSelectionRect::range(const QCPAxis *axis) const
   
   \see setBrush
 */
-void QCPSelectionRect::setPen(const QPen &pen)
-{
-  mPen = pen;
+void QCPSelectionRect::setPen(const QPen &pen) {
+    mPen = pen;
 }
 
 /*!
@@ -159,22 +153,19 @@ void QCPSelectionRect::setPen(const QPen &pen)
   
   \see setPen
 */
-void QCPSelectionRect::setBrush(const QBrush &brush)
-{
-  mBrush = brush;
+void QCPSelectionRect::setBrush(const QBrush &brush) {
+    mBrush = brush;
 }
 
 /*!
   If there is currently a selection interaction going on (\ref isActive), the interaction is
   canceled. The selection rect will emit the \ref canceled signal.
 */
-void QCPSelectionRect::cancel()
-{
-  if (mActive)
-  {
-    mActive = false;
-    emit canceled(mRect, 0);
-  }
+void QCPSelectionRect::cancel() {
+    if (mActive) {
+        mActive = false;
+        emit canceled(mRect, nullptr);
+    }
 }
 
 /*! \internal
@@ -183,11 +174,10 @@ void QCPSelectionRect::cancel()
   The default implementation sets the selection rect to active, initializes the selection rect
   geometry and emits the \ref started signal.
 */
-void QCPSelectionRect::startSelection(QMouseEvent *event)
-{
-  mActive = true;
-  mRect = QRect(event->pos(), event->pos());
-  emit started(event);
+void QCPSelectionRect::startSelection(QMouseEvent *event) {
+    mActive = true;
+    mRect = QRect(event->pos(), event->pos());
+    emit started(event);
 }
 
 /*! \internal
@@ -196,11 +186,10 @@ void QCPSelectionRect::startSelection(QMouseEvent *event)
   to update its geometry. The default implementation updates the rect and emits the \ref changed
   signal.
 */
-void QCPSelectionRect::moveSelection(QMouseEvent *event)
-{
-  mRect.setBottomRight(event->pos());
-  emit changed(mRect, event);
-  layer()->replot();
+void QCPSelectionRect::moveSelection(QMouseEvent *event) {
+    mRect.setBottomRight(event->pos());
+    emit changed(mRect, event);
+    layer()->replot();
 }
 
 /*! \internal
@@ -209,11 +198,10 @@ void QCPSelectionRect::moveSelection(QMouseEvent *event)
   finished by the user releasing the mouse button. The default implementation deactivates the
   selection rect and emits the \ref accepted signal.
 */
-void QCPSelectionRect::endSelection(QMouseEvent *event)
-{
-  mRect.setBottomRight(event->pos());
-  mActive = false;
-  emit accepted(mRect, event);
+void QCPSelectionRect::endSelection(QMouseEvent *event) {
+    mRect.setBottomRight(event->pos());
+    mActive = false;
+    emit accepted(mRect, event);
 }
 
 /*! \internal
@@ -222,19 +210,16 @@ void QCPSelectionRect::endSelection(QMouseEvent *event)
   rect interaction is active. The default implementation allows to \ref cancel the interaction by
   hitting the escape key.
 */
-void QCPSelectionRect::keyPressEvent(QKeyEvent *event)
-{
-  if (event->key() == Qt::Key_Escape && mActive)
-  {
-    mActive = false;
-    emit canceled(mRect, event);
-  }
+void QCPSelectionRect::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Escape && mActive) {
+        mActive = false;
+        emit canceled(mRect, event);
+    }
 }
 
 /* inherits documentation from base class */
-void QCPSelectionRect::applyDefaultAntialiasingHint(QCPPainter *painter) const
-{
-  applyAntialiasingHint(painter, mAntialiased, QCP::aeOther);
+void QCPSelectionRect::applyDefaultAntialiasingHint(QCPPainter *painter) const {
+    applyAntialiasingHint(painter, mAntialiased, QCP::aeOther);
 }
 
 /*! \internal
@@ -243,13 +228,11 @@ void QCPSelectionRect::applyDefaultAntialiasingHint(QCPPainter *painter) const
   
   \seebaseclassmethod
 */
-void QCPSelectionRect::draw(QCPPainter *painter)
-{
-  if (mActive)
-  {
-    painter->setPen(mPen);
-    painter->setBrush(mBrush);
-    painter->drawRect(mRect);
-  }
+void QCPSelectionRect::draw(QCPPainter *painter) {
+    if (mActive) {
+        painter->setPen(mPen);
+        painter->setBrush(mBrush);
+        painter->drawRect(mRect);
+    }
 }
 

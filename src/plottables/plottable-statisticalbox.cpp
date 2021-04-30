@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-statisticalbox.h"
@@ -126,28 +126,27 @@
   Constructs a data point with key and all values set to zero.
 */
 QCPStatisticalBoxData::QCPStatisticalBoxData() :
-  key(0),
-  minimum(0),
-  lowerQuartile(0),
-  median(0),
-  upperQuartile(0),
-  maximum(0)
-{
+        key(0),
+        minimum(0),
+        lowerQuartile(0),
+        median(0),
+        upperQuartile(0),
+        maximum(0) {
 }
 
 /*!
   Constructs a data point with the specified \a key, \a minimum, \a lowerQuartile, \a median, \a
   upperQuartile, \a maximum and optionally a number of \a outliers.
 */
-QCPStatisticalBoxData::QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum, const QVector<double> &outliers) :
-  key(key),
-  minimum(minimum),
-  lowerQuartile(lowerQuartile),
-  median(median),
-  upperQuartile(upperQuartile),
-  maximum(maximum),
-  outliers(outliers)
-{
+QCPStatisticalBoxData::QCPStatisticalBoxData(double key, double minimum, double lowerQuartile, double median,
+                                             double upperQuartile, double maximum, const QVector<double> &outliers) :
+        key(key),
+        minimum(minimum),
+        lowerQuartile(lowerQuartile),
+        median(median),
+        upperQuartile(upperQuartile),
+        maximum(maximum),
+        outliers(outliers) {
 }
 
 
@@ -225,17 +224,16 @@ QCPStatisticalBoxData::QCPStatisticalBoxData(double key, double minimum, double 
   delete it manually but use QCustomPlot::removePlottable() instead.
 */
 QCPStatisticalBox::QCPStatisticalBox(QCPAxis *keyAxis, QCPAxis *valueAxis) :
-  QCPAbstractPlottable1D<QCPStatisticalBoxData>(keyAxis, valueAxis),
-  mWidth(0.5),
-  mWhiskerWidth(0.2),
-  mWhiskerPen(Qt::black, 0, Qt::DashLine, Qt::FlatCap),
-  mWhiskerBarPen(Qt::black),
-  mWhiskerAntialiased(false),
-  mMedianPen(Qt::black, 3, Qt::SolidLine, Qt::FlatCap),
-  mOutlierStyle(QCPScatterStyle::ssCircle, Qt::blue, 6)
-{
-  setPen(QPen(Qt::black));
-  setBrush(Qt::NoBrush);
+        QCPAbstractPlottable1D<QCPStatisticalBoxData>(keyAxis, valueAxis),
+        mWidth(0.5),
+        mWhiskerWidth(0.2),
+        mWhiskerPen(Qt::black, 0, Qt::DashLine, Qt::FlatCap),
+        mWhiskerBarPen(Qt::black),
+        mWhiskerAntialiased(false),
+        mMedianPen(Qt::black, 3, Qt::SolidLine, Qt::FlatCap),
+        mOutlierStyle(QCPScatterStyle::ssCircle, Qt::blue, 6) {
+    setPen(QPen(Qt::black));
+    setBrush(Qt::NoBrush);
 }
 
 /*! \overload
@@ -254,10 +252,10 @@ QCPStatisticalBox::QCPStatisticalBox(QCPAxis *keyAxis, QCPAxis *valueAxis) :
   
   \see addData
 */
-void QCPStatisticalBox::setData(QSharedPointer<QCPStatisticalBoxDataContainer> data)
-{
-  mDataContainer = data;
+void QCPStatisticalBox::setData(QSharedPointer<QCPStatisticalBoxDataContainer> data) {
+    mDataContainer = data;
 }
+
 /*! \overload
   
   Replaces the current data with the provided points in \a keys, \a minimum, \a lowerQuartile, \a
@@ -269,10 +267,12 @@ void QCPStatisticalBox::setData(QSharedPointer<QCPStatisticalBoxDataContainer> d
   
   \see addData
 */
-void QCPStatisticalBox::setData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile, const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum, bool alreadySorted)
-{
-  mDataContainer->clear();
-  addData(keys, minimum, lowerQuartile, median, upperQuartile, maximum, alreadySorted);
+void QCPStatisticalBox::setData(const QVector<double> &keys, const QVector<double> &minimum,
+                                const QVector<double> &lowerQuartile, const QVector<double> &median,
+                                const QVector<double> &upperQuartile, const QVector<double> &maximum,
+                                bool alreadySorted) {
+    mDataContainer->clear();
+    addData(keys, minimum, lowerQuartile, median, upperQuartile, maximum, alreadySorted);
 }
 
 /*!
@@ -280,9 +280,8 @@ void QCPStatisticalBox::setData(const QVector<double> &keys, const QVector<doubl
   
   \see setWhiskerWidth
 */
-void QCPStatisticalBox::setWidth(double width)
-{
-  mWidth = width;
+void QCPStatisticalBox::setWidth(double width) {
+    mWidth = width;
 }
 
 /*!
@@ -293,9 +292,8 @@ void QCPStatisticalBox::setWidth(double width)
   
   \see setWidth
 */
-void QCPStatisticalBox::setWhiskerWidth(double width)
-{
-  mWhiskerWidth = width;
+void QCPStatisticalBox::setWhiskerWidth(double width) {
+    mWhiskerWidth = width;
 }
 
 /*!
@@ -309,9 +307,8 @@ void QCPStatisticalBox::setWhiskerWidth(double width)
   
   \see setWhiskerBarPen
 */
-void QCPStatisticalBox::setWhiskerPen(const QPen &pen)
-{
-  mWhiskerPen = pen;
+void QCPStatisticalBox::setWhiskerPen(const QPen &pen) {
+    mWhiskerPen = pen;
 }
 
 /*!
@@ -323,9 +320,8 @@ void QCPStatisticalBox::setWhiskerPen(const QPen &pen)
   
   \see setWhiskerPen
 */
-void QCPStatisticalBox::setWhiskerBarPen(const QPen &pen)
-{
-  mWhiskerBarPen = pen;
+void QCPStatisticalBox::setWhiskerBarPen(const QPen &pen) {
+    mWhiskerBarPen = pen;
 }
 
 /*!
@@ -334,17 +330,15 @@ void QCPStatisticalBox::setWhiskerBarPen(const QPen &pen)
   Note that antialiasing settings may be overridden by QCustomPlot::setAntialiasedElements and
   QCustomPlot::setNotAntialiasedElements.
 */
-void QCPStatisticalBox::setWhiskerAntialiased(bool enabled)
-{
-  mWhiskerAntialiased = enabled;
+void QCPStatisticalBox::setWhiskerAntialiased(bool enabled) {
+    mWhiskerAntialiased = enabled;
 }
 
 /*!
   Sets the pen used for drawing the median indicator line inside the statistical boxes.
 */
-void QCPStatisticalBox::setMedianPen(const QPen &pen)
-{
-  mMedianPen = pen;
+void QCPStatisticalBox::setMedianPen(const QPen &pen) {
+    mMedianPen = pen;
 }
 
 /*!
@@ -353,9 +347,8 @@ void QCPStatisticalBox::setMedianPen(const QPen &pen)
   Outliers can be specified with the method
   \ref addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum, const QVector<double> &outliers)
 */
-void QCPStatisticalBox::setOutlierStyle(const QCPScatterStyle &style)
-{
-  mOutlierStyle = style;
+void QCPStatisticalBox::setOutlierStyle(const QCPScatterStyle &style) {
+    mOutlierStyle = style;
 }
 
 /*! \overload
@@ -370,29 +363,35 @@ void QCPStatisticalBox::setOutlierStyle(const QCPScatterStyle &style)
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<double> &minimum, const QVector<double> &lowerQuartile, const QVector<double> &median, const QVector<double> &upperQuartile, const QVector<double> &maximum, bool alreadySorted)
-{
-  if (keys.size() != minimum.size() || minimum.size() != lowerQuartile.size() || lowerQuartile.size() != median.size() ||
-      median.size() != upperQuartile.size() || upperQuartile.size() != maximum.size() || maximum.size() != keys.size())
-    qDebug() << Q_FUNC_INFO << "keys, minimum, lowerQuartile, median, upperQuartile, maximum have different sizes:"
-             << keys.size() << minimum.size() << lowerQuartile.size() << median.size() << upperQuartile.size() << maximum.size();
-  const int n = qMin(keys.size(), qMin(minimum.size(), qMin(lowerQuartile.size(), qMin(median.size(), qMin(upperQuartile.size(), maximum.size())))));
-  QVector<QCPStatisticalBoxData> tempData(n);
-  QVector<QCPStatisticalBoxData>::iterator it = tempData.begin();
-  const QVector<QCPStatisticalBoxData>::iterator itEnd = tempData.end();
-  int i = 0;
-  while (it != itEnd)
-  {
-    it->key = keys[i];
-    it->minimum = minimum[i];
-    it->lowerQuartile = lowerQuartile[i];
-    it->median = median[i];
-    it->upperQuartile = upperQuartile[i];
-    it->maximum = maximum[i];
-    ++it;
-    ++i;
-  }
-  mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
+void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<double> &minimum,
+                                const QVector<double> &lowerQuartile, const QVector<double> &median,
+                                const QVector<double> &upperQuartile, const QVector<double> &maximum,
+                                bool alreadySorted) {
+    if (keys.size() != minimum.size() || minimum.size() != lowerQuartile.size() ||
+        lowerQuartile.size() != median.size() ||
+        median.size() != upperQuartile.size() || upperQuartile.size() != maximum.size() ||
+        maximum.size() != keys.size())
+        qDebug() << Q_FUNC_INFO << "keys, minimum, lowerQuartile, median, upperQuartile, maximum have different sizes:"
+                 << keys.size() << minimum.size() << lowerQuartile.size() << median.size() << upperQuartile.size()
+                 << maximum.size();
+    const int n = qMin(keys.size(), qMin(minimum.size(), qMin(lowerQuartile.size(), qMin(median.size(),
+                                                                                         qMin(upperQuartile.size(),
+                                                                                              maximum.size())))));
+    QVector<QCPStatisticalBoxData> tempData(n);
+    QVector<QCPStatisticalBoxData>::iterator it = tempData.begin();
+    const QVector<QCPStatisticalBoxData>::iterator itEnd = tempData.end();
+    int i = 0;
+    while (it != itEnd) {
+        it->key = keys[i];
+        it->minimum = minimum[i];
+        it->lowerQuartile = lowerQuartile[i];
+        it->median = median[i];
+        it->upperQuartile = upperQuartile[i];
+        it->maximum = maximum[i];
+        ++it;
+        ++i;
+    }
+    mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
 }
 
 /*! \overload
@@ -403,32 +402,32 @@ void QCPStatisticalBox::addData(const QVector<double> &keys, const QVector<doubl
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPStatisticalBox::addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile, double maximum, const QVector<double> &outliers)
-{
-  mDataContainer->add(QCPStatisticalBoxData(key, minimum, lowerQuartile, median, upperQuartile, maximum, outliers));
+void QCPStatisticalBox::addData(double key, double minimum, double lowerQuartile, double median, double upperQuartile,
+                                double maximum, const QVector<double> &outliers) {
+    mDataContainer->add(QCPStatisticalBoxData(key, minimum, lowerQuartile, median, upperQuartile, maximum, outliers));
 }
 
 /*!
   \copydoc QCPPlottableInterface1D::selectTestRect
 */
-QCPDataSelection QCPStatisticalBox::selectTestRect(const QRectF &rect, bool onlySelectable) const
-{
-  QCPDataSelection result;
-  if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+QCPDataSelection QCPStatisticalBox::selectTestRect(const QRectF &rect, bool onlySelectable) const {
+    QCPDataSelection result;
+    if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+        return result;
+    if (!mKeyAxis || !mValueAxis)
+        return result;
+
+    QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
+    getVisibleDataBounds(visibleBegin, visibleEnd);
+
+    for (QCPStatisticalBoxDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
+        if (rect.intersects(getQuartileBox(it)))
+            result.addDataRange(
+                    QCPDataRange(int(it - mDataContainer->constBegin()), int(it - mDataContainer->constBegin() + 1)),
+                    false);
+    }
+    result.simplify();
     return result;
-  if (!mKeyAxis || !mValueAxis)
-    return result;
-  
-  QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
-  getVisibleDataBounds(visibleBegin, visibleEnd);
-  
-  for (QCPStatisticalBoxDataContainer::const_iterator it=visibleBegin; it!=visibleEnd; ++it)
-  {
-    if (rect.intersects(getQuartileBox(it)))
-      result.addDataRange(QCPDataRange(it-mDataContainer->constBegin(), it-mDataContainer->constBegin()+1), false);
-  }
-  result.simplify();
-  return result;
 }
 
 /*!
@@ -439,144 +438,135 @@ QCPDataSelection QCPStatisticalBox::selectTestRect(const QRectF &rect, bool only
   
   \seebaseclassmethod \ref QCPAbstractPlottable::selectTest
 */
-double QCPStatisticalBox::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  Q_UNUSED(details)
-  if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+double QCPStatisticalBox::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    Q_UNUSED(details)
+    if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+        return -1;
+    if (!mKeyAxis || !mValueAxis)
+        return -1;
+
+    if (mKeyAxis->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
+        // get visible data range:
+        QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
+        QCPStatisticalBoxDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
+        getVisibleDataBounds(visibleBegin, visibleEnd);
+        double minDistSqr = (std::numeric_limits<double>::max)();
+        for (QCPStatisticalBoxDataContainer::const_iterator it = visibleBegin; it != visibleEnd; ++it) {
+            if (getQuartileBox(it).contains(pos)) // quartile box
+            {
+                double currentDistSqr =
+                        mParentPlot->selectionTolerance() * 0.99 * mParentPlot->selectionTolerance() * 0.99;
+                if (currentDistSqr < minDistSqr) {
+                    minDistSqr = currentDistSqr;
+                    closestDataPoint = it;
+                }
+            } else // whiskers
+            {
+                const QVector<QLineF> whiskerBackbones = getWhiskerBackboneLines(it);
+                const QCPVector2D posVec(pos);
+                        foreach (const QLineF &backbone, whiskerBackbones) {
+                        double currentDistSqr = posVec.distanceSquaredToLine(backbone);
+                        if (currentDistSqr < minDistSqr) {
+                            minDistSqr = currentDistSqr;
+                            closestDataPoint = it;
+                        }
+                    }
+            }
+        }
+        if (details) {
+            int pointIndex = int(closestDataPoint - mDataContainer->constBegin());
+            details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
+        }
+        return qSqrt(minDistSqr);
+    }
     return -1;
-  if (!mKeyAxis || !mValueAxis)
-    return -1;
-  
-  if (mKeyAxis->axisRect()->rect().contains(pos.toPoint()))
-  {
-    // get visible data range:
+}
+
+/* inherits documentation from base class */
+QCPRange QCPStatisticalBox::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const {
+    QCPRange range = mDataContainer->keyRange(foundRange, inSignDomain);
+    // determine exact range by including width of bars/flags:
+    if (foundRange) {
+        if (inSignDomain != QCP::sdPositive || range.lower - mWidth * 0.5 > 0)
+            range.lower -= mWidth * 0.5;
+        if (inSignDomain != QCP::sdNegative || range.upper + mWidth * 0.5 < 0)
+            range.upper += mWidth * 0.5;
+    }
+    return range;
+}
+
+/* inherits documentation from base class */
+QCPRange
+QCPStatisticalBox::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
+    return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
+}
+
+/* inherits documentation from base class */
+void QCPStatisticalBox::draw(QCPPainter *painter) {
+    if (mDataContainer->isEmpty()) return;
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
+    }
+
     QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
-    QCPStatisticalBoxDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
     getVisibleDataBounds(visibleBegin, visibleEnd);
-    double minDistSqr = (std::numeric_limits<double>::max)();
-    for (QCPStatisticalBoxDataContainer::const_iterator it=visibleBegin; it!=visibleEnd; ++it)
-    {
-      if (getQuartileBox(it).contains(pos)) // quartile box
-      {
-        double currentDistSqr = mParentPlot->selectionTolerance()*0.99 * mParentPlot->selectionTolerance()*0.99;
-        if (currentDistSqr < minDistSqr)
-        {
-          minDistSqr = currentDistSqr;
-          closestDataPoint = it;
-        }
-      } else // whiskers
-      {
-        const QVector<QLineF> whiskerBackbones(getWhiskerBackboneLines(it));
-        for (int i=0; i<whiskerBackbones.size(); ++i)
-        {
-          double currentDistSqr = QCPVector2D(pos).distanceSquaredToLine(whiskerBackbones.at(i));
-          if (currentDistSqr < minDistSqr)
-          {
-            minDistSqr = currentDistSqr;
-            closestDataPoint = it;
-          }
-        }
-      }
-    }
-    if (details)
-    {
-      int pointIndex = closestDataPoint-mDataContainer->constBegin();
-      details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex+1)));
-    }
-    return qSqrt(minDistSqr);
-  }
-  return -1;
-}
 
-/* inherits documentation from base class */
-QCPRange QCPStatisticalBox::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const
-{
-  QCPRange range = mDataContainer->keyRange(foundRange, inSignDomain);
-  // determine exact range by including width of bars/flags:
-  if (foundRange)
-  {
-    if (inSignDomain != QCP::sdPositive || range.lower-mWidth*0.5 > 0)
-      range.lower -= mWidth*0.5;
-    if (inSignDomain != QCP::sdNegative || range.upper+mWidth*0.5 < 0)
-      range.upper += mWidth*0.5;
-  }
-  return range;
-}
+    // loop over and draw segments of unselected/selected data:
+    QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
+    getDataSegments(selectedSegments, unselectedSegments);
+    allSegments << unselectedSegments << selectedSegments;
+    for (int i = 0; i < allSegments.size(); ++i) {
+        bool isSelectedSegment = i >= unselectedSegments.size();
+        QCPStatisticalBoxDataContainer::const_iterator begin = visibleBegin;
+        QCPStatisticalBoxDataContainer::const_iterator end = visibleEnd;
+        mDataContainer->limitIteratorsToDataRange(begin, end, allSegments.at(i));
+        if (begin == end)
+            continue;
 
-/* inherits documentation from base class */
-QCPRange QCPStatisticalBox::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const
-{
-  return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
-}
-
-/* inherits documentation from base class */
-void QCPStatisticalBox::draw(QCPPainter *painter)
-{
-  if (mDataContainer->isEmpty()) return;
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  
-  QCPStatisticalBoxDataContainer::const_iterator visibleBegin, visibleEnd;
-  getVisibleDataBounds(visibleBegin, visibleEnd);
-  
-  // loop over and draw segments of unselected/selected data:
-  QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
-  getDataSegments(selectedSegments, unselectedSegments);
-  allSegments << unselectedSegments << selectedSegments;
-  for (int i=0; i<allSegments.size(); ++i)
-  {
-    bool isSelectedSegment = i >= unselectedSegments.size();
-    QCPStatisticalBoxDataContainer::const_iterator begin = visibleBegin;
-    QCPStatisticalBoxDataContainer::const_iterator end = visibleEnd;
-    mDataContainer->limitIteratorsToDataRange(begin, end, allSegments.at(i));
-    if (begin == end)
-      continue;
-    
-    for (QCPStatisticalBoxDataContainer::const_iterator it=begin; it!=end; ++it)
-    {
-      // check data validity if flag set:
+        for (QCPStatisticalBoxDataContainer::const_iterator it = begin; it != end; ++it) {
+            // check data validity if flag set:
 # ifdef QCUSTOMPLOT_CHECK_DATA
-      if (QCP::isInvalidData(it->key, it->minimum) ||
-          QCP::isInvalidData(it->lowerQuartile, it->median) ||
-          QCP::isInvalidData(it->upperQuartile, it->maximum))
-        qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "of drawn range has invalid data." << "Plottable name:" << name();
-      for (int i=0; i<it->outliers.size(); ++i)
-        if (QCP::isInvalidData(it->outliers.at(i)))
-          qDebug() << Q_FUNC_INFO << "Data point outlier at" << it->key << "of drawn range invalid." << "Plottable name:" << name();
+            if (QCP::isInvalidData(it->key, it->minimum) ||
+                QCP::isInvalidData(it->lowerQuartile, it->median) ||
+                QCP::isInvalidData(it->upperQuartile, it->maximum))
+              qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "of drawn range has invalid data." << "Plottable name:" << name();
+            for (int i=0; i<it->outliers.size(); ++i)
+              if (QCP::isInvalidData(it->outliers.at(i)))
+                qDebug() << Q_FUNC_INFO << "Data point outlier at" << it->key << "of drawn range invalid." << "Plottable name:" << name();
 # endif
-      
-      if (isSelectedSegment && mSelectionDecorator)
-      {
-        mSelectionDecorator->applyPen(painter);
-        mSelectionDecorator->applyBrush(painter);
-      } else
-      {
-        painter->setPen(mPen);
-        painter->setBrush(mBrush);
-      }
-      QCPScatterStyle finalOutlierStyle = mOutlierStyle;
-      if (isSelectedSegment && mSelectionDecorator)
-        finalOutlierStyle = mSelectionDecorator->getFinalScatterStyle(mOutlierStyle);
-      drawStatisticalBox(painter, it, finalOutlierStyle);
+
+            if (isSelectedSegment && mSelectionDecorator) {
+                mSelectionDecorator->applyPen(painter);
+                mSelectionDecorator->applyBrush(painter);
+            } else {
+                painter->setPen(mPen);
+                painter->setBrush(mBrush);
+            }
+            QCPScatterStyle finalOutlierStyle = mOutlierStyle;
+            if (isSelectedSegment && mSelectionDecorator)
+                finalOutlierStyle = mSelectionDecorator->getFinalScatterStyle(mOutlierStyle);
+            drawStatisticalBox(painter, it, finalOutlierStyle);
+        }
     }
-  }
-  
-  // draw other selection decoration that isn't just line/scatter pens and brushes:
-  if (mSelectionDecorator)
-    mSelectionDecorator->drawDecoration(painter, selection());
+
+    // draw other selection decoration that isn't just line/scatter pens and brushes:
+    if (mSelectionDecorator)
+        mSelectionDecorator->drawDecoration(painter, selection());
 }
 
 /* inherits documentation from base class */
-void QCPStatisticalBox::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
-{
-  // draw filled rect:
-  applyDefaultAntialiasingHint(painter);
-  painter->setPen(mPen);
-  painter->setBrush(mBrush);
-  QRectF r = QRectF(0, 0, rect.width()*0.67, rect.height()*0.67);
-  r.moveCenter(rect.center());
-  painter->drawRect(r);
+void QCPStatisticalBox::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {
+    // draw filled rect:
+    applyDefaultAntialiasingHint(painter);
+    painter->setPen(mPen);
+    painter->setBrush(mBrush);
+    QRectF r = QRectF(0, 0, rect.width() * 0.67, rect.height() * 0.67);
+    r.moveCenter(rect.center());
+    painter->drawRect(r);
 }
 
 /*!
@@ -587,29 +577,30 @@ void QCPStatisticalBox::drawLegendIcon(QCPPainter *painter, const QRectF &rect) 
 
   \see getQuartileBox, getWhiskerBackboneLines, getWhiskerBarLines
 */
-void QCPStatisticalBox::drawStatisticalBox(QCPPainter *painter, QCPStatisticalBoxDataContainer::const_iterator it, const QCPScatterStyle &outlierStyle) const
-{
-  // draw quartile box:
-  applyDefaultAntialiasingHint(painter);
-  const QRectF quartileBox = getQuartileBox(it);
-  painter->drawRect(quartileBox);
-  // draw median line with cliprect set to quartile box:
-  painter->save();
-  painter->setClipRect(quartileBox, Qt::IntersectClip);
-  painter->setPen(mMedianPen);
-  painter->drawLine(QLineF(coordsToPixels(it->key-mWidth*0.5, it->median), coordsToPixels(it->key+mWidth*0.5, it->median)));
-  painter->restore();
-  // draw whisker lines:
-  applyAntialiasingHint(painter, mWhiskerAntialiased, QCP::aePlottables);
-  painter->setPen(mWhiskerPen);
-  painter->drawLines(getWhiskerBackboneLines(it));
-  painter->setPen(mWhiskerBarPen);
-  painter->drawLines(getWhiskerBarLines(it));
-  // draw outliers:
-  applyScattersAntialiasingHint(painter);
-  outlierStyle.applyTo(painter, mPen);
-  for (int i=0; i<it->outliers.size(); ++i)
-    outlierStyle.drawShape(painter, coordsToPixels(it->key, it->outliers.at(i)));
+void QCPStatisticalBox::drawStatisticalBox(QCPPainter *painter, QCPStatisticalBoxDataContainer::const_iterator it,
+                                           const QCPScatterStyle &outlierStyle) const {
+    // draw quartile box:
+    applyDefaultAntialiasingHint(painter);
+    const QRectF quartileBox = getQuartileBox(it);
+    painter->drawRect(quartileBox);
+    // draw median line with cliprect set to quartile box:
+    painter->save();
+    painter->setClipRect(quartileBox, Qt::IntersectClip);
+    painter->setPen(mMedianPen);
+    painter->drawLine(QLineF(coordsToPixels(it->key - mWidth * 0.5, it->median),
+                             coordsToPixels(it->key + mWidth * 0.5, it->median)));
+    painter->restore();
+    // draw whisker lines:
+    applyAntialiasingHint(painter, mWhiskerAntialiased, QCP::aePlottables);
+    painter->setPen(mWhiskerPen);
+    painter->drawLines(getWhiskerBackboneLines(it));
+    painter->setPen(mWhiskerBarPen);
+    painter->drawLines(getWhiskerBarLines(it));
+    // draw outliers:
+    applyScattersAntialiasingHint(painter);
+    outlierStyle.applyTo(painter, mPen);
+    for (int i = 0; i < it->outliers.size(); ++i)
+        outlierStyle.drawShape(painter, coordsToPixels(it->key, it->outliers.at(i)));
 }
 
 /*!  \internal
@@ -626,17 +617,18 @@ void QCPStatisticalBox::drawStatisticalBox(QCPPainter *painter, QCPStatisticalBo
   
   if the plottable contains no data, both \a begin and \a end point to constEnd.
 */
-void QCPStatisticalBox::getVisibleDataBounds(QCPStatisticalBoxDataContainer::const_iterator &begin, QCPStatisticalBoxDataContainer::const_iterator &end) const
-{
-  if (!mKeyAxis)
-  {
-    qDebug() << Q_FUNC_INFO << "invalid key axis";
-    begin = mDataContainer->constEnd();
-    end = mDataContainer->constEnd();
-    return;
-  }
-  begin = mDataContainer->findBegin(mKeyAxis.data()->range().lower-mWidth*0.5); // subtract half width of box to include partially visible data points
-  end = mDataContainer->findEnd(mKeyAxis.data()->range().upper+mWidth*0.5); // add half width of box to include partially visible data points
+void QCPStatisticalBox::getVisibleDataBounds(QCPStatisticalBoxDataContainer::const_iterator &begin,
+                                             QCPStatisticalBoxDataContainer::const_iterator &end) const {
+    if (!mKeyAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key axis";
+        begin = mDataContainer->constEnd();
+        end = mDataContainer->constEnd();
+        return;
+    }
+    begin = mDataContainer->findBegin(mKeyAxis.data()->range().lower - mWidth *
+                                                                       0.5); // subtract half width of box to include partially visible data points
+    end = mDataContainer->findEnd(mKeyAxis.data()->range().upper +
+                                  mWidth * 0.5); // add half width of box to include partially visible data points
 }
 
 /*!  \internal
@@ -646,12 +638,11 @@ void QCPStatisticalBox::getVisibleDataBounds(QCPStatisticalBoxDataContainer::con
 
   \see drawStatisticalBox, getWhiskerBackboneLines, getWhiskerBarLines
 */
-QRectF QCPStatisticalBox::getQuartileBox(QCPStatisticalBoxDataContainer::const_iterator it) const
-{
-  QRectF result;
-  result.setTopLeft(coordsToPixels(it->key-mWidth*0.5, it->upperQuartile));
-  result.setBottomRight(coordsToPixels(it->key+mWidth*0.5, it->lowerQuartile));
-  return result;
+QRectF QCPStatisticalBox::getQuartileBox(QCPStatisticalBoxDataContainer::const_iterator it) const {
+    QRectF result;
+    result.setTopLeft(coordsToPixels(it->key - mWidth * 0.5, it->upperQuartile));
+    result.setBottomRight(coordsToPixels(it->key + mWidth * 0.5, it->lowerQuartile));
+    return result;
 }
 
 /*!  \internal
@@ -662,12 +653,13 @@ QRectF QCPStatisticalBox::getQuartileBox(QCPStatisticalBoxDataContainer::const_i
 
   \see drawStatisticalBox, getQuartileBox, getWhiskerBarLines
 */
-QVector<QLineF> QCPStatisticalBox::getWhiskerBackboneLines(QCPStatisticalBoxDataContainer::const_iterator it) const
-{
-  QVector<QLineF> result(2);
-  result[0].setPoints(coordsToPixels(it->key, it->lowerQuartile), coordsToPixels(it->key, it->minimum)); // min backbone
-  result[1].setPoints(coordsToPixels(it->key, it->upperQuartile), coordsToPixels(it->key, it->maximum)); // max backbone
-  return result;
+QVector<QLineF> QCPStatisticalBox::getWhiskerBackboneLines(QCPStatisticalBoxDataContainer::const_iterator it) const {
+    QVector<QLineF> result(2);
+    result[0].setPoints(coordsToPixels(it->key, it->lowerQuartile),
+                        coordsToPixels(it->key, it->minimum)); // min backbone
+    result[1].setPoints(coordsToPixels(it->key, it->upperQuartile),
+                        coordsToPixels(it->key, it->maximum)); // max backbone
+    return result;
 }
 
 /*!  \internal
@@ -677,11 +669,12 @@ QVector<QLineF> QCPStatisticalBox::getWhiskerBackboneLines(QCPStatisticalBoxData
 
   \see drawStatisticalBox, getQuartileBox, getWhiskerBackboneLines
 */
-QVector<QLineF> QCPStatisticalBox::getWhiskerBarLines(QCPStatisticalBoxDataContainer::const_iterator it) const
-{
-  QVector<QLineF> result(2);
-  result[0].setPoints(coordsToPixels(it->key-mWhiskerWidth*0.5, it->minimum), coordsToPixels(it->key+mWhiskerWidth*0.5, it->minimum)); // min bar
-  result[1].setPoints(coordsToPixels(it->key-mWhiskerWidth*0.5, it->maximum), coordsToPixels(it->key+mWhiskerWidth*0.5, it->maximum)); // max bar
-  return result;
+QVector<QLineF> QCPStatisticalBox::getWhiskerBarLines(QCPStatisticalBoxDataContainer::const_iterator it) const {
+    QVector<QLineF> result(2);
+    result[0].setPoints(coordsToPixels(it->key - mWhiskerWidth * 0.5, it->minimum),
+                        coordsToPixels(it->key + mWhiskerWidth * 0.5, it->minimum)); // min bar
+    result[1].setPoints(coordsToPixels(it->key - mWhiskerWidth * 0.5, it->maximum),
+                        coordsToPixels(it->key + mWhiskerWidth * 0.5, it->maximum)); // max bar
+    return result;
 }
 

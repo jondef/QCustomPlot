@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "plottable-curve.h"
@@ -107,20 +107,18 @@
   Constructs a curve data point with t, key and value set to zero.
 */
 QCPCurveData::QCPCurveData() :
-  t(0),
-  key(0),
-  value(0)
-{
+        t(0),
+        key(0),
+        value(0) {
 }
 
 /*!
   Constructs a curve data point with the specified \a t, \a key and \a value.
 */
 QCPCurveData::QCPCurveData(double t, double key, double value) :
-  t(t),
-  key(key),
-  value(value)
-{
+        t(t),
+        key(key),
+        value(value) {
 }
 
 
@@ -186,19 +184,19 @@ QCPCurveData::QCPCurveData(double t, double key, double value) :
   but use QCustomPlot::removePlottable() instead.
 */
 QCPCurve::QCPCurve(QCPAxis *keyAxis, QCPAxis *valueAxis) :
-  QCPAbstractPlottable1D<QCPCurveData>(keyAxis, valueAxis)
-{
-  // modify inherited properties from abstract plottable:
-  setPen(QPen(Qt::blue, 0));
-  setBrush(Qt::NoBrush);
-  
-  setScatterStyle(QCPScatterStyle());
-  setLineStyle(lsLine);
-  setScatterSkip(0);
+        QCPAbstractPlottable1D<QCPCurveData>(keyAxis, valueAxis),
+        mScatterSkip{},
+        mLineStyle{} {
+    // modify inherited properties from abstract plottable:
+    setPen(QPen(Qt::blue, 0));
+    setBrush(Qt::NoBrush);
+
+    setScatterStyle(QCPScatterStyle());
+    setLineStyle(lsLine);
+    setScatterSkip(0);
 }
 
-QCPCurve::~QCPCurve()
-{
+QCPCurve::~QCPCurve() {
 }
 
 /*! \overload
@@ -216,9 +214,8 @@ QCPCurve::~QCPCurve()
   
   \see addData
 */
-void QCPCurve::setData(QSharedPointer<QCPCurveDataContainer> data)
-{
-  mDataContainer = data;
+void QCPCurve::setData(QSharedPointer<QCPCurveDataContainer> data) {
+    mDataContainer = data;
 }
 
 /*! \overload
@@ -232,10 +229,10 @@ void QCPCurve::setData(QSharedPointer<QCPCurveDataContainer> data)
   
   \see addData
 */
-void QCPCurve::setData(const QVector<double> &t, const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
-{
-  mDataContainer->clear();
-  addData(t, keys, values, alreadySorted);
+void QCPCurve::setData(const QVector<double> &t, const QVector<double> &keys, const QVector<double> &values,
+                       bool alreadySorted) {
+    mDataContainer->clear();
+    addData(t, keys, values, alreadySorted);
 }
 
 
@@ -250,10 +247,9 @@ void QCPCurve::setData(const QVector<double> &t, const QVector<double> &keys, co
   
   \see addData
 */
-void QCPCurve::setData(const QVector<double> &keys, const QVector<double> &values)
-{
-  mDataContainer->clear();
-  addData(keys, values);
+void QCPCurve::setData(const QVector<double> &keys, const QVector<double> &values) {
+    mDataContainer->clear();
+    addData(keys, values);
 }
 
 /*!
@@ -263,9 +259,8 @@ void QCPCurve::setData(const QVector<double> &keys, const QVector<double> &value
   
   \see QCPScatterStyle, setLineStyle
 */
-void QCPCurve::setScatterStyle(const QCPScatterStyle &style)
-{
-  mScatterStyle = style;
+void QCPCurve::setScatterStyle(const QCPScatterStyle &style) {
+    mScatterStyle = style;
 }
 
 /*!
@@ -279,9 +274,8 @@ void QCPCurve::setScatterStyle(const QCPScatterStyle &style)
 
   \see setScatterStyle
 */
-void QCPCurve::setScatterSkip(int skip)
-{
-  mScatterSkip = qMax(0, skip);
+void QCPCurve::setScatterSkip(int skip) {
+    mScatterSkip = qMax(0, skip);
 }
 
 /*!
@@ -291,9 +285,8 @@ void QCPCurve::setScatterSkip(int skip)
   
   \see setScatterStyle
 */
-void QCPCurve::setLineStyle(QCPCurve::LineStyle style)
-{
-  mLineStyle = style;
+void QCPCurve::setLineStyle(QCPCurve::LineStyle style) {
+    mLineStyle = style;
 }
 
 /*! \overload
@@ -308,24 +301,24 @@ void QCPCurve::setLineStyle(QCPCurve::LineStyle style)
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPCurve::addData(const QVector<double> &t, const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
-{
-  if (t.size() != keys.size() || t.size() != values.size())
-    qDebug() << Q_FUNC_INFO << "ts, keys and values have different sizes:" << t.size() << keys.size() << values.size();
-  const int n = qMin(qMin(t.size(), keys.size()), values.size());
-  QVector<QCPCurveData> tempData(n);
-  QVector<QCPCurveData>::iterator it = tempData.begin();
-  const QVector<QCPCurveData>::iterator itEnd = tempData.end();
-  int i = 0;
-  while (it != itEnd)
-  {
-    it->t = t[i];
-    it->key = keys[i];
-    it->value = values[i];
-    ++it;
-    ++i;
-  }
-  mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
+void QCPCurve::addData(const QVector<double> &t, const QVector<double> &keys, const QVector<double> &values,
+                       bool alreadySorted) {
+    if (t.size() != keys.size() || t.size() != values.size())
+        qDebug() << Q_FUNC_INFO << "ts, keys and values have different sizes:" << t.size() << keys.size()
+                 << values.size();
+    const int n = qMin(qMin(t.size(), keys.size()), values.size());
+    QVector<QCPCurveData> tempData(n);
+    QVector<QCPCurveData>::iterator it = tempData.begin();
+    const QVector<QCPCurveData>::iterator itEnd = tempData.end();
+    int i = 0;
+    while (it != itEnd) {
+        it->t = t[i];
+        it->key = keys[i];
+        it->value = values[i];
+        ++it;
+        ++i;
+    }
+    mDataContainer->add(tempData, alreadySorted); // don't modify tempData beyond this to prevent copy on write
 }
 
 /*! \overload
@@ -340,29 +333,27 @@ void QCPCurve::addData(const QVector<double> &t, const QVector<double> &keys, co
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPCurve::addData(const QVector<double> &keys, const QVector<double> &values)
-{
-  if (keys.size() != values.size())
-    qDebug() << Q_FUNC_INFO << "keys and values have different sizes:" << keys.size() << values.size();
-  const int n = qMin(keys.size(), values.size());
-  double tStart;
-  if (!mDataContainer->isEmpty())
-    tStart = (mDataContainer->constEnd()-1)->t + 1.0;
-  else
-    tStart = 0;
-  QVector<QCPCurveData> tempData(n);
-  QVector<QCPCurveData>::iterator it = tempData.begin();
-  const QVector<QCPCurveData>::iterator itEnd = tempData.end();
-  int i = 0;
-  while (it != itEnd)
-  {
-    it->t = tStart + i;
-    it->key = keys[i];
-    it->value = values[i];
-    ++it;
-    ++i;
-  }
-  mDataContainer->add(tempData, true); // don't modify tempData beyond this to prevent copy on write
+void QCPCurve::addData(const QVector<double> &keys, const QVector<double> &values) {
+    if (keys.size() != values.size())
+        qDebug() << Q_FUNC_INFO << "keys and values have different sizes:" << keys.size() << values.size();
+    const int n = qMin(keys.size(), values.size());
+    double tStart;
+    if (!mDataContainer->isEmpty())
+        tStart = (mDataContainer->constEnd() - 1)->t + 1.0;
+    else
+        tStart = 0;
+    QVector<QCPCurveData> tempData(n);
+    QVector<QCPCurveData>::iterator it = tempData.begin();
+    const QVector<QCPCurveData>::iterator itEnd = tempData.end();
+    int i = 0;
+    while (it != itEnd) {
+        it->t = tStart + i;
+        it->key = keys[i];
+        it->value = values[i];
+        ++it;
+        ++i;
+    }
+    mDataContainer->add(tempData, true); // don't modify tempData beyond this to prevent copy on write
 }
 
 /*! \overload
@@ -371,9 +362,8 @@ void QCPCurve::addData(const QVector<double> &keys, const QVector<double> &value
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPCurve::addData(double t, double key, double value)
-{
-  mDataContainer->add(QCPCurveData(t, key, value));
+void QCPCurve::addData(double t, double key, double value) {
+    mDataContainer->add(QCPCurveData(t, key, value));
 }
 
 /*! \overload
@@ -386,12 +376,11 @@ void QCPCurve::addData(double t, double key, double value)
   Alternatively, you can also access and modify the data directly via the \ref data method, which
   returns a pointer to the internal data container.
 */
-void QCPCurve::addData(double key, double value)
-{
-  if (!mDataContainer->isEmpty())
-    mDataContainer->add(QCPCurveData((mDataContainer->constEnd()-1)->t + 1.0, key, value));
-  else
-    mDataContainer->add(QCPCurveData(0.0, key, value));
+void QCPCurve::addData(double key, double value) {
+    if (!mDataContainer->isEmpty())
+        mDataContainer->add(QCPCurveData((mDataContainer->constEnd() - 1)->t + 1.0, key, value));
+    else
+        mDataContainer->add(QCPCurveData(0.0, key, value));
 }
 
 /*!
@@ -402,140 +391,133 @@ void QCPCurve::addData(double key, double value)
   
   \seebaseclassmethod \ref QCPAbstractPlottable::selectTest
 */
-double QCPCurve::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const
-{
-  if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
-    return -1;
-  if (!mKeyAxis || !mValueAxis)
-    return -1;
-  
-  if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()))
-  {
-    QCPCurveDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
-    double result = pointDistance(pos, closestDataPoint);
-    if (details)
-    {
-      int pointIndex = closestDataPoint-mDataContainer->constBegin();
-      details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex+1)));
-    }
-    return result;
-  } else
-    return -1;
-}
+double QCPCurve::selectTest(const QPointF &pos, bool onlySelectable, QVariant *details) const {
+    if ((onlySelectable && mSelectable == QCP::stNone) || mDataContainer->isEmpty())
+        return -1;
+    if (!mKeyAxis || !mValueAxis)
+        return -1;
 
-/* inherits documentation from base class */
-QCPRange QCPCurve::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const
-{
-  return mDataContainer->keyRange(foundRange, inSignDomain);
-}
-
-/* inherits documentation from base class */
-QCPRange QCPCurve::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const
-{
-  return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
-}
-
-/* inherits documentation from base class */
-void QCPCurve::draw(QCPPainter *painter)
-{
-  if (mDataContainer->isEmpty()) return;
-  
-  // allocate line vector:
-  QVector<QPointF> lines, scatters;
-  
-  // loop over and draw segments of unselected/selected data:
-  QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
-  getDataSegments(selectedSegments, unselectedSegments);
-  allSegments << unselectedSegments << selectedSegments;
-  for (int i=0; i<allSegments.size(); ++i)
-  {
-    bool isSelectedSegment = i >= unselectedSegments.size();
-    
-    // fill with curve data:
-    QPen finalCurvePen = mPen; // determine the final pen already here, because the line optimization depends on its stroke width
-    if (isSelectedSegment && mSelectionDecorator)
-      finalCurvePen = mSelectionDecorator->pen();
-    
-    QCPDataRange lineDataRange = isSelectedSegment ? allSegments.at(i) : allSegments.at(i).adjusted(-1, 1); // unselected segments extend lines to bordering selected data point (safe to exceed total data bounds in first/last segment, getCurveLines takes care)
-    getCurveLines(&lines, lineDataRange, finalCurvePen.widthF());
-    
-    // check data validity if flag set:
-  #ifdef QCUSTOMPLOT_CHECK_DATA
-    for (QCPCurveDataContainer::const_iterator it = mDataContainer->constBegin(); it != mDataContainer->constEnd(); ++it)
-    {
-      if (QCP::isInvalidData(it->t) ||
-          QCP::isInvalidData(it->key, it->value))
-        qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "invalid." << "Plottable name:" << name();
-    }
-  #endif
-    
-    // draw curve fill:
-    applyFillAntialiasingHint(painter);
-    if (isSelectedSegment && mSelectionDecorator)
-      mSelectionDecorator->applyBrush(painter);
-    else
-      painter->setBrush(mBrush);
-    painter->setPen(Qt::NoPen);
-    if (painter->brush().style() != Qt::NoBrush && painter->brush().color().alpha() != 0)
-      painter->drawPolygon(QPolygonF(lines));
-    
-    // draw curve line:
-    if (mLineStyle != lsNone)
-    {
-      painter->setPen(finalCurvePen);
-      painter->setBrush(Qt::NoBrush);
-      drawCurveLine(painter, lines);
-    }
-    
-    // draw scatters:
-    QCPScatterStyle finalScatterStyle = mScatterStyle;
-    if (isSelectedSegment && mSelectionDecorator)
-      finalScatterStyle = mSelectionDecorator->getFinalScatterStyle(mScatterStyle);
-    if (!finalScatterStyle.isNone())
-    {
-      getScatters(&scatters, allSegments.at(i), finalScatterStyle.size());
-      drawScatterPlot(painter, scatters, finalScatterStyle);
-    }
-  }
-  
-  // draw other selection decoration that isn't just line/scatter pens and brushes:
-  if (mSelectionDecorator)
-    mSelectionDecorator->drawDecoration(painter, selection());
-}
-
-/* inherits documentation from base class */
-void QCPCurve::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
-{
-  // draw fill:
-  if (mBrush.style() != Qt::NoBrush)
-  {
-    applyFillAntialiasingHint(painter);
-    painter->fillRect(QRectF(rect.left(), rect.top()+rect.height()/2.0, rect.width(), rect.height()/3.0), mBrush);
-  }
-  // draw line vertically centered:
-  if (mLineStyle != lsNone)
-  {
-    applyDefaultAntialiasingHint(painter);
-    painter->setPen(mPen);
-    painter->drawLine(QLineF(rect.left(), rect.top()+rect.height()/2.0, rect.right()+5, rect.top()+rect.height()/2.0)); // +5 on x2 else last segment is missing from dashed/dotted pens
-  }
-  // draw scatter symbol:
-  if (!mScatterStyle.isNone())
-  {
-    applyScattersAntialiasingHint(painter);
-    // scale scatter pixmap if it's too large to fit in legend icon rect:
-    if (mScatterStyle.shape() == QCPScatterStyle::ssPixmap && (mScatterStyle.pixmap().size().width() > rect.width() || mScatterStyle.pixmap().size().height() > rect.height()))
-    {
-      QCPScatterStyle scaledStyle(mScatterStyle);
-      scaledStyle.setPixmap(scaledStyle.pixmap().scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-      scaledStyle.applyTo(painter, mPen);
-      scaledStyle.drawShape(painter, QRectF(rect).center());
+    if (mKeyAxis.data()->axisRect()->rect().contains(pos.toPoint()) ||
+        mParentPlot->interactions().testFlag(QCP::iSelectPlottablesBeyondAxisRect)) {
+        QCPCurveDataContainer::const_iterator closestDataPoint = mDataContainer->constEnd();
+        double result = pointDistance(pos, closestDataPoint);
+        if (details) {
+            int pointIndex = int(closestDataPoint - mDataContainer->constBegin());
+            details->setValue(QCPDataSelection(QCPDataRange(pointIndex, pointIndex + 1)));
+        }
+        return result;
     } else
-    {
-      mScatterStyle.applyTo(painter, mPen);
-      mScatterStyle.drawShape(painter, QRectF(rect).center());
+        return -1;
+}
+
+/* inherits documentation from base class */
+QCPRange QCPCurve::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) const {
+    return mDataContainer->keyRange(foundRange, inSignDomain);
+}
+
+/* inherits documentation from base class */
+QCPRange QCPCurve::getValueRange(bool &foundRange, QCP::SignDomain inSignDomain, const QCPRange &inKeyRange) const {
+    return mDataContainer->valueRange(foundRange, inSignDomain, inKeyRange);
+}
+
+/* inherits documentation from base class */
+void QCPCurve::draw(QCPPainter *painter) {
+    if (mDataContainer->isEmpty()) return;
+
+    // allocate line vector:
+    QVector<QPointF> lines, scatters;
+
+    // loop over and draw segments of unselected/selected data:
+    QList<QCPDataRange> selectedSegments, unselectedSegments, allSegments;
+    getDataSegments(selectedSegments, unselectedSegments);
+    allSegments << unselectedSegments << selectedSegments;
+    for (int i = 0; i < allSegments.size(); ++i) {
+        bool isSelectedSegment = i >= unselectedSegments.size();
+
+        // fill with curve data:
+        QPen finalCurvePen = mPen; // determine the final pen already here, because the line optimization depends on its stroke width
+        if (isSelectedSegment && mSelectionDecorator)
+            finalCurvePen = mSelectionDecorator->pen();
+
+        QCPDataRange lineDataRange = isSelectedSegment ? allSegments.at(i) : allSegments.at(i).adjusted(-1,
+                                                                                                        1); // unselected segments extend lines to bordering selected data point (safe to exceed total data bounds in first/last segment, getCurveLines takes care)
+        getCurveLines(&lines, lineDataRange, finalCurvePen.widthF());
+
+        // check data validity if flag set:
+#ifdef QCUSTOMPLOT_CHECK_DATA
+        for (QCPCurveDataContainer::const_iterator it = mDataContainer->constBegin(); it != mDataContainer->constEnd(); ++it)
+        {
+          if (QCP::isInvalidData(it->t) ||
+              QCP::isInvalidData(it->key, it->value))
+            qDebug() << Q_FUNC_INFO << "Data point at" << it->key << "invalid." << "Plottable name:" << name();
+        }
+#endif
+
+        // draw curve fill:
+        applyFillAntialiasingHint(painter);
+        if (isSelectedSegment && mSelectionDecorator)
+            mSelectionDecorator->applyBrush(painter);
+        else
+            painter->setBrush(mBrush);
+        painter->setPen(Qt::NoPen);
+        if (painter->brush().style() != Qt::NoBrush && painter->brush().color().alpha() != 0)
+            painter->drawPolygon(QPolygonF(lines));
+
+        // draw curve line:
+        if (mLineStyle != lsNone) {
+            painter->setPen(finalCurvePen);
+            painter->setBrush(Qt::NoBrush);
+            drawCurveLine(painter, lines);
+        }
+
+        // draw scatters:
+        QCPScatterStyle finalScatterStyle = mScatterStyle;
+        if (isSelectedSegment && mSelectionDecorator)
+            finalScatterStyle = mSelectionDecorator->getFinalScatterStyle(mScatterStyle);
+        if (!finalScatterStyle.isNone()) {
+            getScatters(&scatters, allSegments.at(i), finalScatterStyle.size());
+            drawScatterPlot(painter, scatters, finalScatterStyle);
+        }
     }
-  }
+
+    // draw other selection decoration that isn't just line/scatter pens and brushes:
+    if (mSelectionDecorator)
+        mSelectionDecorator->drawDecoration(painter, selection());
+}
+
+/* inherits documentation from base class */
+void QCPCurve::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {
+    // draw fill:
+    if (mBrush.style() != Qt::NoBrush) {
+        applyFillAntialiasingHint(painter);
+        painter->fillRect(QRectF(rect.left(), rect.top() + rect.height() / 2.0, rect.width(), rect.height() / 3.0),
+                          mBrush);
+    }
+    // draw line vertically centered:
+    if (mLineStyle != lsNone) {
+        applyDefaultAntialiasingHint(painter);
+        painter->setPen(mPen);
+        painter->drawLine(QLineF(rect.left(), rect.top() + rect.height() / 2.0, rect.right() + 5, rect.top() +
+                                                                                                  rect.height() /
+                                                                                                  2.0)); // +5 on x2 else last segment is missing from dashed/dotted pens
+    }
+    // draw scatter symbol:
+    if (!mScatterStyle.isNone()) {
+        applyScattersAntialiasingHint(painter);
+        // scale scatter pixmap if it's too large to fit in legend icon rect:
+        if (mScatterStyle.shape() == QCPScatterStyle::ssPixmap &&
+            (mScatterStyle.pixmap().size().width() > rect.width() ||
+             mScatterStyle.pixmap().size().height() > rect.height())) {
+            QCPScatterStyle scaledStyle(mScatterStyle);
+            scaledStyle.setPixmap(
+                    scaledStyle.pixmap().scaled(rect.size().toSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            scaledStyle.applyTo(painter, mPen);
+            scaledStyle.drawShape(painter, QRectF(rect).center());
+        } else {
+            mScatterStyle.applyTo(painter, mPen);
+            mScatterStyle.drawShape(painter, QRectF(rect).center());
+        }
+    }
 }
 
 /*!  \internal
@@ -544,13 +526,11 @@ void QCPCurve::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
 
   \see drawScatterPlot, getCurveLines
 */
-void QCPCurve::drawCurveLine(QCPPainter *painter, const QVector<QPointF> &lines) const
-{
-  if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0)
-  {
-    applyDefaultAntialiasingHint(painter);
-    drawPolyline(painter, lines);
-  }
+void QCPCurve::drawCurveLine(QCPPainter *painter, const QVector<QPointF> &lines) const {
+    if (painter->pen().style() != Qt::NoPen && painter->pen().color().alpha() != 0) {
+        applyDefaultAntialiasingHint(painter);
+        drawPolyline(painter, lines);
+    }
 }
 
 /*! \internal
@@ -560,14 +540,13 @@ void QCPCurve::drawCurveLine(QCPPainter *painter, const QVector<QPointF> &lines)
 
   \see drawCurveLine, getCurveLines
 */
-void QCPCurve::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &points, const QCPScatterStyle &style) const
-{
-  // draw scatter point symbols:
-  applyScattersAntialiasingHint(painter);
-  style.applyTo(painter, mPen);
-  for (int i=0; i<points.size(); ++i)
-    if (!qIsNaN(points.at(i).x()) && !qIsNaN(points.at(i).y()))
-      style.drawShape(painter,  points.at(i));
+void
+QCPCurve::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &points, const QCPScatterStyle &style) const {
+    // draw scatter point symbols:
+    applyScattersAntialiasingHint(painter);
+    style.applyTo(painter, mPen);
+            foreach (const QPointF &point, points) if (!qIsNaN(point.x()) && !qIsNaN(point.y()))
+            style.drawShape(painter, point);
 }
 
 /*! \internal
@@ -598,87 +577,100 @@ void QCPCurve::drawScatterPlot(QCPPainter *painter, const QVector<QPointF> &poin
 
   \see drawCurveLine, drawScatterPlot
 */
-void QCPCurve::getCurveLines(QVector<QPointF> *lines, const QCPDataRange &dataRange, double penWidth) const
-{
-  if (!lines) return;
-  lines->clear();
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  
-  // add margins to rect to compensate for stroke width
-  const double strokeMargin = qMax(qreal(1.0), qreal(penWidth*0.75)); // stroke radius + 50% safety
-  const double keyMin = keyAxis->pixelToCoord(keyAxis->coordToPixel(keyAxis->range().lower)-strokeMargin*keyAxis->pixelOrientation());
-  const double keyMax = keyAxis->pixelToCoord(keyAxis->coordToPixel(keyAxis->range().upper)+strokeMargin*keyAxis->pixelOrientation());
-  const double valueMin = valueAxis->pixelToCoord(valueAxis->coordToPixel(valueAxis->range().lower)-strokeMargin*valueAxis->pixelOrientation());
-  const double valueMax = valueAxis->pixelToCoord(valueAxis->coordToPixel(valueAxis->range().upper)+strokeMargin*valueAxis->pixelOrientation());
-  QCPCurveDataContainer::const_iterator itBegin = mDataContainer->constBegin();
-  QCPCurveDataContainer::const_iterator itEnd = mDataContainer->constEnd();
-  mDataContainer->limitIteratorsToDataRange(itBegin, itEnd, dataRange);
-  if (itBegin == itEnd)
-    return;
-  QCPCurveDataContainer::const_iterator it = itBegin;
-  QCPCurveDataContainer::const_iterator prevIt = itEnd-1;
-  int prevRegion = getRegion(prevIt->key, prevIt->value, keyMin, valueMax, keyMax, valueMin);
-  QVector<QPointF> trailingPoints; // points that must be applied after all other points (are generated only when handling first point to get virtual segment between last and first point right)
-  while (it != itEnd)
-  {
-    const int currentRegion = getRegion(it->key, it->value, keyMin, valueMax, keyMax, valueMin);
-    if (currentRegion != prevRegion) // changed region, possibly need to add some optimized edge points or original points if entering R
-    {
-      if (currentRegion != 5) // segment doesn't end in R, so it's a candidate for removal
-      {
-        QPointF crossA, crossB;
-        if (prevRegion == 5) // we're coming from R, so add this point optimized
-        {
-          lines->append(getOptimizedPoint(currentRegion, it->key, it->value, prevIt->key, prevIt->value, keyMin, valueMax, keyMax, valueMin));
-          // in the situations 5->1/7/9/3 the segment may leave R and directly cross through two outer regions. In these cases we need to add an additional corner point
-          *lines << getOptimizedCornerPoints(prevRegion, currentRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax, valueMin);
-        } else if (mayTraverse(prevRegion, currentRegion) &&
-                   getTraverse(prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax, valueMin, crossA, crossB))
-        {
-          // add the two cross points optimized if segment crosses R and if segment isn't virtual zeroth segment between last and first curve point:
-          QVector<QPointF> beforeTraverseCornerPoints, afterTraverseCornerPoints;
-          getTraverseCornerPoints(prevRegion, currentRegion, keyMin, valueMax, keyMax, valueMin, beforeTraverseCornerPoints, afterTraverseCornerPoints);
-          if (it != itBegin)
-          {
-            *lines << beforeTraverseCornerPoints;
-            lines->append(crossA);
-            lines->append(crossB);
-            *lines << afterTraverseCornerPoints;
-          } else
-          {
-            lines->append(crossB);
-            *lines << afterTraverseCornerPoints;
-            trailingPoints << beforeTraverseCornerPoints << crossA ;
-          }
-        } else // doesn't cross R, line is just moving around in outside regions, so only need to add optimized point(s) at the boundary corner(s)
-        {
-          *lines << getOptimizedCornerPoints(prevRegion, currentRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax, valueMin);
-        }
-      } else // segment does end in R, so we add previous point optimized and this point at original position
-      {
-        if (it == itBegin) // it is first point in curve and prevIt is last one. So save optimized point for adding it to the lineData in the end
-          trailingPoints << getOptimizedPoint(prevRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax, valueMin);
-        else
-          lines->append(getOptimizedPoint(prevRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax, valueMin));
-        lines->append(coordsToPixels(it->key, it->value));
-      }
-    } else // region didn't change
-    {
-      if (currentRegion == 5) // still in R, keep adding original points
-      {
-        lines->append(coordsToPixels(it->key, it->value));
-      } else // still outside R, no need to add anything
-      {
-        // see how this is not doing anything? That's the main optimization...
-      }
+void QCPCurve::getCurveLines(QVector<QPointF> *lines, const QCPDataRange &dataRange, double penWidth) const {
+    if (!lines) return;
+    lines->clear();
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
     }
-    prevIt = it;
-    prevRegion = currentRegion;
-    ++it;
-  }
-  *lines << trailingPoints;
+
+    // add margins to rect to compensate for stroke width
+    const double strokeMargin = qMax(qreal(1.0), qreal(penWidth * 0.75)); // stroke radius + 50% safety
+    const double keyMin = keyAxis->pixelToCoord(
+            keyAxis->coordToPixel(keyAxis->range().lower) - strokeMargin * keyAxis->pixelOrientation());
+    const double keyMax = keyAxis->pixelToCoord(
+            keyAxis->coordToPixel(keyAxis->range().upper) + strokeMargin * keyAxis->pixelOrientation());
+    const double valueMin = valueAxis->pixelToCoord(
+            valueAxis->coordToPixel(valueAxis->range().lower) - strokeMargin * valueAxis->pixelOrientation());
+    const double valueMax = valueAxis->pixelToCoord(
+            valueAxis->coordToPixel(valueAxis->range().upper) + strokeMargin * valueAxis->pixelOrientation());
+    QCPCurveDataContainer::const_iterator itBegin = mDataContainer->constBegin();
+    QCPCurveDataContainer::const_iterator itEnd = mDataContainer->constEnd();
+    mDataContainer->limitIteratorsToDataRange(itBegin, itEnd, dataRange);
+    if (itBegin == itEnd)
+        return;
+    QCPCurveDataContainer::const_iterator it = itBegin;
+    QCPCurveDataContainer::const_iterator prevIt = itEnd - 1;
+    int prevRegion = getRegion(prevIt->key, prevIt->value, keyMin, valueMax, keyMax, valueMin);
+    QVector<QPointF> trailingPoints; // points that must be applied after all other points (are generated only when handling first point to get virtual segment between last and first point right)
+    while (it != itEnd) {
+        const int currentRegion = getRegion(it->key, it->value, keyMin, valueMax, keyMax, valueMin);
+        if (currentRegion !=
+            prevRegion) // changed region, possibly need to add some optimized edge points or original points if entering R
+        {
+            if (currentRegion != 5) // segment doesn't end in R, so it's a candidate for removal
+            {
+                QPointF crossA, crossB;
+                if (prevRegion == 5) // we're coming from R, so add this point optimized
+                {
+                    lines->append(
+                            getOptimizedPoint(currentRegion, it->key, it->value, prevIt->key, prevIt->value, keyMin,
+                                              valueMax, keyMax, valueMin));
+                    // in the situations 5->1/7/9/3 the segment may leave R and directly cross through two outer regions. In these cases we need to add an additional corner point
+                    *lines << getOptimizedCornerPoints(prevRegion, currentRegion, prevIt->key, prevIt->value, it->key,
+                                                       it->value, keyMin, valueMax, keyMax, valueMin);
+                } else if (mayTraverse(prevRegion, currentRegion) &&
+                           getTraverse(prevIt->key, prevIt->value, it->key, it->value, keyMin, valueMax, keyMax,
+                                       valueMin, crossA, crossB)) {
+                    // add the two cross points optimized if segment crosses R and if segment isn't virtual zeroth segment between last and first curve point:
+                    QVector<QPointF> beforeTraverseCornerPoints, afterTraverseCornerPoints;
+                    getTraverseCornerPoints(prevRegion, currentRegion, keyMin, valueMax, keyMax, valueMin,
+                                            beforeTraverseCornerPoints, afterTraverseCornerPoints);
+                    if (it != itBegin) {
+                        *lines << beforeTraverseCornerPoints;
+                        lines->append(crossA);
+                        lines->append(crossB);
+                        *lines << afterTraverseCornerPoints;
+                    } else {
+                        lines->append(crossB);
+                        *lines << afterTraverseCornerPoints;
+                        trailingPoints << beforeTraverseCornerPoints << crossA;
+                    }
+                } else // doesn't cross R, line is just moving around in outside regions, so only need to add optimized point(s) at the boundary corner(s)
+                {
+                    *lines << getOptimizedCornerPoints(prevRegion, currentRegion, prevIt->key, prevIt->value, it->key,
+                                                       it->value, keyMin, valueMax, keyMax, valueMin);
+                }
+            } else // segment does end in R, so we add previous point optimized and this point at original position
+            {
+                if (it ==
+                    itBegin) // it is first point in curve and prevIt is last one. So save optimized point for adding it to the lineData in the end
+                    trailingPoints
+                            << getOptimizedPoint(prevRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin,
+                                                 valueMax, keyMax, valueMin);
+                else
+                    lines->append(getOptimizedPoint(prevRegion, prevIt->key, prevIt->value, it->key, it->value, keyMin,
+                                                    valueMax, keyMax, valueMin));
+                lines->append(coordsToPixels(it->key, it->value));
+            }
+        } else // region didn't change
+        {
+            if (currentRegion == 5) // still in R, keep adding original points
+            {
+                lines->append(coordsToPixels(it->key, it->value));
+            } else // still outside R, no need to add anything
+            {
+                // see how this is not doing anything? That's the main optimization...
+            }
+        }
+        prevIt = it;
+        prevRegion = currentRegion;
+        ++it;
+    }
+    *lines << trailingPoints;
 }
 
 /*! \internal
@@ -701,83 +693,82 @@ void QCPCurve::getCurveLines(QVector<QPointF> *lines, const QCPDataRange &dataRa
 
   \see draw, drawScatterPlot
 */
-void QCPCurve::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataRange, double scatterWidth) const
-{
-  if (!scatters) return;
-  scatters->clear();
-  QCPAxis *keyAxis = mKeyAxis.data();
-  QCPAxis *valueAxis = mValueAxis.data();
-  if (!keyAxis || !valueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-  
-  QCPCurveDataContainer::const_iterator begin = mDataContainer->constBegin();
-  QCPCurveDataContainer::const_iterator end = mDataContainer->constEnd();
-  mDataContainer->limitIteratorsToDataRange(begin, end, dataRange);
-  if (begin == end)
-    return;
-  const int scatterModulo = mScatterSkip+1;
-  const bool doScatterSkip = mScatterSkip > 0;
-  int endIndex = end-mDataContainer->constBegin();
-  
-  QCPRange keyRange = keyAxis->range();
-  QCPRange valueRange = valueAxis->range();
-  // extend range to include width of scatter symbols:
-  keyRange.lower = keyAxis->pixelToCoord(keyAxis->coordToPixel(keyRange.lower)-scatterWidth*keyAxis->pixelOrientation());
-  keyRange.upper = keyAxis->pixelToCoord(keyAxis->coordToPixel(keyRange.upper)+scatterWidth*keyAxis->pixelOrientation());
-  valueRange.lower = valueAxis->pixelToCoord(valueAxis->coordToPixel(valueRange.lower)-scatterWidth*valueAxis->pixelOrientation());
-  valueRange.upper = valueAxis->pixelToCoord(valueAxis->coordToPixel(valueRange.upper)+scatterWidth*valueAxis->pixelOrientation());
-  
-  QCPCurveDataContainer::const_iterator it = begin;
-  int itIndex = begin-mDataContainer->constBegin();
-  while (doScatterSkip && it != end && itIndex % scatterModulo != 0) // advance begin iterator to first non-skipped scatter
-  {
-    ++itIndex;
-    ++it;
-  }
-  if (keyAxis->orientation() == Qt::Vertical)
-  {
-    while (it != end)
-    {
-      if (!qIsNaN(it->value) && keyRange.contains(it->key) && valueRange.contains(it->value))
-        scatters->append(QPointF(valueAxis->coordToPixel(it->value), keyAxis->coordToPixel(it->key)));
-      
-      // advance iterator to next (non-skipped) data point:
-      if (!doScatterSkip)
-        ++it;
-      else
-      {
-        itIndex += scatterModulo;
-        if (itIndex < endIndex) // make sure we didn't jump over end
-          it += scatterModulo;
-        else
-        {
-          it = end;
-          itIndex = endIndex;
-        }
-      }
+void QCPCurve::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataRange, double scatterWidth) const {
+    if (!scatters) return;
+    scatters->clear();
+    QCPAxis *keyAxis = mKeyAxis.data();
+    QCPAxis *valueAxis = mValueAxis.data();
+    if (!keyAxis || !valueAxis) {
+        qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+        return;
     }
-  } else
-  {
-    while (it != end)
+
+    QCPCurveDataContainer::const_iterator begin = mDataContainer->constBegin();
+    QCPCurveDataContainer::const_iterator end = mDataContainer->constEnd();
+    mDataContainer->limitIteratorsToDataRange(begin, end, dataRange);
+    if (begin == end)
+        return;
+    const int scatterModulo = mScatterSkip + 1;
+    const bool doScatterSkip = mScatterSkip > 0;
+    int endIndex = int(end - mDataContainer->constBegin());
+
+    QCPRange keyRange = keyAxis->range();
+    QCPRange valueRange = valueAxis->range();
+    // extend range to include width of scatter symbols:
+    keyRange.lower = keyAxis->pixelToCoord(
+            keyAxis->coordToPixel(keyRange.lower) - scatterWidth * keyAxis->pixelOrientation());
+    keyRange.upper = keyAxis->pixelToCoord(
+            keyAxis->coordToPixel(keyRange.upper) + scatterWidth * keyAxis->pixelOrientation());
+    valueRange.lower = valueAxis->pixelToCoord(
+            valueAxis->coordToPixel(valueRange.lower) - scatterWidth * valueAxis->pixelOrientation());
+    valueRange.upper = valueAxis->pixelToCoord(
+            valueAxis->coordToPixel(valueRange.upper) + scatterWidth * valueAxis->pixelOrientation());
+
+    QCPCurveDataContainer::const_iterator it = begin;
+    int itIndex = int(begin - mDataContainer->constBegin());
+    while (doScatterSkip && it != end &&
+           itIndex % scatterModulo != 0) // advance begin iterator to first non-skipped scatter
     {
-      if (!qIsNaN(it->value) && keyRange.contains(it->key) && valueRange.contains(it->value))
-        scatters->append(QPointF(keyAxis->coordToPixel(it->key), valueAxis->coordToPixel(it->value)));
-      
-      // advance iterator to next (non-skipped) data point:
-      if (!doScatterSkip)
+        ++itIndex;
         ++it;
-      else
-      {
-        itIndex += scatterModulo;
-        if (itIndex < endIndex) // make sure we didn't jump over end
-          it += scatterModulo;
-        else
-        {
-          it = end;
-          itIndex = endIndex;
-        }
-      }
     }
-  }
+    if (keyAxis->orientation() == Qt::Vertical) {
+        while (it != end) {
+            if (!qIsNaN(it->value) && keyRange.contains(it->key) && valueRange.contains(it->value))
+                scatters->append(QPointF(valueAxis->coordToPixel(it->value), keyAxis->coordToPixel(it->key)));
+
+            // advance iterator to next (non-skipped) data point:
+            if (!doScatterSkip)
+                ++it;
+            else {
+                itIndex += scatterModulo;
+                if (itIndex < endIndex) // make sure we didn't jump over end
+                    it += scatterModulo;
+                else {
+                    it = end;
+                    itIndex = endIndex;
+                }
+            }
+        }
+    } else {
+        while (it != end) {
+            if (!qIsNaN(it->value) && keyRange.contains(it->key) && valueRange.contains(it->value))
+                scatters->append(QPointF(keyAxis->coordToPixel(it->key), valueAxis->coordToPixel(it->value)));
+
+            // advance iterator to next (non-skipped) data point:
+            if (!doScatterSkip)
+                ++it;
+            else {
+                itIndex += scatterModulo;
+                if (itIndex < endIndex) // make sure we didn't jump over end
+                    it += scatterModulo;
+                else {
+                    it = end;
+                    itIndex = endIndex;
+                }
+            }
+        }
+    }
 }
 
 /*! \internal
@@ -799,33 +790,33 @@ void QCPCurve::getScatters(QVector<QPointF> *scatters, const QCPDataRange &dataR
   With the rectangle being region 5, and the outer regions extending infinitely outwards. In the
   curve optimization algorithm, region 5 is considered to be the visible portion of the plot.
 */
-int QCPCurve::getRegion(double key, double value, double keyMin, double valueMax, double keyMax, double valueMin) const
-{
-  if (key < keyMin) // region 123
-  {
-    if (value > valueMax)
-      return 1;
-    else if (value < valueMin)
-      return 3;
-    else
-      return 2;
-  } else if (key > keyMax) // region 789
-  {
-    if (value > valueMax)
-      return 7;
-    else if (value < valueMin)
-      return 9;
-    else
-      return 8;
-  } else // region 456
-  {
-    if (value > valueMax)
-      return 4;
-    else if (value < valueMin)
-      return 6;
-    else
-      return 5;
-  }
+int
+QCPCurve::getRegion(double key, double value, double keyMin, double valueMax, double keyMax, double valueMin) const {
+    if (key < keyMin) // region 123
+    {
+        if (value > valueMax)
+            return 1;
+        else if (value < valueMin)
+            return 3;
+        else
+            return 2;
+    } else if (key > keyMax) // region 789
+    {
+        if (value > valueMax)
+            return 7;
+        else if (value < valueMin)
+            return 9;
+        else
+            return 8;
+    } else // region 456
+    {
+        if (value > valueMax)
+            return 4;
+        else if (value < valueMin)
+            return 6;
+        else
+            return 5;
+    }
 }
 
 /*! \internal
@@ -843,102 +834,116 @@ int QCPCurve::getRegion(double key, double value, double keyMin, double valueMax
   leaving it. It is important though that \a otherRegion correctly identifies the other region not
   equal to 5.
 */
-QPointF QCPCurve::getOptimizedPoint(int otherRegion, double otherKey, double otherValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin) const
-{
-  // The intersection point interpolation here is done in pixel coordinates, so we don't need to
-  // differentiate between different axis scale types. Note that the nomenclature
-  // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
-  // different in pixel coordinates (horz/vert key axes, reversed ranges)
-  
-  const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
-  const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
-  const double valueMinPx = mValueAxis->coordToPixel(valueMin);
-  const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
-  const double otherValuePx = mValueAxis->coordToPixel(otherValue);
-  const double valuePx = mValueAxis->coordToPixel(value);
-  const double otherKeyPx = mKeyAxis->coordToPixel(otherKey);
-  const double keyPx = mKeyAxis->coordToPixel(key);
-  double intersectKeyPx = keyMinPx; // initial key just a fail-safe
-  double intersectValuePx = valueMinPx; // initial value just a fail-safe
-  switch (otherRegion)
-  {
-    case 1: // top and left edge
-    {
-      intersectValuePx = valueMaxPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether top edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
-      {
-        intersectKeyPx = keyMinPx;
-        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      }
-      break;
+QPointF QCPCurve::getOptimizedPoint(int otherRegion, double otherKey, double otherValue, double key, double value,
+                                    double keyMin, double valueMax, double keyMax, double valueMin) const {
+    // The intersection point interpolation here is done in pixel coordinates, so we don't need to
+    // differentiate between different axis scale types. Note that the nomenclature
+    // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
+    // different in pixel coordinates (horz/vert key axes, reversed ranges)
+
+    const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
+    const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
+    const double valueMinPx = mValueAxis->coordToPixel(valueMin);
+    const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
+    const double otherValuePx = mValueAxis->coordToPixel(otherValue);
+    const double valuePx = mValueAxis->coordToPixel(value);
+    const double otherKeyPx = mKeyAxis->coordToPixel(otherKey);
+    const double keyPx = mKeyAxis->coordToPixel(key);
+    double intersectKeyPx = keyMinPx; // initial key just a fail-safe
+    double intersectValuePx = valueMinPx; // initial value just a fail-safe
+    switch (otherRegion) {
+        case 1: // top and left edge
+        {
+            intersectValuePx = valueMaxPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx,
+                                                                                   keyMaxPx)) // check whether top edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
+            {
+                intersectKeyPx = keyMinPx;
+                intersectValuePx =
+                        otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            }
+            break;
+        }
+        case 2: // left edge
+        {
+            intersectKeyPx = keyMinPx;
+            intersectValuePx =
+                    otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            break;
+        }
+        case 3: // bottom and left edge
+        {
+            intersectValuePx = valueMinPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx,
+                                                                                   keyMaxPx)) // check whether bottom edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
+            {
+                intersectKeyPx = keyMinPx;
+                intersectValuePx =
+                        otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            }
+            break;
+        }
+        case 4: // top edge
+        {
+            intersectValuePx = valueMaxPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            break;
+        }
+        case 5: {
+            break; // case 5 shouldn't happen for this function but we add it anyway to prevent potential discontinuity in branch table
+        }
+        case 6: // bottom edge
+        {
+            intersectValuePx = valueMinPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            break;
+        }
+        case 7: // top and right edge
+        {
+            intersectValuePx = valueMaxPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx,
+                                                                                   keyMaxPx)) // check whether top edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
+            {
+                intersectKeyPx = keyMaxPx;
+                intersectValuePx =
+                        otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            }
+            break;
+        }
+        case 8: // right edge
+        {
+            intersectKeyPx = keyMaxPx;
+            intersectValuePx =
+                    otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            break;
+        }
+        case 9: // bottom and right edge
+        {
+            intersectValuePx = valueMinPx;
+            intersectKeyPx =
+                    otherKeyPx + (keyPx - otherKeyPx) / (valuePx - otherValuePx) * (intersectValuePx - otherValuePx);
+            if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx,
+                                                                                   keyMaxPx)) // check whether bottom edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
+            {
+                intersectKeyPx = keyMaxPx;
+                intersectValuePx =
+                        otherValuePx + (valuePx - otherValuePx) / (keyPx - otherKeyPx) * (intersectKeyPx - otherKeyPx);
+            }
+            break;
+        }
     }
-    case 2: // left edge
-    {
-      intersectKeyPx = keyMinPx;
-      intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      break;
-    }
-    case 3: // bottom and left edge
-    {
-      intersectValuePx = valueMinPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether bottom edge is not intersected, then it must be left edge (qMin/qMax necessary since axes may be reversed)
-      {
-        intersectKeyPx = keyMinPx;
-        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      }
-      break;
-    }
-    case 4: // top edge
-    {
-      intersectValuePx = valueMaxPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      break;
-    }
-    case 5:
-    {
-      break; // case 5 shouldn't happen for this function but we add it anyway to prevent potential discontinuity in branch table
-    }
-    case 6: // bottom edge
-    {
-      intersectValuePx = valueMinPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      break;
-    }
-    case 7: // top and right edge
-    {
-      intersectValuePx = valueMaxPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether top edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
-      {
-        intersectKeyPx = keyMaxPx;
-        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      }
-      break;
-    }
-    case 8: // right edge
-    {
-      intersectKeyPx = keyMaxPx;
-      intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      break;
-    }
-    case 9: // bottom and right edge
-    {
-      intersectValuePx = valueMinPx;
-      intersectKeyPx = otherKeyPx + (keyPx-otherKeyPx)/(valuePx-otherValuePx)*(intersectValuePx-otherValuePx);
-      if (intersectKeyPx < qMin(keyMinPx, keyMaxPx) || intersectKeyPx > qMax(keyMinPx, keyMaxPx)) // check whether bottom edge is not intersected, then it must be right edge (qMin/qMax necessary since axes may be reversed)
-      {
-        intersectKeyPx = keyMaxPx;
-        intersectValuePx = otherValuePx + (valuePx-otherValuePx)/(keyPx-otherKeyPx)*(intersectKeyPx-otherKeyPx);
-      }
-      break;
-    }
-  }
-  if (mKeyAxis->orientation() == Qt::Horizontal)
-    return QPointF(intersectKeyPx, intersectValuePx);
-  else
-    return QPointF(intersectValuePx, intersectKeyPx);
+    if (mKeyAxis->orientation() == Qt::Horizontal)
+        return {intersectKeyPx, intersectValuePx};
+    else
+        return {intersectValuePx, intersectKeyPx};
 }
 
 /*! \internal
@@ -959,156 +964,358 @@ QPointF QCPCurve::getOptimizedPoint(int otherRegion, double otherKey, double oth
   the top left corner, making the optimized curve correctly pass from region 4 to 1 to 2 without
   traversing 5.
 */
-QVector<QPointF> QCPCurve::getOptimizedCornerPoints(int prevRegion, int currentRegion, double prevKey, double prevValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin) const
-{
-  QVector<QPointF> result;
-  switch (prevRegion)
-  {
-    case 1:
-    {
-      switch (currentRegion)
-      {
-        case 2: { result << coordsToPixels(keyMin, valueMax); break; }
-        case 4: { result << coordsToPixels(keyMin, valueMax); break; }
-        case 3: { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin); break; }
-        case 7: { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax); break; }
-        case 6: { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin); result.append(result.last()); break; }
-        case 8: { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax); result.append(result.last()); break; }
-        case 9: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
-          if ((value-prevValue)/(key-prevKey)*(keyMin-key)+value < valueMin) // segment passes below R
-          { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin); result.append(result.last()); result << coordsToPixels(keyMax, valueMin); }
-          else
-          { result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax); result.append(result.last()); result << coordsToPixels(keyMax, valueMin); }
-          break;
+QVector<QPointF>
+QCPCurve::getOptimizedCornerPoints(int prevRegion, int currentRegion, double prevKey, double prevValue, double key,
+                                   double value, double keyMin, double valueMax, double keyMax, double valueMin) const {
+    QVector<QPointF> result;
+    switch (prevRegion) {
+        case 1: {
+            switch (currentRegion) {
+                case 2: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 4: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 6: {
+                    result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 9: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
+                    if ((value - prevValue) / (key - prevKey) * (keyMin - key) + value <
+                        valueMin) // segment passes below R
+                    {
+                        result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMin, valueMin);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMax, valueMin);
+                    }
+                    else {
+                        result << coordsToPixels(keyMin, valueMax) << coordsToPixels(keyMax, valueMax);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMax, valueMin);
+                    }
+                    break;
+                }
+            }
+            break;
         }
-      }
-      break;
-    }
-    case 2:
-    {
-      switch (currentRegion)
-      {
-        case 1: { result << coordsToPixels(keyMin, valueMax); break; }
-        case 3: { result << coordsToPixels(keyMin, valueMin); break; }
-        case 4: { result << coordsToPixels(keyMin, valueMax); result.append(result.last()); break; }
-        case 6: { result << coordsToPixels(keyMin, valueMin); result.append(result.last()); break; }
-        case 7: { result << coordsToPixels(keyMin, valueMax); result.append(result.last()); result << coordsToPixels(keyMax, valueMax); break; }
-        case 9: { result << coordsToPixels(keyMin, valueMin); result.append(result.last()); result << coordsToPixels(keyMax, valueMin); break; }
-      }
-      break;
-    }
-    case 3:
-    {
-      switch (currentRegion)
-      {
-        case 2: { result << coordsToPixels(keyMin, valueMin); break; }
-        case 6: { result << coordsToPixels(keyMin, valueMin); break; }
-        case 1: { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax); break; }
-        case 9: { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin); break; }
-        case 4: { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax); result.append(result.last()); break; }
-        case 8: { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin); result.append(result.last()); break; }
-        case 7: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
-          if ((value-prevValue)/(key-prevKey)*(keyMax-key)+value < valueMin) // segment passes below R
-          { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin); result.append(result.last()); result << coordsToPixels(keyMax, valueMax); }
-          else
-          { result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax); result.append(result.last()); result << coordsToPixels(keyMax, valueMax); }
-          break;
+        case 2: {
+            switch (currentRegion) {
+                case 1: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 4: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 6: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+            }
+            break;
         }
-      }
-      break;
-    }
-    case 4:
-    {
-      switch (currentRegion)
-      {
-        case 1: { result << coordsToPixels(keyMin, valueMax); break; }
-        case 7: { result << coordsToPixels(keyMax, valueMax); break; }
-        case 2: { result << coordsToPixels(keyMin, valueMax); result.append(result.last()); break; }
-        case 8: { result << coordsToPixels(keyMax, valueMax); result.append(result.last()); break; }
-        case 3: { result << coordsToPixels(keyMin, valueMax); result.append(result.last()); result << coordsToPixels(keyMin, valueMin); break; }
-        case 9: { result << coordsToPixels(keyMax, valueMax); result.append(result.last()); result << coordsToPixels(keyMax, valueMin); break; }
-      }
-      break;
-    }
-    case 5:
-    {
-      switch (currentRegion)
-      {
-        case 1: { result << coordsToPixels(keyMin, valueMax); break; }
-        case 7: { result << coordsToPixels(keyMax, valueMax); break; }
-        case 9: { result << coordsToPixels(keyMax, valueMin); break; }
-        case 3: { result << coordsToPixels(keyMin, valueMin); break; }
-      }
-      break;
-    }
-    case 6:
-    {
-      switch (currentRegion)
-      {
-        case 3: { result << coordsToPixels(keyMin, valueMin); break; }
-        case 9: { result << coordsToPixels(keyMax, valueMin); break; }
-        case 2: { result << coordsToPixels(keyMin, valueMin); result.append(result.last()); break; }
-        case 8: { result << coordsToPixels(keyMax, valueMin); result.append(result.last()); break; }
-        case 1: { result << coordsToPixels(keyMin, valueMin); result.append(result.last()); result << coordsToPixels(keyMin, valueMax); break; }
-        case 7: { result << coordsToPixels(keyMax, valueMin); result.append(result.last()); result << coordsToPixels(keyMax, valueMax); break; }
-      }
-      break;
-    }
-    case 7:
-    {
-      switch (currentRegion)
-      {
-        case 4: { result << coordsToPixels(keyMax, valueMax); break; }
-        case 8: { result << coordsToPixels(keyMax, valueMax); break; }
-        case 1: { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax); break; }
-        case 9: { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin); break; }
-        case 2: { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax); result.append(result.last()); break; }
-        case 6: { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin); result.append(result.last()); break; }
-        case 3: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
-          if ((value-prevValue)/(key-prevKey)*(keyMax-key)+value < valueMin) // segment passes below R
-          { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin); result.append(result.last()); result << coordsToPixels(keyMin, valueMin); }
-          else
-          { result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax); result.append(result.last()); result << coordsToPixels(keyMin, valueMin); }
-          break;
+        case 3: {
+            switch (currentRegion) {
+                case 2: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 6: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 1: {
+                    result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 4: {
+                    result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 7: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
+                    if ((value - prevValue) / (key - prevKey) * (keyMax - key) + value <
+                        valueMin) // segment passes below R
+                    {
+                        result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMax, valueMin);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMax, valueMax);
+                    }
+                    else {
+                        result << coordsToPixels(keyMin, valueMin) << coordsToPixels(keyMin, valueMax);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMax, valueMax);
+                    }
+                    break;
+                }
+            }
+            break;
         }
-      }
-      break;
-    }
-    case 8:
-    {
-      switch (currentRegion)
-      {
-        case 7: { result << coordsToPixels(keyMax, valueMax); break; }
-        case 9: { result << coordsToPixels(keyMax, valueMin); break; }
-        case 4: { result << coordsToPixels(keyMax, valueMax); result.append(result.last()); break; }
-        case 6: { result << coordsToPixels(keyMax, valueMin); result.append(result.last()); break; }
-        case 1: { result << coordsToPixels(keyMax, valueMax); result.append(result.last()); result << coordsToPixels(keyMin, valueMax); break; }
-        case 3: { result << coordsToPixels(keyMax, valueMin); result.append(result.last()); result << coordsToPixels(keyMin, valueMin); break; }
-      }
-      break;
-    }
-    case 9:
-    {
-      switch (currentRegion)
-      {
-        case 6: { result << coordsToPixels(keyMax, valueMin); break; }
-        case 8: { result << coordsToPixels(keyMax, valueMin); break; }
-        case 3: { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin); break; }
-        case 7: { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax); break; }
-        case 2: { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin); result.append(result.last()); break; }
-        case 4: { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax); result.append(result.last()); break; }
-        case 1: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
-          if ((value-prevValue)/(key-prevKey)*(keyMin-key)+value < valueMin) // segment passes below R
-          { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin); result.append(result.last()); result << coordsToPixels(keyMin, valueMax); }
-          else
-          { result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax); result.append(result.last()); result << coordsToPixels(keyMin, valueMax); }
-          break;
+        case 4: {
+            switch (currentRegion) {
+                case 1: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 2: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+            }
+            break;
         }
-      }
-      break;
+        case 5: {
+            switch (currentRegion) {
+                case 1: {
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 6: {
+            switch (currentRegion) {
+                case 3: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 2: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 1: {
+                    result << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+            }
+            break;
+        }
+        case 7: {
+            switch (currentRegion) {
+                case 4: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 1: {
+                    result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 2: {
+                    result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 6: {
+                    result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 3: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
+                    if ((value - prevValue) / (key - prevKey) * (keyMax - key) + value <
+                        valueMin) // segment passes below R
+                    {
+                        result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMax, valueMin);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMin, valueMin);
+                    }
+                    else {
+                        result << coordsToPixels(keyMax, valueMax) << coordsToPixels(keyMin, valueMax);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMin, valueMin);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 8: {
+            switch (currentRegion) {
+                case 7: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 9: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 4: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 6: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 1: {
+                    result << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    result.append(result.last());
+                    result << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 9: {
+            switch (currentRegion) {
+                case 6: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 8: {
+                    result << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 3: {
+                    result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 7: {
+                    result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 2: {
+                    result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin);
+                    result.append(result.last());
+                    break;
+                }
+                case 4: {
+                    result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax);
+                    result.append(result.last());
+                    break;
+                }
+                case 1: { // in this case we need another distinction of cases: segment may pass below or above rect, requiring either bottom right or top left corner points
+                    if ((value - prevValue) / (key - prevKey) * (keyMin - key) + value <
+                        valueMin) // segment passes below R
+                    {
+                        result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMin, valueMin);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMin, valueMax);
+                    }
+                    else {
+                        result << coordsToPixels(keyMax, valueMin) << coordsToPixels(keyMax, valueMax);
+                        result.append(result.last());
+                        result << coordsToPixels(keyMin, valueMax);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 /*! \internal
@@ -1123,93 +1330,93 @@ QVector<QPointF> QCPCurve::getOptimizedCornerPoints(int prevRegion, int currentR
   segment may or may not pass region 5 and a more fine-grained calculation must be used (\ref
   getTraverse).
 */
-bool QCPCurve::mayTraverse(int prevRegion, int currentRegion) const
-{
-  switch (prevRegion)
-  {
-    case 1:
-    {
-      switch (currentRegion)
-      {
-        case 4:
-        case 7:
-        case 2:
-        case 3: return false;
-        default: return true;
-      }
+bool QCPCurve::mayTraverse(int prevRegion, int currentRegion) const {
+    switch (prevRegion) {
+        case 1: {
+            switch (currentRegion) {
+                case 4:
+                case 7:
+                case 2:
+                case 3:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 2: {
+            switch (currentRegion) {
+                case 1:
+                case 3:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 3: {
+            switch (currentRegion) {
+                case 1:
+                case 2:
+                case 6:
+                case 9:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 4: {
+            switch (currentRegion) {
+                case 1:
+                case 7:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 5:
+            return false; // should never occur
+        case 6: {
+            switch (currentRegion) {
+                case 3:
+                case 9:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 7: {
+            switch (currentRegion) {
+                case 1:
+                case 4:
+                case 8:
+                case 9:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 8: {
+            switch (currentRegion) {
+                case 7:
+                case 9:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        case 9: {
+            switch (currentRegion) {
+                case 3:
+                case 6:
+                case 8:
+                case 7:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+        default:
+            return true;
     }
-    case 2:
-    {
-      switch (currentRegion)
-      {
-        case 1:
-        case 3: return false;
-        default: return true;
-      }
-    }
-    case 3:
-    {
-      switch (currentRegion)
-      {
-        case 1:
-        case 2:
-        case 6:
-        case 9: return false;
-        default: return true;
-      }
-    }
-    case 4:
-    {
-      switch (currentRegion)
-      {
-        case 1:
-        case 7: return false;
-        default: return true;
-      }
-    }
-    case 5: return false; // should never occur
-    case 6:
-    {
-      switch (currentRegion)
-      {
-        case 3:
-        case 9: return false;
-        default: return true;
-      }
-    }
-    case 7:
-    {
-      switch (currentRegion)
-      {
-        case 1:
-        case 4:
-        case 8:
-        case 9: return false;
-        default: return true;
-      }
-    }
-    case 8:
-    {
-      switch (currentRegion)
-      {
-        case 7:
-        case 9: return false;
-        default: return true;
-      }
-    }
-    case 9:
-    {
-      switch (currentRegion)
-      {
-        case 3:
-        case 6:
-        case 8:
-        case 7: return false;
-        default: return true;
-      }
-    }
-    default: return true;
-  }
 }
 
 
@@ -1226,92 +1433,104 @@ bool QCPCurve::mayTraverse(int prevRegion, int currentRegion) const
   If the segment traverses 5, the output parameters \a crossA and \a crossB indicate the entry and
   exit points of region 5. They will become the optimized points for that segment.
 */
-bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin, QPointF &crossA, QPointF &crossB) const
-{
-  // The intersection point interpolation here is done in pixel coordinates, so we don't need to
-  // differentiate between different axis scale types. Note that the nomenclature
-  // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
-  // different in pixel coordinates (horz/vert key axes, reversed ranges)
-  
-  QList<QPointF> intersections;
-  const double valueMinPx = mValueAxis->coordToPixel(valueMin);
-  const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
-  const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
-  const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
-  const double keyPx = mKeyAxis->coordToPixel(key);
-  const double valuePx = mValueAxis->coordToPixel(value);
-  const double prevKeyPx = mKeyAxis->coordToPixel(prevKey);
-  const double prevValuePx = mValueAxis->coordToPixel(prevValue);
-  if (qFuzzyIsNull(key-prevKey)) // line is parallel to value axis
-  {
-    // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
-    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMinPx) : QPointF(valueMinPx, keyPx)); // direction will be taken care of at end of method
-    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMaxPx) : QPointF(valueMaxPx, keyPx));
-  } else if (qFuzzyIsNull(value-prevValue)) // line is parallel to key axis
-  {
-    // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
-    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, valuePx) : QPointF(valuePx, keyMinPx)); // direction will be taken care of at end of method
-    intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, valuePx) : QPointF(valuePx, keyMaxPx));
-  } else // line is skewed
-  {
-    double gamma;
-    double keyPerValuePx = (keyPx-prevKeyPx)/(valuePx-prevValuePx);
-    // check top of rect:
-    gamma = prevKeyPx + (valueMaxPx-prevValuePx)*keyPerValuePx;
-    if (gamma >= qMin(keyMinPx, keyMaxPx) && gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
-      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMaxPx) : QPointF(valueMaxPx, gamma));
-    // check bottom of rect:
-    gamma = prevKeyPx + (valueMinPx-prevValuePx)*keyPerValuePx;
-    if (gamma >= qMin(keyMinPx, keyMaxPx) && gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
-      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMinPx) : QPointF(valueMinPx, gamma));
-    const double valuePerKeyPx = 1.0/keyPerValuePx;
-    // check left of rect:
-    gamma = prevValuePx + (keyMinPx-prevKeyPx)*valuePerKeyPx;
-    if (gamma >= qMin(valueMinPx, valueMaxPx) && gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
-      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, gamma) : QPointF(gamma, keyMinPx));
-    // check right of rect:
-    gamma = prevValuePx + (keyMaxPx-prevKeyPx)*valuePerKeyPx;
-    if (gamma >= qMin(valueMinPx, valueMaxPx) && gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
-      intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, gamma) : QPointF(gamma, keyMaxPx));
-  }
-  
-  // handle cases where found points isn't exactly 2:
-  if (intersections.size() > 2)
-  {
-    // line probably goes through corner of rect, and we got duplicate points there. single out the point pair with greatest distance in between:
-    double distSqrMax = 0;
-    QPointF pv1, pv2;
-    for (int i=0; i<intersections.size()-1; ++i)
+bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double value, double keyMin, double valueMax,
+                           double keyMax, double valueMin, QPointF &crossA, QPointF &crossB) const {
+    // The intersection point interpolation here is done in pixel coordinates, so we don't need to
+    // differentiate between different axis scale types. Note that the nomenclature
+    // top/left/bottom/right/min/max is with respect to the rect in plot coordinates, wich may be
+    // different in pixel coordinates (horz/vert key axes, reversed ranges)
+
+    QList<QPointF> intersections;
+    const double valueMinPx = mValueAxis->coordToPixel(valueMin);
+    const double valueMaxPx = mValueAxis->coordToPixel(valueMax);
+    const double keyMinPx = mKeyAxis->coordToPixel(keyMin);
+    const double keyMaxPx = mKeyAxis->coordToPixel(keyMax);
+    const double keyPx = mKeyAxis->coordToPixel(key);
+    const double valuePx = mValueAxis->coordToPixel(value);
+    const double prevKeyPx = mKeyAxis->coordToPixel(prevKey);
+    const double prevValuePx = mValueAxis->coordToPixel(prevValue);
+    if (qFuzzyIsNull(keyPx - prevKeyPx)) // line is parallel to value axis
     {
-      for (int k=i+1; k<intersections.size(); ++k)
-      {
-        QPointF distPoint = intersections.at(i)-intersections.at(k);
-        double distSqr = distPoint.x()*distPoint.x()+distPoint.y()+distPoint.y();
-        if (distSqr > distSqrMax)
-        {
-          pv1 = intersections.at(i);
-          pv2 = intersections.at(k);
-          distSqrMax = distSqr;
-        }
-      }
+        // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
+        intersections.append(
+                mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMinPx) : QPointF(valueMinPx,
+                                                                                                 keyPx)); // direction will be taken care of at end of method
+        intersections.append(
+                mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyPx, valueMaxPx) : QPointF(valueMaxPx, keyPx));
+    } else if (qFuzzyIsNull(valuePx - prevValuePx)) // line is parallel to key axis
+    {
+        // due to region filter in mayTraverse(), if line is parallel to value or key axis, region 5 is traversed here
+        intersections.append(mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, valuePx) : QPointF(valuePx,
+                                                                                                              keyMinPx)); // direction will be taken care of at end of method
+        intersections.append(
+                mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, valuePx) : QPointF(valuePx, keyMaxPx));
+    } else // line is skewed
+    {
+        double gamma;
+        double keyPerValuePx = (keyPx - prevKeyPx) / (valuePx - prevValuePx);
+        // check top of rect:
+        gamma = prevKeyPx + (valueMaxPx - prevValuePx) * keyPerValuePx;
+        if (gamma >= qMin(keyMinPx, keyMaxPx) &&
+            gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
+            intersections.append(
+                    mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMaxPx) : QPointF(valueMaxPx,
+                                                                                                     gamma));
+        // check bottom of rect:
+        gamma = prevKeyPx + (valueMinPx - prevValuePx) * keyPerValuePx;
+        if (gamma >= qMin(keyMinPx, keyMaxPx) &&
+            gamma <= qMax(keyMinPx, keyMaxPx)) // qMin/qMax necessary since axes may be reversed
+            intersections.append(
+                    mKeyAxis->orientation() == Qt::Horizontal ? QPointF(gamma, valueMinPx) : QPointF(valueMinPx,
+                                                                                                     gamma));
+        const double valuePerKeyPx = 1.0 / keyPerValuePx;
+        // check left of rect:
+        gamma = prevValuePx + (keyMinPx - prevKeyPx) * valuePerKeyPx;
+        if (gamma >= qMin(valueMinPx, valueMaxPx) &&
+            gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
+            intersections.append(
+                    mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMinPx, gamma) : QPointF(gamma, keyMinPx));
+        // check right of rect:
+        gamma = prevValuePx + (keyMaxPx - prevKeyPx) * valuePerKeyPx;
+        if (gamma >= qMin(valueMinPx, valueMaxPx) &&
+            gamma <= qMax(valueMinPx, valueMaxPx)) // qMin/qMax necessary since axes may be reversed
+            intersections.append(
+                    mKeyAxis->orientation() == Qt::Horizontal ? QPointF(keyMaxPx, gamma) : QPointF(gamma, keyMaxPx));
     }
-    intersections = QList<QPointF>() << pv1 << pv2;
-  } else if (intersections.size() != 2)
-  {
-    // one or even zero points found (shouldn't happen unless line perfectly tangent to corner), no need to draw segment
-    return false;
-  }
-  
-  // possibly re-sort points so optimized point segment has same direction as original segment:
-  double xDelta = keyPx-prevKeyPx;
-  double yDelta = valuePx-prevValuePx;
-  if (mKeyAxis->orientation() != Qt::Horizontal)
-    qSwap(xDelta, yDelta);
-  if (xDelta*(intersections.at(1).x()-intersections.at(0).x()) + yDelta*(intersections.at(1).y()-intersections.at(0).y()) < 0) // scalar product of both segments < 0 -> opposite direction
-    intersections.move(0, 1);
-  crossA = intersections.at(0);
-  crossB = intersections.at(1);
-  return true;
+
+    // handle cases where found points isn't exactly 2:
+    if (intersections.size() > 2) {
+        // line probably goes through corner of rect, and we got duplicate points there. single out the point pair with greatest distance in between:
+        double distSqrMax = 0;
+        QPointF pv1, pv2;
+        for (int i = 0; i < intersections.size() - 1; ++i) {
+            for (int k = i + 1; k < intersections.size(); ++k) {
+                QPointF distPoint = intersections.at(i) - intersections.at(k);
+                double distSqr = distPoint.x() * distPoint.x() + distPoint.y() + distPoint.y();
+                if (distSqr > distSqrMax) {
+                    pv1 = intersections.at(i);
+                    pv2 = intersections.at(k);
+                    distSqrMax = distSqr;
+                }
+            }
+        }
+        intersections = QList<QPointF>() << pv1 << pv2;
+    } else if (intersections.size() != 2) {
+        // one or even zero points found (shouldn't happen unless line perfectly tangent to corner), no need to draw segment
+        return false;
+    }
+
+    // possibly re-sort points so optimized point segment has same direction as original segment:
+    double xDelta = keyPx - prevKeyPx;
+    double yDelta = valuePx - prevValuePx;
+    if (mKeyAxis->orientation() != Qt::Horizontal)
+        qSwap(xDelta, yDelta);
+    if (xDelta * (intersections.at(1).x() - intersections.at(0).x()) +
+        yDelta * (intersections.at(1).y() - intersections.at(0).y()) <
+        0) // scalar product of both segments < 0 -> opposite direction
+        intersections.move(0, 1);
+    crossA = intersections.at(0);
+    crossB = intersections.at(1);
+    return true;
 }
 
 /*! \internal
@@ -1339,88 +1558,138 @@ bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double 
   corner points before and after the traverse. Then both \a beforeTraverse and \a afterTraverse
   return the respective corner points.
 */
-void QCPCurve::getTraverseCornerPoints(int prevRegion, int currentRegion, double keyMin, double valueMax, double keyMax, double valueMin, QVector<QPointF> &beforeTraverse, QVector<QPointF> &afterTraverse) const
-{
-  switch (prevRegion)
-  {
-    case 1:
-    {
-      switch (currentRegion)
-      {
-        case 6: { beforeTraverse << coordsToPixels(keyMin, valueMax); break; }
-        case 9: { beforeTraverse << coordsToPixels(keyMin, valueMax); afterTraverse << coordsToPixels(keyMax, valueMin); break; }
-        case 8: { beforeTraverse << coordsToPixels(keyMin, valueMax); break; }
-      }
-      break;
+void QCPCurve::getTraverseCornerPoints(int prevRegion, int currentRegion, double keyMin, double valueMax, double keyMax,
+                                       double valueMin, QVector<QPointF> &beforeTraverse,
+                                       QVector<QPointF> &afterTraverse) const {
+    switch (prevRegion) {
+        case 1: {
+            switch (currentRegion) {
+                case 6: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 9: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMax);
+                    afterTraverse << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 8: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+            }
+            break;
+        }
+        case 2: {
+            switch (currentRegion) {
+                case 7: {
+                    afterTraverse << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 9: {
+                    afterTraverse << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 3: {
+            switch (currentRegion) {
+                case 4: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 7: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMin);
+                    afterTraverse << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 8: {
+                    beforeTraverse << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 4: {
+            switch (currentRegion) {
+                case 3: {
+                    afterTraverse << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 9: {
+                    afterTraverse << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 5: {
+            break;
+        } // shouldn't happen because this method only handles full traverses
+        case 6: {
+            switch (currentRegion) {
+                case 1: {
+                    afterTraverse << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 7: {
+                    afterTraverse << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+            }
+            break;
+        }
+        case 7: {
+            switch (currentRegion) {
+                case 2: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+                case 3: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMax);
+                    afterTraverse << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+                case 6: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMax);
+                    break;
+                }
+            }
+            break;
+        }
+        case 8: {
+            switch (currentRegion) {
+                case 1: {
+                    afterTraverse << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 3: {
+                    afterTraverse << coordsToPixels(keyMin, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
+        case 9: {
+            switch (currentRegion) {
+                case 2: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+                case 1: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMin);
+                    afterTraverse << coordsToPixels(keyMin, valueMax);
+                    break;
+                }
+                case 4: {
+                    beforeTraverse << coordsToPixels(keyMax, valueMin);
+                    break;
+                }
+            }
+            break;
+        }
     }
-    case 2:
-    {
-      switch (currentRegion)
-      {
-        case 7: { afterTraverse << coordsToPixels(keyMax, valueMax); break; }
-        case 9: { afterTraverse << coordsToPixels(keyMax, valueMin); break; }
-      }
-      break;
-    }
-    case 3:
-    {
-      switch (currentRegion)
-      {
-        case 4: { beforeTraverse << coordsToPixels(keyMin, valueMin); break; }
-        case 7: { beforeTraverse << coordsToPixels(keyMin, valueMin); afterTraverse << coordsToPixels(keyMax, valueMax); break; }
-        case 8: { beforeTraverse << coordsToPixels(keyMin, valueMin); break; }
-      }
-      break;
-    }
-    case 4:
-    {
-      switch (currentRegion)
-      {
-        case 3: { afterTraverse << coordsToPixels(keyMin, valueMin); break; }
-        case 9: { afterTraverse << coordsToPixels(keyMax, valueMin); break; }
-      }
-      break;
-    }
-    case 5: { break; } // shouldn't happen because this method only handles full traverses
-    case 6:
-    {
-      switch (currentRegion)
-      {
-        case 1: { afterTraverse << coordsToPixels(keyMin, valueMax); break; }
-        case 7: { afterTraverse << coordsToPixels(keyMax, valueMax); break; }
-      }
-      break;
-    }
-    case 7:
-    {
-      switch (currentRegion)
-      {
-        case 2: { beforeTraverse << coordsToPixels(keyMax, valueMax); break; }
-        case 3: { beforeTraverse << coordsToPixels(keyMax, valueMax); afterTraverse << coordsToPixels(keyMin, valueMin); break; }
-        case 6: { beforeTraverse << coordsToPixels(keyMax, valueMax); break; }
-      }
-      break;
-    }
-    case 8:
-    {
-      switch (currentRegion)
-      {
-        case 1: { afterTraverse << coordsToPixels(keyMin, valueMax); break; }
-        case 3: { afterTraverse << coordsToPixels(keyMin, valueMin); break; }
-      }
-      break;
-    }
-    case 9:
-    {
-      switch (currentRegion)
-      {
-        case 2: { beforeTraverse << coordsToPixels(keyMax, valueMin); break; }
-        case 1: { beforeTraverse << coordsToPixels(keyMax, valueMin); afterTraverse << coordsToPixels(keyMin, valueMax); break; }
-        case 4: { beforeTraverse << coordsToPixels(keyMax, valueMin); break; }
-      }
-      break;
-    }
-  }
 }
 
 /*! \internal
@@ -1435,48 +1704,43 @@ void QCPCurve::getTraverseCornerPoints(int prevRegion, int currentRegion, double
   is \ref QCPScatterStyle::ssNone (i.e. there is no visual representation of the curve), returns
   -1.0.
 */
-double QCPCurve::pointDistance(const QPointF &pixelPoint, QCPCurveDataContainer::const_iterator &closestData) const
-{
-  closestData = mDataContainer->constEnd();
-  if (mDataContainer->isEmpty())
-    return -1.0;
-  if (mLineStyle == lsNone && mScatterStyle.isNone())
-    return -1.0;
-  
-  if (mDataContainer->size() == 1)
-  {
-    QPointF dataPoint = coordsToPixels(mDataContainer->constBegin()->key, mDataContainer->constBegin()->value);
-    closestData = mDataContainer->constBegin();
-    return QCPVector2D(dataPoint-pixelPoint).length();
-  }
-  
-  // calculate minimum distances to curve data points and find closestData iterator:
-  double minDistSqr = (std::numeric_limits<double>::max)();
-  // iterate over found data points and then choose the one with the shortest distance to pos:
-  QCPCurveDataContainer::const_iterator begin = mDataContainer->constBegin();
-  QCPCurveDataContainer::const_iterator end = mDataContainer->constEnd();
-  for (QCPCurveDataContainer::const_iterator it=begin; it!=end; ++it)
-  {
-    const double currentDistSqr = QCPVector2D(coordsToPixels(it->key, it->value)-pixelPoint).lengthSquared();
-    if (currentDistSqr < minDistSqr)
-    {
-      minDistSqr = currentDistSqr;
-      closestData = it;
+double QCPCurve::pointDistance(const QPointF &pixelPoint, QCPCurveDataContainer::const_iterator &closestData) const {
+    closestData = mDataContainer->constEnd();
+    if (mDataContainer->isEmpty())
+        return -1.0;
+    if (mLineStyle == lsNone && mScatterStyle.isNone())
+        return -1.0;
+
+    if (mDataContainer->size() == 1) {
+        QPointF dataPoint = coordsToPixels(mDataContainer->constBegin()->key, mDataContainer->constBegin()->value);
+        closestData = mDataContainer->constBegin();
+        return QCPVector2D(dataPoint - pixelPoint).length();
     }
-  }
-  
-  // calculate distance to line if there is one (if so, will probably be smaller than distance to closest data point):
-  if (mLineStyle != lsNone)
-  {
-    QVector<QPointF> lines;
-    getCurveLines(&lines, QCPDataRange(0, dataCount()), mParentPlot->selectionTolerance()*1.2); // optimized lines outside axis rect shouldn't respond to clicks at the edge, so use 1.2*tolerance as pen width
-    for (int i=0; i<lines.size()-1; ++i)
-    {
-      double currentDistSqr = QCPVector2D(pixelPoint).distanceSquaredToLine(lines.at(i), lines.at(i+1));
-      if (currentDistSqr < minDistSqr)
-        minDistSqr = currentDistSqr;
+
+    // calculate minimum distances to curve data points and find closestData iterator:
+    double minDistSqr = (std::numeric_limits<double>::max)();
+    // iterate over found data points and then choose the one with the shortest distance to pos:
+    QCPCurveDataContainer::const_iterator begin = mDataContainer->constBegin();
+    QCPCurveDataContainer::const_iterator end = mDataContainer->constEnd();
+    for (QCPCurveDataContainer::const_iterator it = begin; it != end; ++it) {
+        const double currentDistSqr = QCPVector2D(coordsToPixels(it->key, it->value) - pixelPoint).lengthSquared();
+        if (currentDistSqr < minDistSqr) {
+            minDistSqr = currentDistSqr;
+            closestData = it;
+        }
     }
-  }
-  
-  return qSqrt(minDistSqr);
+
+    // calculate distance to line if there is one (if so, will probably be smaller than distance to closest data point):
+    if (mLineStyle != lsNone) {
+        QVector<QPointF> lines;
+        getCurveLines(&lines, QCPDataRange(0, dataCount()), mParentPlot->selectionTolerance() *
+                                                            1.2); // optimized lines outside axis rect shouldn't respond to clicks at the edge, so use 1.2*tolerance as pen width
+        for (int i = 0; i < lines.size() - 1; ++i) {
+            double currentDistSqr = QCPVector2D(pixelPoint).distanceSquaredToLine(lines.at(i), lines.at(i + 1));
+            if (currentDistSqr < minDistSqr)
+                minDistSqr = currentDistSqr;
+        }
+    }
+
+    return qSqrt(minDistSqr);
 }

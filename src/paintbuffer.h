@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_PAINTBUFFER_H
@@ -30,58 +30,67 @@
 
 class QCPPainter;
 
-class QCP_LIB_DECL QCPAbstractPaintBuffer
-{
+class QCP_LIB_DECL QCPAbstractPaintBuffer {
 public:
-  explicit QCPAbstractPaintBuffer(const QSize &size, double devicePixelRatio);
-  virtual ~QCPAbstractPaintBuffer();
-  
-  // getters:
-  QSize size() const { return mSize; }
-  bool invalidated() const { return mInvalidated; }
-  double devicePixelRatio() const { return mDevicePixelRatio; }
-  
-  // setters:
-  void setSize(const QSize &size);
-  void setInvalidated(bool invalidated=true);
-  void setDevicePixelRatio(double ratio);
-  
-  // introduced virtual methods:
-  virtual QCPPainter *startPainting() = 0;
-  virtual void donePainting() {}
-  virtual void draw(QCPPainter *painter) const = 0;
-  virtual void clear(const QColor &color) = 0;
-  
+    explicit QCPAbstractPaintBuffer(const QSize &size, double devicePixelRatio);
+
+    virtual ~QCPAbstractPaintBuffer();
+
+    // getters:
+    QSize size() const { return mSize; }
+
+    bool invalidated() const { return mInvalidated; }
+
+    double devicePixelRatio() const { return mDevicePixelRatio; }
+
+    // setters:
+    void setSize(const QSize &size);
+
+    void setInvalidated(bool invalidated = true);
+
+    void setDevicePixelRatio(double ratio);
+
+    // introduced virtual methods:
+    virtual QCPPainter *startPainting() = 0;
+
+    virtual void donePainting() {}
+
+    virtual void draw(QCPPainter *painter) const = 0;
+
+    virtual void clear(const QColor &color) = 0;
+
 protected:
-  // property members:
-  QSize mSize;
-  double mDevicePixelRatio;
-  
-  // non-property members:
-  bool mInvalidated;
-  
-  // introduced virtual methods:
-  virtual void reallocateBuffer() = 0;
+    // property members:
+    QSize mSize;
+    double mDevicePixelRatio;
+
+    // non-property members:
+    bool mInvalidated;
+
+    // introduced virtual methods:
+    virtual void reallocateBuffer() = 0;
 };
 
 
-class QCP_LIB_DECL QCPPaintBufferPixmap : public QCPAbstractPaintBuffer
-{
+class QCP_LIB_DECL QCPPaintBufferPixmap : public QCPAbstractPaintBuffer {
 public:
-  explicit QCPPaintBufferPixmap(const QSize &size, double devicePixelRatio);
-  virtual ~QCPPaintBufferPixmap();
-  
-  // reimplemented virtual methods:
-  virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
-  virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
-  void clear(const QColor &color) Q_DECL_OVERRIDE;
-  
+    explicit QCPPaintBufferPixmap(const QSize &size, double devicePixelRatio);
+
+    virtual ~QCPPaintBufferPixmap() Q_DECL_OVERRIDE;
+
+    // reimplemented virtual methods:
+    virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
+
+    virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
+
+    void clear(const QColor &color) Q_DECL_OVERRIDE;
+
 protected:
-  // non-property members:
-  QPixmap mBuffer;
-  
-  // reimplemented virtual methods:
-  virtual void reallocateBuffer() Q_DECL_OVERRIDE;
+    // non-property members:
+    QPixmap mBuffer;
+
+    // reimplemented virtual methods:
+    virtual void reallocateBuffer() Q_DECL_OVERRIDE;
 };
 
 
@@ -90,7 +99,7 @@ class QCP_LIB_DECL QCPPaintBufferGlPbuffer : public QCPAbstractPaintBuffer
 {
 public:
   explicit QCPPaintBufferGlPbuffer(const QSize &size, double devicePixelRatio, int multisamples);
-  virtual ~QCPPaintBufferGlPbuffer();
+  virtual ~QCPPaintBufferGlPbuffer() Q_DECL_OVERRIDE;
   
   // reimplemented virtual methods:
   virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
@@ -109,27 +118,33 @@ protected:
 
 
 #ifdef QCP_OPENGL_FBO
-class QCP_LIB_DECL QCPPaintBufferGlFbo : public QCPAbstractPaintBuffer
-{
+
+class QCP_LIB_DECL QCPPaintBufferGlFbo : public QCPAbstractPaintBuffer {
 public:
-  explicit QCPPaintBufferGlFbo(const QSize &size, double devicePixelRatio, QWeakPointer<QOpenGLContext> glContext, QWeakPointer<QOpenGLPaintDevice> glPaintDevice);
-  virtual ~QCPPaintBufferGlFbo();
-  
-  // reimplemented virtual methods:
-  virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
-  virtual void donePainting() Q_DECL_OVERRIDE;
-  virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
-  void clear(const QColor &color) Q_DECL_OVERRIDE;
-  
+    explicit QCPPaintBufferGlFbo(const QSize &size, double devicePixelRatio, QWeakPointer<QOpenGLContext> glContext,
+                                 QWeakPointer<QOpenGLPaintDevice> glPaintDevice);
+
+    virtual ~QCPPaintBufferGlFbo() Q_DECL_OVERRIDE;
+
+    // reimplemented virtual methods:
+    virtual QCPPainter *startPainting() Q_DECL_OVERRIDE;
+
+    virtual void donePainting() Q_DECL_OVERRIDE;
+
+    virtual void draw(QCPPainter *painter) const Q_DECL_OVERRIDE;
+
+    void clear(const QColor &color) Q_DECL_OVERRIDE;
+
 protected:
-  // non-property members:
-  QWeakPointer<QOpenGLContext> mGlContext;
-  QWeakPointer<QOpenGLPaintDevice> mGlPaintDevice;
-  QOpenGLFramebufferObject *mGlFrameBuffer;
-  
-  // reimplemented virtual methods:
-  virtual void reallocateBuffer() Q_DECL_OVERRIDE;
+    // non-property members:
+    QWeakPointer<QOpenGLContext> mGlContext;
+    QWeakPointer<QOpenGLPaintDevice> mGlPaintDevice;
+    QOpenGLFramebufferObject *mGlFrameBuffer;
+
+    // reimplemented virtual methods:
+    virtual void reallocateBuffer() Q_DECL_OVERRIDE;
 };
+
 #endif // QCP_OPENGL_FBO
 
 #endif // QCP_PAINTBUFFER_H

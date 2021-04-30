@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "axisticker.h"
@@ -86,24 +86,21 @@
   managed by a QSharedPointer, which then can be passed to QCPAxis::setTicker.
 */
 QCPAxisTicker::QCPAxisTicker() :
-  mTickStepStrategy(tssReadability),
-  mTickCount(5),
-  mTickOrigin(0)
-{
+        mTickStepStrategy(tssReadability),
+        mTickCount(5),
+        mTickOrigin(0) {
 }
 
-QCPAxisTicker::~QCPAxisTicker()
-{
-  
+QCPAxisTicker::~QCPAxisTicker() {
+
 }
 
 /*!
   Sets which strategy the axis ticker follows when choosing the size of the tick step. For the
   available strategies, see \ref TickStepStrategy.
 */
-void QCPAxisTicker::setTickStepStrategy(QCPAxisTicker::TickStepStrategy strategy)
-{
-  mTickStepStrategy = strategy;
+void QCPAxisTicker::setTickStepStrategy(QCPAxisTicker::TickStepStrategy strategy) {
+    mTickStepStrategy = strategy;
 }
 
 /*!
@@ -114,12 +111,11 @@ void QCPAxisTicker::setTickStepStrategy(QCPAxisTicker::TickStepStrategy strategy
   Whether the readability has priority over meeting the requested \a count can be specified with
   \ref setTickStepStrategy.
 */
-void QCPAxisTicker::setTickCount(int count)
-{
-  if (count > 0)
-    mTickCount = count;
-  else
-    qDebug() << Q_FUNC_INFO << "tick count must be greater than zero:" << count;
+void QCPAxisTicker::setTickCount(int count) {
+    if (count > 0)
+        mTickCount = count;
+    else
+        qDebug() << Q_FUNC_INFO << "tick count must be greater than zero:" << count;
 }
 
 /*!
@@ -130,9 +126,8 @@ void QCPAxisTicker::setTickCount(int count)
   step is five. If \a origin is now set to 1 instead, the correspondingly generated ticks would be
   {-4, 1, 6, 11, 16,...}.
 */
-void QCPAxisTicker::setTickOrigin(double origin)
-{
-  mTickOrigin = origin;
+void QCPAxisTicker::setTickOrigin(double origin) {
+    mTickOrigin = origin;
 }
 
 /*!
@@ -144,33 +139,32 @@ void QCPAxisTicker::setTickOrigin(double origin)
   even irrelevant) for certain QCPAxisTicker subclasses.
   
   The output parameter \a ticks is filled with the generated tick positions in axis coordinates.
-  The output parameters \a subTicks and \a tickLabels are optional (set them to 0 if not needed)
-  and are respectively filled with sub tick coordinates, and tick label strings belonging to \a
-  ticks by index.
+  The output parameters \a subTicks and \a tickLabels are optional (set them to \c nullptr if not
+  needed) and are respectively filled with sub tick coordinates, and tick label strings belonging
+  to \a ticks by index.
 */
-void QCPAxisTicker::generate(const QCPRange &range, const QLocale &locale, QChar formatChar, int precision, QVector<double> &ticks, QVector<double> *subTicks, QVector<QString> *tickLabels)
-{
-  // generate (major) ticks:
-  double tickStep = getTickStep(range);
-  ticks = createTickVector(tickStep, range);
-  trimTicks(range, ticks, true); // trim ticks to visible range plus one outer tick on each side (incase a subclass createTickVector creates more)
-  
-  // generate sub ticks between major ticks:
-  if (subTicks)
-  {
-    if (ticks.size() > 0)
-    {
-      *subTicks = createSubTickVector(getSubTickCount(tickStep), ticks);
-      trimTicks(range, *subTicks, false);
-    } else
-      *subTicks = QVector<double>();
-  }
-  
-  // finally trim also outliers (no further clipping happens in axis drawing):
-  trimTicks(range, ticks, false);
-  // generate labels for visible ticks if requested:
-  if (tickLabels)
-    *tickLabels = createLabelVector(ticks, locale, formatChar, precision);
+void QCPAxisTicker::generate(const QCPRange &range, const QLocale &locale, QChar formatChar, int precision,
+                             QVector<double> &ticks, QVector<double> *subTicks, QVector<QString> *tickLabels) {
+    // generate (major) ticks:
+    double tickStep = getTickStep(range);
+    ticks = createTickVector(tickStep, range);
+    trimTicks(range, ticks,
+              true); // trim ticks to visible range plus one outer tick on each side (incase a subclass createTickVector creates more)
+
+    // generate sub ticks between major ticks:
+    if (subTicks) {
+        if (!ticks.isEmpty()) {
+            *subTicks = createSubTickVector(getSubTickCount(tickStep), ticks);
+            trimTicks(range, *subTicks, false);
+        } else
+            *subTicks = QVector<double>();
+    }
+
+    // finally trim also outliers (no further clipping happens in axis drawing):
+    trimTicks(range, ticks, false);
+    // generate labels for visible ticks if requested:
+    if (tickLabels)
+        *tickLabels = createLabelVector(ticks, locale, formatChar, precision);
 }
 
 /*! \internal
@@ -183,10 +177,9 @@ void QCPAxisTicker::generate(const QCPRange &range, const QLocale &locale, QChar
   implementation, it should reimplement this method. See \ref cleanMantissa for a possible helper
   function.
 */
-double QCPAxisTicker::getTickStep(const QCPRange &range)
-{
-  double exactStep = range.size()/(double)(mTickCount+1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
-  return cleanMantissa(exactStep);
+double QCPAxisTicker::getTickStep(const QCPRange &range) {
+    double exactStep = range.size() / double(mTickCount + 1e-10); // mTickCount ticks on average, the small addition is to prevent jitter on exact integers
+    return cleanMantissa(exactStep);
 }
 
 /*! \internal
@@ -196,56 +189,87 @@ double QCPAxisTicker::getTickStep(const QCPRange &range)
   
   Note that a returned sub tick count of e.g. 4 will split each tick interval into 5 sections.
 */
-int QCPAxisTicker::getSubTickCount(double tickStep)
-{
-  int result = 1; // default to 1, if no proper value can be found
-  
-  // separate integer and fractional part of mantissa:
-  double epsilon = 0.01;
-  double intPartf;
-  int intPart;
-  double fracPart = modf(getMantissa(tickStep), &intPartf);
-  intPart = intPartf;
-  
-  // handle cases with (almost) integer mantissa:
-  if (fracPart < epsilon || 1.0-fracPart < epsilon)
-  {
-    if (1.0-fracPart < epsilon)
-      ++intPart;
-    switch (intPart)
-    {
-      case 1: result = 4; break; // 1.0 -> 0.2 substep
-      case 2: result = 3; break; // 2.0 -> 0.5 substep
-      case 3: result = 2; break; // 3.0 -> 1.0 substep
-      case 4: result = 3; break; // 4.0 -> 1.0 substep
-      case 5: result = 4; break; // 5.0 -> 1.0 substep
-      case 6: result = 2; break; // 6.0 -> 2.0 substep
-      case 7: result = 6; break; // 7.0 -> 1.0 substep
-      case 8: result = 3; break; // 8.0 -> 2.0 substep
-      case 9: result = 2; break; // 9.0 -> 3.0 substep
+int QCPAxisTicker::getSubTickCount(double tickStep) {
+    int result = 1; // default to 1, if no proper value can be found
+
+    // separate integer and fractional part of mantissa:
+    double epsilon = 0.01;
+    double intPartf;
+    int intPart;
+    double fracPart = modf(getMantissa(tickStep), &intPartf);
+    intPart = int(intPartf);
+
+    // handle cases with (almost) integer mantissa:
+    if (fracPart < epsilon || 1.0 - fracPart < epsilon) {
+        if (1.0 - fracPart < epsilon)
+            ++intPart;
+        switch (intPart) {
+            case 1:
+                result = 4;
+                break; // 1.0 -> 0.2 substep
+            case 2:
+                result = 3;
+                break; // 2.0 -> 0.5 substep
+            case 3:
+                result = 2;
+                break; // 3.0 -> 1.0 substep
+            case 4:
+                result = 3;
+                break; // 4.0 -> 1.0 substep
+            case 5:
+                result = 4;
+                break; // 5.0 -> 1.0 substep
+            case 6:
+                result = 2;
+                break; // 6.0 -> 2.0 substep
+            case 7:
+                result = 6;
+                break; // 7.0 -> 1.0 substep
+            case 8:
+                result = 3;
+                break; // 8.0 -> 2.0 substep
+            case 9:
+                result = 2;
+                break; // 9.0 -> 3.0 substep
+        }
+    } else {
+        // handle cases with significantly fractional mantissa:
+        if (qAbs(fracPart - 0.5) < epsilon) // *.5 mantissa
+        {
+            switch (intPart) {
+                case 1:
+                    result = 2;
+                    break; // 1.5 -> 0.5 substep
+                case 2:
+                    result = 4;
+                    break; // 2.5 -> 0.5 substep
+                case 3:
+                    result = 4;
+                    break; // 3.5 -> 0.7 substep
+                case 4:
+                    result = 2;
+                    break; // 4.5 -> 1.5 substep
+                case 5:
+                    result = 4;
+                    break; // 5.5 -> 1.1 substep (won't occur with default getTickStep from here on)
+                case 6:
+                    result = 4;
+                    break; // 6.5 -> 1.3 substep
+                case 7:
+                    result = 2;
+                    break; // 7.5 -> 2.5 substep
+                case 8:
+                    result = 4;
+                    break; // 8.5 -> 1.7 substep
+                case 9:
+                    result = 4;
+                    break; // 9.5 -> 1.9 substep
+            }
+        }
+        // if mantissa fraction isn't 0.0 or 0.5, don't bother finding good sub tick marks, leave default
     }
-  } else
-  {
-    // handle cases with significantly fractional mantissa:
-    if (qAbs(fracPart-0.5) < epsilon) // *.5 mantissa
-    {
-      switch (intPart)
-      {
-        case 1: result = 2; break; // 1.5 -> 0.5 substep
-        case 2: result = 4; break; // 2.5 -> 0.5 substep
-        case 3: result = 4; break; // 3.5 -> 0.7 substep
-        case 4: result = 2; break; // 4.5 -> 1.5 substep
-        case 5: result = 4; break; // 5.5 -> 1.1 substep (won't occur with default getTickStep from here on)
-        case 6: result = 4; break; // 6.5 -> 1.3 substep
-        case 7: result = 2; break; // 7.5 -> 2.5 substep
-        case 8: result = 4; break; // 8.5 -> 1.7 substep
-        case 9: result = 4; break; // 9.5 -> 1.9 substep
-      }
-    }
-    // if mantissa fraction isn't 0.0 or 0.5, don't bother finding good sub tick marks, leave default
-  }
-  
-  return result;
+
+    return result;
 }
 
 /*! \internal
@@ -259,9 +283,8 @@ int QCPAxisTicker::getSubTickCount(double tickStep)
   be formatted accordingly using multiplication symbol and superscript during rendering of the
   label automatically.
 */
-QString QCPAxisTicker::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision)
-{
-  return locale.toString(tick, formatChar.toLatin1(), precision);
+QString QCPAxisTicker::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
+    return locale.toString(tick, formatChar.toLatin1(), precision);
 }
 
 /*! \internal
@@ -273,20 +296,18 @@ QString QCPAxisTicker::getTickLabel(double tick, const QLocale &locale, QChar fo
   reimplement this method. Depending on the purpose of the subclass it doesn't necessarily need to
   base its result on \a subTickCount or \a ticks.
 */
-QVector<double> QCPAxisTicker::createSubTickVector(int subTickCount, const QVector<double> &ticks)
-{
-  QVector<double> result;
-  if (subTickCount <= 0 || ticks.size() < 2)
+QVector<double> QCPAxisTicker::createSubTickVector(int subTickCount, const QVector<double> &ticks) {
+    QVector<double> result;
+    if (subTickCount <= 0 || ticks.size() < 2)
+        return result;
+
+    result.reserve((ticks.size() - 1) * subTickCount);
+    for (int i = 1; i < ticks.size(); ++i) {
+        double subTickStep = (ticks.at(i) - ticks.at(i - 1)) / double(subTickCount + 1);
+        for (int k = 1; k <= subTickCount; ++k)
+            result.append(ticks.at(i - 1) + k * subTickStep);
+    }
     return result;
-  
-  result.reserve((ticks.size()-1)*subTickCount);
-  for (int i=1; i<ticks.size(); ++i)
-  {
-    double subTickStep = (ticks.at(i)-ticks.at(i-1))/(double)(subTickCount+1);
-    for (int k=1; k<=subTickCount; ++k)
-      result.append(ticks.at(i-1) + k*subTickStep);
-  }
-  return result;
 }
 
 /*! \internal
@@ -304,18 +325,17 @@ QVector<double> QCPAxisTicker::createSubTickVector(int subTickCount, const QVect
   result on \a tickStep, e.g. when the ticks are spaced unequally like in the case of
   QCPAxisTickerLog.
 */
-QVector<double> QCPAxisTicker::createTickVector(double tickStep, const QCPRange &range)
-{
-  QVector<double> result;
-  // Generate tick positions according to tickStep:
-  qint64 firstStep = floor((range.lower-mTickOrigin)/tickStep); // do not use qFloor here, or we'll lose 64 bit precision
-  qint64 lastStep = ceil((range.upper-mTickOrigin)/tickStep); // do not use qCeil here, or we'll lose 64 bit precision
-  int tickcount = lastStep-firstStep+1;
-  if (tickcount < 0) tickcount = 0;
-  result.resize(tickcount);
-  for (int i=0; i<tickcount; ++i)
-    result[i] = mTickOrigin + (firstStep+i)*tickStep;
-  return result;
+QVector<double> QCPAxisTicker::createTickVector(double tickStep, const QCPRange &range) {
+    QVector<double> result;
+    // Generate tick positions according to tickStep:
+    qint64 firstStep = qint64(floor((range.lower - mTickOrigin) / tickStep)); // do not use qFloor here, or we'll lose 64 bit precision
+    qint64 lastStep = qint64(ceil((range.upper - mTickOrigin) / tickStep)); // do not use qCeil here, or we'll lose 64 bit precision
+    int tickcount = int(lastStep - firstStep + 1);
+    if (tickcount < 0) tickcount = 0;
+    result.resize(tickcount);
+    for (int i = 0; i < tickcount; ++i)
+        result[i] = mTickOrigin + (firstStep + i) * tickStep;
+    return result;
 }
 
 /*! \internal
@@ -327,13 +347,12 @@ QVector<double> QCPAxisTicker::createTickVector(double tickStep, const QCPRange 
   It is possible but uncommon for QCPAxisTicker subclasses to reimplement this method, as
   reimplementing \ref getTickLabel often achieves the intended result easier.
 */
-QVector<QString> QCPAxisTicker::createLabelVector(const QVector<double> &ticks, const QLocale &locale, QChar formatChar, int precision)
-{
-  QVector<QString> result;
-  result.reserve(ticks.size());
-  for (int i=0; i<ticks.size(); ++i)
-    result.append(getTickLabel(ticks.at(i), locale, formatChar, precision));
-  return result;
+QVector<QString>
+QCPAxisTicker::createLabelVector(const QVector<double> &ticks, const QLocale &locale, QChar formatChar, int precision) {
+    QVector<QString> result;
+    result.reserve(ticks.size());
+            foreach (double tickCoord, ticks)result.append(getTickLabel(tickCoord, locale, formatChar, precision));
+    return result;
 }
 
 /*! \internal
@@ -343,40 +362,34 @@ QVector<QString> QCPAxisTicker::createLabelVector(const QVector<double> &ticks, 
   
   The passed \a ticks must be sorted in ascending order.
 */
-void QCPAxisTicker::trimTicks(const QCPRange &range, QVector<double> &ticks, bool keepOneOutlier) const
-{
-  bool lowFound = false;
-  bool highFound = false;
-  int lowIndex = 0;
-  int highIndex = -1;
-  
-  for (int i=0; i < ticks.size(); ++i)
-  {
-    if (ticks.at(i) >= range.lower)
-    {
-      lowFound = true;
-      lowIndex = i;
-      break;
+void QCPAxisTicker::trimTicks(const QCPRange &range, QVector<double> &ticks, bool keepOneOutlier) const {
+    bool lowFound = false;
+    bool highFound = false;
+    int lowIndex = 0;
+    int highIndex = -1;
+
+    for (int i = 0; i < ticks.size(); ++i) {
+        if (ticks.at(i) >= range.lower) {
+            lowFound = true;
+            lowIndex = i;
+            break;
+        }
     }
-  }
-  for (int i=ticks.size()-1; i >= 0; --i)
-  {
-    if (ticks.at(i) <= range.upper)
-    {
-      highFound = true;
-      highIndex = i;
-      break;
+    for (int i = ticks.size() - 1; i >= 0; --i) {
+        if (ticks.at(i) <= range.upper) {
+            highFound = true;
+            highIndex = i;
+            break;
+        }
     }
-  }
-  
-  if (highFound && lowFound)
-  {
-    int trimFront = qMax(0, lowIndex-(keepOneOutlier ? 1 : 0));
-    int trimBack = qMax(0, ticks.size()-(keepOneOutlier ? 2 : 1)-highIndex);
-    if (trimFront > 0 || trimBack > 0)
-      ticks = ticks.mid(trimFront, ticks.size()-trimFront-trimBack);
-  } else // all ticks are either all below or all above the range
-    ticks.clear();
+
+    if (highFound && lowFound) {
+        int trimFront = qMax(0, lowIndex - (keepOneOutlier ? 1 : 0));
+        int trimBack = qMax(0, ticks.size() - (keepOneOutlier ? 2 : 1) - highIndex);
+        if (trimFront > 0 || trimBack > 0)
+            ticks = ticks.mid(trimFront, ticks.size() - trimFront - trimBack);
+    } else // all ticks are either all below or all above the range
+        ticks.clear();
 }
 
 /*! \internal
@@ -385,17 +398,16 @@ void QCPAxisTicker::trimTicks(const QCPRange &range, QVector<double> &ticks, boo
   
   This method assumes \a candidates is not empty and sorted in ascending order.
 */
-double QCPAxisTicker::pickClosest(double target, const QVector<double> &candidates) const
-{
-  if (candidates.size() == 1)
-    return candidates.first();
-  QVector<double>::const_iterator it = std::lower_bound(candidates.constBegin(), candidates.constEnd(), target);
-  if (it == candidates.constEnd())
-    return *(it-1);
-  else if (it == candidates.constBegin())
-    return *it;
-  else
-    return target-*(it-1) < *it-target ? *(it-1) : *it;
+double QCPAxisTicker::pickClosest(double target, const QVector<double> &candidates) const {
+    if (candidates.size() == 1)
+        return candidates.first();
+    QVector<double>::const_iterator it = std::lower_bound(candidates.constBegin(), candidates.constEnd(), target);
+    if (it == candidates.constEnd())
+        return *(it - 1);
+    else if (it == candidates.constBegin())
+        return *it;
+    else
+        return target - *(it - 1) < *it - target ? *(it - 1) : *it;
 }
 
 /*! \internal
@@ -405,11 +417,10 @@ double QCPAxisTicker::pickClosest(double target, const QVector<double> &candidat
   
   For example, an input of 142.6 will return a mantissa of 1.426 and a magnitude of 100.
 */
-double QCPAxisTicker::getMantissa(double input, double *magnitude) const
-{
-  const double mag = qPow(10.0, qFloor(qLn(input)/qLn(10.0)));
-  if (magnitude) *magnitude = mag;
-  return input/mag;
+double QCPAxisTicker::getMantissa(double input, double *magnitude) const {
+    const double mag = qPow(10.0, qFloor(qLn(input) / qLn(10.0)));
+    if (magnitude) *magnitude = mag;
+    return input / mag;
 }
 
 /*! \internal
@@ -418,24 +429,20 @@ double QCPAxisTicker::getMantissa(double input, double *magnitude) const
   strongly the mantissa is altered, and thus how strong the result deviates from the original \a
   input, depends on the current tick step strategy (see \ref setTickStepStrategy).
 */
-double QCPAxisTicker::cleanMantissa(double input) const
-{
-  double magnitude;
-  const double mantissa = getMantissa(input, &magnitude);
-  switch (mTickStepStrategy)
-  {
-    case tssReadability:
-    {
-      return pickClosest(mantissa, QVector<double>() << 1.0 << 2.0 << 2.5 << 5.0 << 10.0)*magnitude;
+double QCPAxisTicker::cleanMantissa(double input) const {
+    double magnitude;
+    const double mantissa = getMantissa(input, &magnitude);
+    switch (mTickStepStrategy) {
+        case tssReadability: {
+            return pickClosest(mantissa, QVector<double>() << 1.0 << 2.0 << 2.5 << 5.0 << 10.0) * magnitude;
+        }
+        case tssMeetTickCount: {
+            // this gives effectively a mantissa of 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 8.0, 10.0
+            if (mantissa <= 5.0)
+                return int(mantissa * 2) / 2.0 * magnitude; // round digit after decimal point to 0.5
+            else
+                return int(mantissa / 2.0) * 2.0 * magnitude; // round to first digit in multiples of 2
+        }
     }
-    case tssMeetTickCount:
-    {
-      // this gives effectively a mantissa of 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 8.0, 10.0
-      if (mantissa <= 5.0)
-        return (int)(mantissa*2)/2.0*magnitude; // round digit after decimal point to 0.5
-      else
-        return (int)(mantissa/2.0)*2.0*magnitude; // round to first digit in multiples of 2
-    }
-  }
-  return input;
+    return input;
 }

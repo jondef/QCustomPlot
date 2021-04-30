@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #include "axistickertext.h"
@@ -66,8 +66,7 @@
   managed by a QSharedPointer, which then can be passed to QCPAxis::setTicker.
 */
 QCPAxisTickerText::QCPAxisTickerText() :
-  mSubTickCount(0)
-{
+        mSubTickCount(0) {
 }
 
 /*! \overload
@@ -80,9 +79,8 @@ QCPAxisTickerText::QCPAxisTickerText() :
   
   \see addTicks, addTick, clear
 */
-void QCPAxisTickerText::setTicks(const QMap<double, QString> &ticks)
-{
-  mTicks = ticks;
+void QCPAxisTickerText::setTicks(const QMap<double, QString> &ticks) {
+    mTicks = ticks;
 }
 
 /*! \overload
@@ -93,10 +91,9 @@ void QCPAxisTickerText::setTicks(const QMap<double, QString> &ticks)
   
   \see addTicks, addTick, clear
 */
-void QCPAxisTickerText::setTicks(const QVector<double> &positions, const QVector<QString> &labels)
-{
-  clear();
-  addTicks(positions, labels);
+void QCPAxisTickerText::setTicks(const QVector<double> &positions, const QVector<QString> &labels) {
+    clear();
+    addTicks(positions, labels);
 }
 
 /*!
@@ -104,12 +101,11 @@ void QCPAxisTickerText::setTicks(const QVector<double> &positions, const QVector
   automatic sub tick count calculation. So if sub ticks are needed, they must be configured with this
   method.
 */
-void QCPAxisTickerText::setSubTickCount(int subTicks)
-{
-  if (subTicks >= 0)
-    mSubTickCount = subTicks;
-  else
-    qDebug() << Q_FUNC_INFO << "sub tick count can't be negative:" << subTicks;
+void QCPAxisTickerText::setSubTickCount(int subTicks) {
+    if (subTicks >= 0)
+        mSubTickCount = subTicks;
+    else
+        qDebug() << Q_FUNC_INFO << "sub tick count can't be negative:" << subTicks;
 }
 
 /*!
@@ -120,9 +116,8 @@ void QCPAxisTickerText::setSubTickCount(int subTicks)
   
   \see setTicks, addTicks, addTick
 */
-void QCPAxisTickerText::clear()
-{
-  mTicks.clear();
+void QCPAxisTickerText::clear() {
+    mTicks.clear();
 }
 
 /*!
@@ -131,9 +126,8 @@ void QCPAxisTickerText::clear()
   
   \see addTicks, setTicks, clear
 */
-void QCPAxisTickerText::addTick(double position, const QString &label)
-{
-  mTicks.insert(position, label);
+void QCPAxisTickerText::addTick(double position, const QString &label) {
+    mTicks.insert(position, label);
 }
 
 /*! \overload
@@ -146,9 +140,12 @@ void QCPAxisTickerText::addTick(double position, const QString &label)
   
   \see addTick, setTicks, clear
 */
-void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks)
-{
-  mTicks.unite(ticks);
+void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+    mTicks.unite(ticks);
+#else
+    mTicks.insert(ticks);
+#endif
 }
 
 /*! \overload
@@ -162,13 +159,13 @@ void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks)
   
   \see addTick, setTicks, clear
 */
-void QCPAxisTickerText::addTicks(const QVector<double> &positions, const QVector<QString> &labels)
-{
-  if (positions.size() != labels.size())
-    qDebug() << Q_FUNC_INFO << "passed unequal length vectors for positions and labels:" << positions.size() << labels.size();
-  int n = qMin(positions.size(), labels.size());
-  for (int i=0; i<n; ++i)
-    mTicks.insert(positions.at(i), labels.at(i));
+void QCPAxisTickerText::addTicks(const QVector<double> &positions, const QVector<QString> &labels) {
+    if (positions.size() != labels.size())
+        qDebug() << Q_FUNC_INFO << "passed unequal length vectors for positions and labels:" << positions.size()
+                 << labels.size();
+    int n = qMin(positions.size(), labels.size());
+    for (int i = 0; i < n; ++i)
+        mTicks.insert(positions.at(i), labels.at(i));
 }
 
 /*!
@@ -176,11 +173,10 @@ void QCPAxisTickerText::addTicks(const QVector<double> &positions, const QVector
   
   \seebaseclassmethod
 */
-double QCPAxisTickerText::getTickStep(const QCPRange &range)
-{
-  // text axis ticker has manual tick positions, so doesn't need this method
-  Q_UNUSED(range)
-  return 1.0;
+double QCPAxisTickerText::getTickStep(const QCPRange &range) {
+    // text axis ticker has manual tick positions, so doesn't need this method
+    Q_UNUSED(range)
+    return 1.0;
 }
 
 /*!
@@ -188,10 +184,9 @@ double QCPAxisTickerText::getTickStep(const QCPRange &range)
   
   \seebaseclassmethod
 */
-int QCPAxisTickerText::getSubTickCount(double tickStep)
-{
-  Q_UNUSED(tickStep)
-  return mSubTickCount;
+int QCPAxisTickerText::getSubTickCount(double tickStep) {
+    Q_UNUSED(tickStep)
+    return mSubTickCount;
 }
 
 /*!
@@ -200,12 +195,11 @@ int QCPAxisTickerText::getSubTickCount(double tickStep)
   
   \seebaseclassmethod
 */
-QString QCPAxisTickerText::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision)
-{
-  Q_UNUSED(locale)
-  Q_UNUSED(formatChar)
-  Q_UNUSED(precision)
-  return mTicks.value(tick);
+QString QCPAxisTickerText::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) {
+    Q_UNUSED(locale)
+    Q_UNUSED(formatChar)
+    Q_UNUSED(precision)
+    return mTicks.value(tick);
 }
 
 /*!
@@ -215,20 +209,19 @@ QString QCPAxisTickerText::getTickLabel(double tick, const QLocale &locale, QCha
   
   \seebaseclassmethod
 */
-QVector<double> QCPAxisTickerText::createTickVector(double tickStep, const QCPRange &range)
-{
-  Q_UNUSED(tickStep)
-  QVector<double> result;
-  if (mTicks.isEmpty())
+QVector<double> QCPAxisTickerText::createTickVector(double tickStep, const QCPRange &range) {
+    Q_UNUSED(tickStep)
+    QVector<double> result;
+    if (mTicks.isEmpty())
+        return result;
+
+    QMap<double, QString>::const_iterator start = mTicks.lowerBound(range.lower);
+    QMap<double, QString>::const_iterator end = mTicks.upperBound(range.upper);
+    // this method should try to give one tick outside of range so proper subticks can be generated:
+    if (start != mTicks.constBegin()) --start;
+    if (end != mTicks.constEnd()) ++end;
+    for (QMap<double, QString>::const_iterator it = start; it != end; ++it)
+        result.append(it.key());
+
     return result;
-  
-  QMap<double, QString>::const_iterator start = mTicks.lowerBound(range.lower);
-  QMap<double, QString>::const_iterator end = mTicks.upperBound(range.upper);
-  // this method should try to give one tick outside of range so proper subticks can be generated:
-  if (start != mTicks.constBegin()) --start;
-  if (end != mTicks.constEnd()) ++end;
-  for (QMap<double, QString>::const_iterator it = start; it != end; ++it)
-    result.append(it.key());
-  
-  return result;
 }

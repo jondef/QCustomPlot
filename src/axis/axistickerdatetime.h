@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_AXISTICKERDATETIME_H
@@ -28,39 +28,62 @@
 
 #include "axisticker.h"
 
-class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker
-{
+class QCP_LIB_DECL QCPAxisTickerDateTime : public QCPAxisTicker {
 public:
-  QCPAxisTickerDateTime();
-  
-  // getters:
-  QString dateTimeFormat() const { return mDateTimeFormat; }
-  Qt::TimeSpec dateTimeSpec() const { return mDateTimeSpec; }
-  
-  // setters:
-  void setDateTimeFormat(const QString &format);
-  void setDateTimeSpec(Qt::TimeSpec spec);
-  void setTickOrigin(double origin); // hides base class method but calls baseclass implementation ("using" throws off IDEs and doxygen)
-  void setTickOrigin(const QDateTime &origin);
-  
-  // static methods:
-  static QDateTime keyToDateTime(double key);
-  static double dateTimeToKey(const QDateTime dateTime);
-  static double dateTimeToKey(const QDate date);
-  
+    QCPAxisTickerDateTime();
+
+    // getters:
+    QString dateTimeFormat() const { return mDateTimeFormat; }
+
+    Qt::TimeSpec dateTimeSpec() const { return mDateTimeSpec; }
+
+# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+
+    QTimeZone timeZone() const { return mTimeZone; }
+
+#endif
+
+    // setters:
+    void setDateTimeFormat(const QString &format);
+
+    void setDateTimeSpec(Qt::TimeSpec spec);
+
+# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+
+    void setTimeZone(const QTimeZone &zone);
+
+# endif
+
+    void setTickOrigin(double origin); // hides base class method but calls baseclass implementation ("using" throws off IDEs and doxygen)
+    void setTickOrigin(const QDateTime &origin);
+
+    // static methods:
+    static QDateTime keyToDateTime(double key);
+
+    static double dateTimeToKey(const QDateTime &dateTime);
+
+    static double dateTimeToKey(const QDate &date, Qt::TimeSpec timeSpec = Qt::LocalTime);
+
 protected:
-  // property members:
-  QString mDateTimeFormat;
-  Qt::TimeSpec mDateTimeSpec;
-  
-  // non-property members:
-  enum DateStrategy {dsNone, dsUniformTimeInDay, dsUniformDayInMonth} mDateStrategy;
-  
-  // reimplemented virtual methods:
-  virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
-  virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
-  virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
-  virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
+    // property members:
+    QString mDateTimeFormat;
+    Qt::TimeSpec mDateTimeSpec;
+# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    QTimeZone mTimeZone;
+# endif
+    // non-property members:
+    enum DateStrategy {
+        dsNone, dsUniformTimeInDay, dsUniformDayInMonth
+    } mDateStrategy;
+
+    // reimplemented virtual methods:
+    virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
+
+    virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
+
+    virtual QString getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision) Q_DECL_OVERRIDE;
+
+    virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
 };
 
 #endif // QCP_AXISTICKERDATETIME_H

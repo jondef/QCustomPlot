@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2018 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -19,8 +19,8 @@
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
 **  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 25.06.18                                             **
-**          Version: 2.0.1                                                **
+**             Date: 29.03.21                                             **
+**          Version: 2.1.0                                                **
 ****************************************************************************/
 
 #ifndef QCP_AXISTICKERLOG_H
@@ -28,31 +28,32 @@
 
 #include "axisticker.h"
 
-class QCP_LIB_DECL QCPAxisTickerLog : public QCPAxisTicker
-{
+class QCP_LIB_DECL QCPAxisTickerLog : public QCPAxisTicker {
 public:
-  QCPAxisTickerLog();
-  
-  // getters:
-  double logBase() const { return mLogBase; }
-  int subTickCount() const { return mSubTickCount; }
-  
-  // setters:
-  void setLogBase(double base);
-  void setSubTickCount(int subTicks);
-  
+    QCPAxisTickerLog();
+
+    // getters:
+    double logBase() const { return mLogBase; }
+
+    int subTickCount() const { return mSubTickCount; }
+
+    // setters:
+    void setLogBase(double base);
+
+    void setSubTickCount(int subTicks);
+
 protected:
-  // property members:
-  double mLogBase;
-  int mSubTickCount;
-  
-  // non-property members:
-  double mLogBaseLnInv;
-  
-  // reimplemented virtual methods:
-  virtual double getTickStep(const QCPRange &range) Q_DECL_OVERRIDE;
-  virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
-  virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
+    // property members:
+    double mLogBase;
+    int mSubTickCount;
+
+    // non-property members:
+    double mLogBaseLnInv;
+
+    // reimplemented virtual methods:
+    virtual int getSubTickCount(double tickStep) Q_DECL_OVERRIDE;
+
+    virtual QVector<double> createTickVector(double tickStep, const QCPRange &range) Q_DECL_OVERRIDE;
 };
 
 #endif // QCP_AXISTICKERLOG_H
