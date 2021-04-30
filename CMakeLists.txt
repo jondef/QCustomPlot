@@ -25,7 +25,7 @@ add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
 add_definitions(-DQCUSTOMPLOT_COMPILE_LIBRARY)
 
 ################################
-# Compiling
+# Compilation
 ################################
 add_library(QCustomPlot SHARED ${SOURCES} ${HEADERS})
 
