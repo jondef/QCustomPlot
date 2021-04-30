@@ -34,8 +34,8 @@ add_library(QCustomPlot SHARED ${SOURCES} ${HEADERS})
 ################################
 target_link_libraries(QCustomPlot PUBLIC Qt6::Core Qt6::PrintSupport Qt6::OpenGL)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
-    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplotd2" PREFIX "")
-elseif (${CMAKE_BUILD_TYPE} STREQUAL Release)
-    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "qcustomplot2")
+if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "QCustomPlotd" PREFIX "")
+elseif (${CMAKE_BUILD_TYPE} MATCHES "Release")
+    set_target_properties(QCustomPlot PROPERTIES OUTPUT_NAME "QCustomPlot" PREFIX "")
 endif ()
